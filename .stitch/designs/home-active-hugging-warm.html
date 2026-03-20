@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#a66d6d", // Deeper rose
+                        "accent": "#f7cdc3",  // Warmer peach
+                        "background-light": "#fff9f8", // Soft pinkish off-white
+                        "background-dark": "#2d2420",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "1.5rem",
+                        "xl": "2rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .hand-drawn-border {
+            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+        }
+        .blob-shape {
+            border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="relative flex min-h-screen w-full max-w-md mx-auto flex-col overflow-hidden shadow-2xl bg-background-light dark:bg-background-dark"><!-- Top Navigation -->
+<div class="flex items-center justify-between p-6">
+<div class="size-10 flex items-center justify-center rounded-full bg-accent/30 text-primary">
+<span class="material-symbols-outlined">calendar_today</span>
+</div>
+<div class="size-10 flex items-center justify-center rounded-full bg-accent/30 text-primary">
+<span class="material-symbols-outlined">settings</span>
+</div>
+</div>
+<header class="text-center mb-4">
+<p class="text-primary/60 font-medium text-lg tracking-wide mb-4">照顾好自己哦</p>
+<div class="relative inline-block">
+<h1 class="text-[88px] font-bold leading-none tracking-tighter text-primary">抱抱</h1>
+<div class="absolute -top-2 -right-8 text-primary/40 rotate-12">
+<span class="material-symbols-outlined text-4xl">favorite</span>
+</div>
+</div>
+</header>
+<div class="flex justify-center mb-8">
+<p class="text-primary/70 text-sm font-semibold bg-accent/20 px-6 py-2 rounded-full border border-accent/30">预计 10月28日 结束 (还有4天)</p>
+</div>
+<!-- Illustration Section (Moved Up) -->
+<div class="px-6 py-4 flex w-full justify-center">
+<div class="w-full max-w-[280px] aspect-square relative flex items-center justify-center">
+<div class="absolute inset-0 bg-primary/10 rounded-full blur-3xl opacity-50"></div>
+<div class="relative w-full h-full bg-center bg-no-repeat bg-contain rounded-2xl overflow-hidden" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBgC_Sv6KM7DlVuZXeW5DkjwTI9VY_uru6iOTFe7l0KZdMieFHkZ330sYj9rWrR_2e8E96_aA6Nuc_gvU2ACb4LKS1jmqA9yErQatAYq5Isifl_5lW77pME-yhX7jHCLTO8cvEJnjcJFhd7LW3FedX3t7oMasmq_i0oGyTyhAjRT_IC-Z2RDpu6VEjhMpfZ5X0lbaunJInvKsYcNP5SFFHQmoKtYbwz3D-54ABssAUx_dWTegUnUwBxUU6M3ZiKLv_qE5vKnobUcA6s");'>
+</div>
+</div>
+</div>
+<!-- Stats Section (Moved Down) -->
+<!-- Primary Action -->
+<div class="mt-auto px-6 pb-10">
+<button class="w-full h-16 text-white rounded-full font-bold text-xl shadow-lg flex items-center justify-center gap-3 active:scale-95 transition-transform" style="background-color: #B37D71;">
+<span class="material-symbols-outlined">edit_note</span>
+        记录月经
+    </button>
+</div></div>
+</body></html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;700&amp;family=Gaegu:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8b5e5e", // 匹配参考图的主色
+                        "accent": "#f2d5c4",  // 柔和的桃色/米色
+                        "background-light": "#fdf8f5", // 暖白色背景
+                        "background-dark": "#2d2420",
+                        "soft-pink": "#f9ebe4",
+                    },
+                    fontFamily: {
+                        "display": ["Gaegu", "Public Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1.5rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .hand-drawn-border {
+            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+        }
+        .organic-blob {
+            border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+        }
+        .irregular-card {
+            border-radius: 40% 60% 40% 60% / 60% 40% 60% 40%;
+            border: none;
+        }
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+        .hand-drawn-border {
+            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+        }
+        .organic-blob {
+            border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+        }
+        .irregular-card {
+            border-radius: 40% 60% 40% 60% / 60% 40% 60% 40%;
+            border: none;
+        }
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-primary antialiased">
+<div class="relative min-h-screen max-w-md mx-auto px-6 py-8 flex flex-col gap-8">
+<!-- Header Section -->
+<!-- Calendar Section -->
+<section class="bg-soft-pink/50 p-6 relative overflow-hidden bg-accent/20 organic-blob">
+<div class="flex items-center justify-between mb-6">
+<button class="p-1"><span class="material-symbols-outlined">chevron_left</span></button>
+<h2 class="text-2xl font-bold">October 2023</h2>
+<button class="p-1"><span class="material-symbols-outlined">chevron_right</span></button>
+</div>
+<div class="grid grid-cols-7 gap-y-4 text-center">
+<span class="text-lg font-bold opacity-70 font-display">S</span>
+<span class="text-lg font-bold opacity-70 font-display">M</span>
+<span class="text-lg font-bold opacity-70 font-display">T</span>
+<span class="text-lg font-bold opacity-70 font-display">W</span>
+<span class="text-lg font-bold opacity-70 font-display">T</span>
+<span class="text-lg font-bold opacity-70 font-display">F</span>
+<span class="text-lg font-bold opacity-70 font-display">S</span>
+<!-- Empty spaces for the grid start -->
+<span class="text-lg font-bold opacity-70 font-display"></span><span class="text-lg font-bold opacity-70 font-display"></span><span class="text-lg font-bold opacity-70 font-display"></span>
+<button class="relative py-2 flex items-center justify-center text-xl">1</button>
+<button class="relative py-2 flex items-center justify-center text-xl">2</button>
+<button class="relative py-2 flex items-center justify-center text-xl">3</button>
+<button class="relative py-2 flex items-center justify-center text-xl">4</button>
+<!-- Period Days (Blobs) -->
+<button class="relative py-2 flex items-center justify-center text-primary text-xl">
+<div class="absolute inset-0 organic-blob -z-10 scale-90 rotate-12 bg-primary/30 border border-primary/20"></div>5
+                </button>
+<button class="relative py-2 flex items-center justify-center text-primary text-xl">
+<div class="absolute inset-0 organic-blob -z-10 scale-95 -rotate-6 bg-primary/30 border border-primary/20"></div>6
+                </button>
+<button class="relative py-2 flex items-center justify-center text-primary text-xl">
+<div class="absolute inset-0 organic-blob -z-10 scale-90 rotate-45 bg-primary/30 border border-primary/20"></div>7
+                </button>
+<button class="relative py-2 flex items-center justify-center text-primary text-xl">
+<div class="absolute inset-0 organic-blob -z-10 scale-95 rotate-12 bg-primary/30 border border-primary/20"></div>8
+                </button>
+<button class="relative py-2 flex items-center justify-center text-primary text-xl">
+<div class="absolute inset-0 organic-blob -z-10 scale-90 -rotate-12 bg-primary/30 border border-primary/20"></div>9
+                </button>
+<button class="relative py-2 flex items-center justify-center text-xl">10</button>
+<button class="relative py-2 flex items-center justify-center text-xl">11</button>
+<!-- Selected Day -->
+<button class="relative py-2 flex items-center justify-center text-xl">
+<div class="absolute inset-0 border-[3px] border-primary/40 hand-drawn-border -z-10 scale-125 rotate-3"></div>12
+                </button>
+<button class="relative py-2 flex items-center justify-center text-xl">13</button>
+<button class="relative py-2 flex items-center justify-center text-xl">14</button>
+<button class="relative py-2 flex items-center justify-center text-xl">15</button>
+<button class="relative py-2 flex items-center justify-center text-xl">16</button>
+<button class="relative py-2 flex items-center justify-center text-xl">17</button>
+<button class="relative py-2 flex items-center justify-center text-xl">18</button>
+<button class="relative py-2 flex items-center justify-center text-xl">19</button>
+<button class="relative py-2 flex items-center justify-center text-xl">20</button>
+<button class="relative py-2 flex items-center justify-center text-xl">21</button>
+<button class="relative py-2 flex items-center justify-center text-xl">22</button>
+<button class="relative py-2 flex items-center justify-center text-xl">23</button>
+<button class="relative py-2 flex items-center justify-center text-xl">24</button>
+<button class="relative py-2 flex items-center justify-center text-xl">25</button>
+<button class="relative py-2 flex items-center justify-center text-xl">26</button>
+<button class="relative py-2 flex items-center justify-center text-xl">27</button>
+<button class="relative py-2 flex items-center justify-center text-xl">28</button>
+<button class="relative py-2 flex items-center justify-center text-xl">29</button>
+<button class="relative py-2 flex items-center justify-center text-xl">30</button>
+<button class="relative py-2 flex items-center justify-center text-xl">31</button>
+</div>
+</section>
+<!-- Records List -->
+<section class="flex flex-col gap-6">
+<h3 class="text-2xl font-bold px-2 text-primary/80">Oct 12 Records</h3>
+<div class="flex flex-col gap-4">
+<!-- Record Item 1 -->
+<div class="bg-white border-2 border-accent-brown/10 p-5 irregular-card flex items-center justify-between bg-accent/10">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 bg-accent/40 organic-blob flex items-center justify-center">
+<span class="material-symbols-outlined text-primary scale-125">water_drop</span>
+</div>
+<div>
+<p class="text-xl font-bold leading-none">Flow: Heavy</p>
+<p class="text-sm opacity-60">Logged at 8:30 AM</p>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="w-10 h-10 bg-primary/20 text-primary organic-blob flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">edit</span>
+</button>
+<button class="w-10 h-10 bg-primary/10 text-primary/40 organic-blob flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">delete</span>
+</button>
+</div>
+</div>
+<!-- Record Item 2 -->
+<div class="bg-white border-2 border-accent-brown/10 p-5 irregular-card flex items-center justify-between bg-primary/5">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 bg-blue-100/50 organic-blob flex items-center justify-center">
+<span class="material-symbols-outlined text-blue-400 scale-125">sentiment_satisfied</span>
+</div>
+<div>
+<p class="text-xl font-bold leading-none">Mood: Calm</p>
+<p class="text-sm opacity-60">Logged at 10:15 AM</p>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="w-10 h-10 bg-primary/20 text-primary organic-blob flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">edit</span>
+</button>
+<button class="w-10 h-10 bg-primary/10 text-primary/40 organic-blob flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">delete</span>
+</button>
+</div>
+</div>
+<!-- Record Item 3 -->
+<div class="bg-white border-2 border-accent-brown/10 p-5 irregular-card flex items-center justify-between bg-accent/10">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 bg-yellow-100/50 organic-blob flex items-center justify-center">
+<span class="material-symbols-outlined text-yellow-500 scale-125">pill</span>
+</div>
+<div>
+<p class="text-xl font-bold leading-none">Med: Iron</p>
+<p class="text-sm opacity-60">Logged at 9:00 PM</p>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="w-10 h-10 bg-primary/20 text-primary organic-blob flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">edit</span>
+</button>
+<button class="w-10 h-10 bg-primary/10 text-primary/40 organic-blob flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">delete</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Floating Action Button Styled Organically -->
+<button class="relative py-2 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+<!-- Navigation Placeholder (Hand-drawn style) -->
+</div>
+</body></html>

@@ -1,0 +1,94 @@
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;700&amp;family=Noto+Sans+SC:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#a66e6e",
+            "accent-peach": "#f7cdc3",
+            "background-light": "#fff9f8",
+            "background-dark": "#1b1717",
+            "muted-rose": "#B37D71",
+          },
+          fontFamily: {
+            "display": ["Public Sans", "Noto Sans SC", "sans-serif"]
+          },
+          borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+<style>
+    .blob-shape {
+      border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+    }
+    .custom-glow {
+      filter: blur(40px);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased">
+<div class="relative flex h-screen w-full flex-col overflow-hidden max-w-[430px] mx-auto shadow-2xl bg-background-light">
+<!-- Top Bar -->
+<div class="flex items-center justify-between px-6 pt-12 pb-4">
+<button class="flex size-11 items-center justify-center rounded-full bg-accent-peach/30 text-primary">
+<span class="material-symbols-outlined text-[24px]">calendar_today</span>
+</button>
+<button class="flex size-11 items-center justify-center rounded-full bg-accent-peach/30 text-primary">
+<span class="material-symbols-outlined text-[24px]">settings</span>
+</button>
+</div>
+<!-- Main Content -->
+<div class="flex flex-1 flex-col items-center justify-center px-8 text-center">
+<!-- Hero Title Section -->
+<div class="relative mb-2">
+<h1 class="text-[88px] font-bold leading-none tracking-tighter text-primary">
+          你好
+        </h1>
+<div class="absolute -right-4 top-2 rotate-12">
+<span class="material-symbols-outlined text-primary text-3xl fill-current">favorite</span>
+</div>
+</div>
+<p class="text-lg font-medium text-muted-rose/70 mb-12">
+        让我们开始记录你的故事
+      </p>
+<!-- Central Illustration Area -->
+<div class="relative flex items-center justify-center w-full mb-12">
+<!-- Soft Glow -->
+<div class="absolute size-64 bg-primary/10 rounded-full custom-glow"></div>
+<!-- Hand-drawn blob frame with image -->
+<div class="relative z-10 blob-shape bg-accent-peach/20 p-6 border-2 border-dashed border-primary/20">
+<div class="size-48 overflow-hidden blob-shape">
+<img alt="Soft blooming pink flower in gentle sunlight" class="h-full w-full object-cover opacity-80" data-alt="Soft blooming pink flower in gentle sunlight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmwmBWwg8RGjhxM8anBNM579-N6hsZ4DylYxlXjH63HgUMgV5MEm-gHNAfuXk2jdRTciexmnQDi1fa9rQrv1qoXQ1XevicndAUX8s--Qwb1Lqqiid7UwjY6tsjIxIJUrShe5Oq1_Ttq_SA_ijn8Ox4JICAXh4l9xHRInGBngc9Tba2pa9XDSEc4GVMWXaE_Eqai-mJtxBN7jPY_DleZ_WOcWBA0w2hI1k6AS4mHSa_6YtkeDhNGeo15OoCOlgqYofpP-9nJR59Q9pO"/>
+</div>
+</div>
+</div>
+<!-- Empty State Badge -->
+<div class="inline-flex items-center px-6 py-2 rounded-full bg-accent-peach/15 border border-accent-peach/30 mb-16">
+<span class="text-primary/80 text-sm font-medium tracking-wide">还没有任何记录</span>
+</div>
+<!-- CTA Button -->
+<div class="w-full pb-10">
+<button class="group flex h-16 w-full items-center justify-center gap-3 rounded-full bg-muted-rose text-white shadow-lg shadow-muted-rose/20 transition-transform active:scale-95">
+<span class="material-symbols-outlined text-[28px]">add_circle</span>
+<span class="text-lg font-bold">开始第一次记录</span>
+</button>
+</div>
+</div>
+<!-- Decorative Bottom Elements -->
+<div class="absolute bottom-[-20px] left-[-20px] size-40 bg-accent-peach/10 rounded-full blur-3xl"></div>
+<div class="absolute top-[20%] right-[-30px] size-32 bg-primary/5 rounded-full blur-2xl"></div>
+</div>
+</body></html>
