@@ -100,10 +100,12 @@ private fun com.haodong.yimalaile.data.Menstrual_record.toDomain(): MenstrualRec
 // ---------- Database singleton (simple DI) ----------
 
 object AppDatabase {
-    private var repository: SqlDelightRecordsRepository? = null
+    private var repository: SuspendRecordsRepository? = null
 
     fun init(factory: DatabaseDriverFactory) {
-        repository = SqlDelightRecordsRepository(factory.createDriver())
+        if (repository == null) {
+            repository = SqlDelightRecordsRepository(factory.createDriver())
+        }
     }
 
     fun requireRepository(): SuspendRecordsRepository =
