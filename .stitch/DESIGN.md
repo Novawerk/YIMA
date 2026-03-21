@@ -86,7 +86,9 @@
 | `_4/` | 记录对话框 (补记日期) | Bottom sheet — log period start, date picker, flow intensity |
 | `_5/` | 首页 (经期中 - 抱抱) | Home — active period state, "照顾好自己哦", shows days remaining |
 | `_6/` | 首页 (状态：快了) — 副本 | Duplicate variant of "快了" state |
-| `cycle_statistics_and_insights/` | 统计 / 洞察 | Cycle length chart, average duration, trend visualization |
+| `cycle_statistics_and_insights/` | 统计 — 已加载 (Loaded state) | Cycle length chart, average duration, trend visualization, prediction confidence |
+| `statistics_empty_state/` | 统计 — 空状态 (Empty state) | Empty state shown when fewer than 2 complete cycles exist; encouraging CTA |
+| `statistics_loading_state/` | 统计 — 加载中 (Loading/Skeleton state) | Shimmer skeleton placeholders while data is loading |
 | `disclaimer_and_privacy_notice/` | 免责声明 / 隐私说明 | First-launch disclaimer + privacy notice |
 | `first_launch_empty_state_welcome/` | 首次使用 / 欢迎空状态 | Onboarding empty state — no period data recorded yet |
 

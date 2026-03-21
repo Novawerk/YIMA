@@ -123,4 +123,49 @@ class CycleCalculatorTest {
         val prediction = calc.predictNextPeriod(records)
         assertEquals(LocalDateKey(2025, 3, 1), prediction)
     }
+
+    @Test
+    fun irregular_cycles_average_correctly() {
+        // gaps: 20, 40 → average 30
+        val records = listOf(
+            record("1", 2025, 1, 1),
+            record("2", 2025, 1, 21),  // +20
+            record("3", 2025, 3, 2),   // +40
+        )
+        assertEquals(30, calc.calculateAverageCycleLength(records))
+    }
+
+    @Test
+    fun predict_next_period_uses_most_recent_start_as_base() {
+        // Records out of insertion order — prediction should use the latest start date
+        val records = listOf(
+            record("2", 2025, 2, 1),
+            record("1", 2025, 1, 1),  // Jan 1 → Feb 1 = 31d
+        )
+        // avg = 31, latest start = Feb 1, prediction = Mar 4
+        val prediction = calc.predictNextPeriod(records)
+        assertEquals(LocalDateKey(2025, 3, 4), prediction)
+    }
+
+    @Test
+    fun all_deleted_records_treated_as_empty() {
+        val records = listOf(
+            record("1", 2025, 1, 1).copy(isDeleted = true),
+            record("2", 2025, 2, 1).copy(isDeleted = true),
+        )
+        assertNull(calc.calculateAverageCycleLength(records))
+        assertNull(calc.predictNextPeriod(records))
+    }
+
+    @Test
+    fun predict_next_period_spans_leap_year_feb() {
+        // Jan 1 2024 → Feb 1 2024 = 31 days; predict 31 days from Feb 1 = Mar 3 (2024 is leap)
+        val records = listOf(
+            record("1", 2024, 1, 1),
+            record("2", 2024, 2, 1),
+        )
+        // Feb 1 + 31 = Mar 3 (Feb has 29 days in 2024, so Feb 1 + 31 = Mar 3)
+        val prediction = calc.predictNextPeriod(records)
+        assertEquals(LocalDateKey(2024, 3, 3), prediction)
+    }
 }

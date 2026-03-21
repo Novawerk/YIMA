@@ -90,6 +90,7 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+    testImplementation(libs.sqldelight.sqlite.driver)
 }
 
 sqldelight {
