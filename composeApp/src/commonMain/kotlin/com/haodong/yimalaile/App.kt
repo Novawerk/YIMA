@@ -34,8 +34,10 @@ import com.haodong.yimalaile.ui.SettingsScreen
 import com.haodong.yimalaile.ui.theme.AppColors
 import com.haodong.yimalaile.ui.theme.AppShapes
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.Res
 import yimalaile.composeapp.generated.resources.compose_multiplatform
+import yimalaile.composeapp.generated.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,6 +68,12 @@ fun App() {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var currentScreen by remember { mutableStateOf("home") }
+
+    // Capture snackbar strings in composable scope before passing to coroutine lambdas
+    val msgSuccess = stringResource(Res.string.record_save_success)
+    val msgDuplicate = stringResource(Res.string.record_duplicate_date)
+    val msgTooClose = stringResource(Res.string.record_too_close)
+    val msgError = stringResource(Res.string.record_save_error)
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -111,16 +119,16 @@ fun App() {
                             when (result) {
                                 is AddRecordResult.Success -> {
                                     showRecordDialog = false
-                                    snackbarHostState.showSnackbar("记录成功")
+                                    snackbarHostState.showSnackbar(msgSuccess)
                                 }
                                 is AddRecordResult.DuplicateStartDate -> {
-                                    snackbarHostState.showSnackbar("该日期已有记录")
+                                    snackbarHostState.showSnackbar(msgDuplicate)
                                 }
                                 is AddRecordResult.TooCloseToOtherRecord -> {
-                                    snackbarHostState.showSnackbar("两次月经记录之间至少需要间隔 15 天")
+                                    snackbarHostState.showSnackbar(msgTooClose)
                                 }
                                 else -> {
-                                    snackbarHostState.showSnackbar("保存失败")
+                                    snackbarHostState.showSnackbar(msgError)
                                 }
                             }
                         }
@@ -144,24 +152,37 @@ fun HomeScreen(
     val predictedNext = state.predictedNextPeriod ?: lastPeriodDate?.plusDays(28)
     val avgCycle = state.averageCycleLength ?: 28
 
-    var statusText = "没来"
-    var statusDescription = "正在等待你的好消息"
-    var predictionText = if (predictedNext != null) "预计 ${predictedNext.month}月${predictedNext.day}日" else "暂无预测"
+    val strStatusNotHere = stringResource(Res.string.status_not_here)
+    val strStatusWaitingDesc = stringResource(Res.string.status_waiting_desc)
+    val strStatusHere = stringResource(Res.string.status_here)
+    val strStatusHereDesc = stringResource(Res.string.status_here_desc)
+    val strStatusSoon = stringResource(Res.string.status_soon)
+    val strStatusSoonDesc = stringResource(Res.string.status_soon_desc)
+    val strStatusRelaxDesc = stringResource(Res.string.status_relax_desc)
+    val strNoPrediction = stringResource(Res.string.status_no_prediction)
+
+    var statusText = strStatusNotHere
+    var statusDescription = strStatusWaitingDesc
+    var predictionText = if (predictedNext != null) {
+        stringResource(Res.string.status_predicted_date, predictedNext.month, predictedNext.day)
+    } else {
+        strNoPrediction
+    }
     var statusColor = AppColors.Primary
 
     if (lastPeriodDate != null && predictedNext != null) {
         val days = daysBetween(today, predictedNext)
         if (days <= 0) {
-            statusText = "来了"
-            statusDescription = "多喝热水，注意保暖"
+            statusText = strStatusHere
+            statusDescription = strStatusHereDesc
             statusColor = AppColors.Primary
         } else if (days <= 3) {
-            statusText = "快了"
-            statusDescription = "大概就在这两天了"
+            statusText = strStatusSoon
+            statusDescription = strStatusSoonDesc
             statusColor = AppColors.Warning
         } else {
-            statusText = "没来"
-            statusDescription = "享受轻松的时光吧"
+            statusText = strStatusNotHere
+            statusDescription = strStatusRelaxDesc
             statusColor = AppColors.Success
         }
     }
@@ -195,7 +216,7 @@ fun HomeScreen(
                 }
 
                 Text(
-                    text = "月经期预测",
+                    text = stringResource(Res.string.home_title),
                     style = TextStyle(
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
@@ -293,18 +314,18 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 StatCardNew(
-                    title = "周期长度",
+                    title = stringResource(Res.string.stat_cycle_length),
                     value = avgCycle.toString(),
-                    unit = "天",
+                    unit = stringResource(Res.string.unit_days),
                     backgroundColor = AppColors.CardBg1,
                     textColor = AppColors.Primary,
                     shape = AppShapes.LeftBlob,
                     modifier = Modifier.weight(1f)
                 )
                 StatCardNew(
-                    title = "经期时长",
+                    title = stringResource(Res.string.stat_period_length),
                     value = state.averagePeriodLength?.toString() ?: "--",
-                    unit = if (state.averagePeriodLength != null) "天" else "",
+                    unit = if (state.averagePeriodLength != null) stringResource(Res.string.unit_days) else "",
                     backgroundColor = AppColors.CardBg2,
                     textColor = AppColors.Primary,
                     shape = AppShapes.RightBlob,
@@ -343,7 +364,7 @@ fun HomeScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "\"照顾好自己，多喝温水。\"",
+                        text = stringResource(Res.string.home_motivational_quote),
                         style = TextStyle(
                             color = AppColors.Primary,
                             fontWeight = FontWeight.SemiBold,
@@ -380,7 +401,7 @@ fun HomeScreen(
                 Icon(Icons.Default.EditNote, contentDescription = null, modifier = Modifier.size(28.dp))
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    "记录月经",
+                    stringResource(Res.string.btn_record_period),
                     style = TextStyle(
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold
@@ -418,7 +439,15 @@ fun CalendarHistoryScreen(
 
     val daysInCurrentMonth = daysInMonth(displayYear, displayMonth)
     val firstDayOffset = dayOfWeek(displayYear, displayMonth, 1)
-    val dayHeaders = listOf("日", "一", "二", "三", "四", "五", "六")
+    val dayHeaders = listOf(
+        stringResource(Res.string.calendar_day_sun),
+        stringResource(Res.string.calendar_day_mon),
+        stringResource(Res.string.calendar_day_tue),
+        stringResource(Res.string.calendar_day_wed),
+        stringResource(Res.string.calendar_day_thu),
+        stringResource(Res.string.calendar_day_fri),
+        stringResource(Res.string.calendar_day_sat)
+    )
 
     val periodDaysThisMonth = remember(records, displayYear, displayMonth) {
         val monthStart = LocalDateKey(displayYear, displayMonth, 1)
@@ -431,6 +460,25 @@ fun CalendarHistoryScreen(
         }
         count
     }
+
+    val strNavBack = stringResource(Res.string.nav_back)
+    val strCalendarTitle = stringResource(Res.string.calendar_title)
+    val strPrevMonth = stringResource(Res.string.calendar_prev_month)
+    val strNextMonth = stringResource(Res.string.calendar_next_month)
+    val strMonthOverview = stringResource(Res.string.calendar_month_overview)
+    val strPeriodDaysCount = if (periodDaysThisMonth > 0) {
+        stringResource(Res.string.calendar_period_days_count, periodDaysThisMonth)
+    } else {
+        stringResource(Res.string.calendar_period_days_none)
+    }
+    val strCycleLengthStat = if (averageCycleLength != null) {
+        stringResource(Res.string.calendar_cycle_length_count, averageCycleLength)
+    } else {
+        stringResource(Res.string.calendar_cycle_length_none)
+    }
+    val strHistoryTitle = stringResource(Res.string.calendar_history)
+    val strNoRecords = stringResource(Res.string.calendar_no_records)
+    val strStartOnly = stringResource(Res.string.calendar_record_start_only)
 
     Column(
         modifier = Modifier
@@ -452,10 +500,10 @@ fun CalendarHistoryScreen(
                     .size(48.dp)
                     .background(AppColors.Accent.copy(alpha = 0.3f), CircleShape)
             ) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = AppColors.Primary)
+                Icon(Icons.Default.ArrowBack, contentDescription = strNavBack, tint = AppColors.Primary)
             }
             Text(
-                text = "日历记录",
+                text = strCalendarTitle,
                 style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold, color = AppColors.Primary)
             )
             Spacer(modifier = Modifier.size(48.dp))
@@ -475,7 +523,7 @@ fun CalendarHistoryScreen(
                 },
                 modifier = Modifier.size(48.dp).background(AppColors.Accent.copy(alpha = 0.3f), CircleShape)
             ) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "上个月", tint = AppColors.Primary)
+                Icon(Icons.Default.ArrowBack, contentDescription = strPrevMonth, tint = AppColors.Primary)
             }
             Box(
                 modifier = Modifier
@@ -487,7 +535,7 @@ fun CalendarHistoryScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "${displayYear}年 ${displayMonth}月",
+                    text = stringResource(Res.string.calendar_year_month, displayYear, displayMonth),
                     style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold, color = AppColors.Primary)
                 )
             }
@@ -497,7 +545,7 @@ fun CalendarHistoryScreen(
                 },
                 modifier = Modifier.size(48.dp).background(AppColors.Accent.copy(alpha = 0.3f), CircleShape)
             ) {
-                Icon(Icons.Default.ArrowForward, contentDescription = "下个月", tint = AppColors.Primary)
+                Icon(Icons.Default.ArrowForward, contentDescription = strNextMonth, tint = AppColors.Primary)
             }
         }
 
@@ -574,7 +622,7 @@ fun CalendarHistoryScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 本月概览 stats
+        // This month stats
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
@@ -582,7 +630,7 @@ fun CalendarHistoryScreen(
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Text(
-                    text = "本月概览",
+                    text = strMonthOverview,
                     style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold, color = AppColors.Primary)
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -590,7 +638,7 @@ fun CalendarHistoryScreen(
                     Box(modifier = Modifier.size(12.dp).clip(CircleShape).background(AppColors.Primary.copy(alpha = 0.4f)))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "经期天数: ${if (periodDaysThisMonth > 0) "${periodDaysThisMonth}天" else "暂无记录"}",
+                        text = strPeriodDaysCount,
                         color = AppColors.Primary.copy(alpha = 0.7f)
                     )
                 }
@@ -599,7 +647,7 @@ fun CalendarHistoryScreen(
                     Box(modifier = Modifier.size(12.dp).clip(CircleShape).background(AppColors.Success.copy(alpha = 0.4f)))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "周期长度: ${if (averageCycleLength != null) "${averageCycleLength}天" else "暂无数据"}",
+                        text = strCycleLengthStat,
                         color = AppColors.Primary.copy(alpha = 0.7f)
                     )
                 }
@@ -616,13 +664,13 @@ fun CalendarHistoryScreen(
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Text(
-                    text = "历史记录",
+                    text = strHistoryTitle,
                     style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold, color = AppColors.Primary)
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 if (sortedRecords.isEmpty()) {
                     Text(
-                        text = "暂无记录",
+                        text = strNoRecords,
                         style = TextStyle(fontSize = 14.sp, color = AppColors.Primary.copy(alpha = 0.5f)),
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center
@@ -648,13 +696,13 @@ fun CalendarHistoryScreen(
                                     .background(AppColors.Primary.copy(alpha = 0.5f))
                             )
                             Spacer(modifier = Modifier.width(12.dp))
-                            val startStr = "${record.startDate.month}月${record.startDate.day}日"
+                            val startStr = stringResource(Res.string.date_month_day, record.startDate.month, record.startDate.day)
                             val label = if (record.endDate != null) {
-                                val endStr = "${record.endDate.month}月${record.endDate.day}日"
+                                val endStr = stringResource(Res.string.date_month_day, record.endDate.month, record.endDate.day)
                                 val days = daysBetween(record.startDate, record.endDate) + 1
-                                "$startStr — $endStr (${days}天)"
+                                "$startStr — $endStr ${stringResource(Res.string.calendar_record_days, days)}"
                             } else {
-                                "$startStr (仅开始日)"
+                                "$startStr $strStartOnly"
                             }
                             Text(
                                 text = label,

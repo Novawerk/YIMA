@@ -8,4 +8,87 @@
     <string name="settings_title">设置</string>
     <string name="settings_language">语言</string>
     <string name="settings_language_follow_system">跟随系统</string>
+
+    <!-- Navigation -->
+    <string name="nav_back">返回</string>
+
+    <!-- Home Screen -->
+    <string name="home_title">月经期预测</string>
+    <string name="status_not_here">没来</string>
+    <string name="status_waiting_desc">正在等待你的好消息</string>
+    <string name="status_here">来了</string>
+    <string name="status_here_desc">多喝热水，注意保暖</string>
+    <string name="status_soon">快了</string>
+    <string name="status_soon_desc">大概就在这两天了</string>
+    <string name="status_relax_desc">享受轻松的时光吧</string>
+    <string name="status_no_prediction">暂无预测</string>
+    <string name="status_predicted_date">预计 %1$d月%2$d日</string>
+    <string name="stat_cycle_length">周期长度</string>
+    <string name="stat_period_length">经期时长</string>
+    <string name="unit_days">天</string>
+    <string name="home_motivational_quote">\"照顾好自己，多喝温水.\"</string>
+    <string name="btn_record_period">记录月经</string>
+
+    <!-- Snackbar messages -->
+    <string name="record_save_success">记录成功</string>
+    <string name="record_duplicate_date">该日期已有记录</string>
+    <string name="record_too_close">两次月经记录之间至少需要间隔 15 天</string>
+    <string name="record_save_error">保存失败</string>
+
+    <!-- Calendar History Screen -->
+    <string name="calendar_title">日历记录</string>
+    <string name="calendar_prev_month">上个月</string>
+    <string name="calendar_next_month">下个月</string>
+    <string name="calendar_year_month">%1$d年 %2$d月</string>
+    <string name="calendar_month_overview">本月概览</string>
+    <string name="calendar_period_days_count">经期天数: %1$d天</string>
+    <string name="calendar_period_days_none">经期天数: 暂无记录</string>
+    <string name="calendar_cycle_length_count">周期长度: %1$d天</string>
+    <string name="calendar_cycle_length_none">周期长度: 暂无数据</string>
+    <string name="calendar_history">历史记录</string>
+    <string name="calendar_no_records">暂无记录</string>
+    <string name="calendar_record_start_only">(仅开始日)</string>
+    <string name="calendar_record_days">(%1$d天)</string>
+    <string name="date_month_day">%1$d月%2$d日</string>
+    <string name="calendar_day_sun">日</string>
+    <string name="calendar_day_mon">一</string>
+    <string name="calendar_day_tue">二</string>
+    <string name="calendar_day_wed">三</string>
+    <string name="calendar_day_thu">四</string>
+    <string name="calendar_day_fri">五</string>
+    <string name="calendar_day_sat">六</string>
+
+    <!-- Record Today Dialog -->
+    <string name="record_dialog_title">记录今天</string>
+    <string name="record_today_label">今天</string>
+    <string name="record_flow_intensity">经量强度</string>
+    <string name="intensity_light">少量</string>
+    <string name="intensity_medium">中量</string>
+    <string name="intensity_heavy">多量</string>
+    <string name="record_mood">今日心情</string>
+    <string name="mood_happy">开心</string>
+    <string name="mood_neutral">一般</string>
+    <string name="mood_sad">低落</string>
+    <string name="mood_very_sad">难受</string>
+    <string name="record_symptoms">身体症状</string>
+    <string name="symptom_cramps">腹痛</string>
+    <string name="symptom_back_pain">腰酸</string>
+    <string name="symptom_headache">头痛</string>
+    <string name="symptom_breast_pain">胸部胀痛</string>
+    <string name="symptom_fatigue">疲倦</string>
+    <string name="record_notes_hint">写下今天的小心情...</string>
+    <string name="record_save_btn">保存记录</string>
+    <string name="dialog_confirm">确定</string>
+    <string name="dialog_cancel">取消</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_profile">我的小档案</string>
+    <string name="settings_period_length">经期长度</string>
+    <string name="settings_period_length_value">5 天</string>
+    <string name="settings_cycle_length">周期长度</string>
+    <string name="settings_cycle_length_value">28 天</string>
+    <string name="settings_reminders">提醒设置</string>
+    <string name="settings_reminders_on">开启</string>
+    <string name="settings_privacy">隐私说明</string>
+    <string name="app_version">版本 1.0.0</string>
 </resources>

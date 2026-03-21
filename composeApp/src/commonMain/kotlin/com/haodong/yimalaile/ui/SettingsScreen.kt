@@ -21,6 +21,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.ui.theme.AppColors
 import com.haodong.yimalaile.ui.theme.AppShapes
+import org.jetbrains.compose.resources.stringResource
+import yimalaile.composeapp.generated.resources.Res
+import yimalaile.composeapp.generated.resources.*
 
 /**
  * Phase 1 Settings: Hand-drawn style settings screen inspired by Stitch designs.
@@ -52,10 +55,10 @@ fun SettingsScreen(
                     .size(48.dp)
                     .background(AppColors.Accent.copy(alpha = 0.3f), CircleShape)
             ) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = AppColors.Primary)
+                Icon(Icons.Default.ArrowBack, contentDescription = stringResource(Res.string.nav_back), tint = AppColors.Primary)
             }
             Text(
-                text = "设置",
+                text = stringResource(Res.string.settings_title),
                 style = TextStyle(
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
@@ -84,7 +87,7 @@ fun SettingsScreen(
         }
 
         Text(
-            text = "我的小档案",
+            text = stringResource(Res.string.settings_profile),
             style = TextStyle(
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
@@ -97,28 +100,28 @@ fun SettingsScreen(
         // Settings Items
         SettingsItem(
             icon = Icons.Default.Timer,
-            title = "经期长度",
-            value = "5 天",
+            title = stringResource(Res.string.settings_period_length),
+            value = stringResource(Res.string.settings_period_length_value),
             color = AppColors.CardBg1
         )
 
         SettingsItem(
             icon = Icons.Default.Autorenew,
-            title = "周期长度",
-            value = "28 天",
+            title = stringResource(Res.string.settings_cycle_length),
+            value = stringResource(Res.string.settings_cycle_length_value),
             color = AppColors.CardBg2
         )
 
         SettingsItem(
             icon = Icons.Default.Notifications,
-            title = "提醒设置",
-            value = "开启",
+            title = stringResource(Res.string.settings_reminders),
+            value = stringResource(Res.string.settings_reminders_on),
             color = AppColors.CardBg1
         )
 
         SettingsItem(
             icon = Icons.Default.Security,
-            title = "隐私说明",
+            title = stringResource(Res.string.settings_privacy),
             value = "",
             color = AppColors.CardBg2,
             onClick = { showDisclaimer.value = true }
@@ -127,13 +130,13 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         Text(
-            text = "版本 1.0.0",
+            text = stringResource(Res.string.app_version),
             style = TextStyle(
                 fontSize = 14.sp,
                 color = AppColors.Primary.copy(alpha = 0.4f)
             )
         )
-        
+
         if (showDisclaimer.value) {
             PrivacyDisclaimerPlaceholder(
                 onAccept = { showDisclaimer.value = false }
@@ -171,9 +174,9 @@ fun SettingsItem(
             ) {
                 Icon(icon, contentDescription = null, tint = AppColors.Primary, modifier = Modifier.size(20.dp))
             }
-            
+
             Spacer(modifier = Modifier.width(16.dp))
-            
+
             Text(
                 text = title,
                 style = TextStyle(
@@ -183,7 +186,7 @@ fun SettingsItem(
                 ),
                 modifier = Modifier.weight(1f)
             )
-            
+
             if (value.isNotEmpty()) {
                 Text(
                     text = value,
@@ -194,7 +197,7 @@ fun SettingsItem(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
             }
-            
+
             Icon(
                 Icons.Default.ChevronRight,
                 contentDescription = null,

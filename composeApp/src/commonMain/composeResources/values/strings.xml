@@ -8,4 +8,87 @@
     <string name="settings_title">Settings</string>
     <string name="settings_language">Language</string>
     <string name="settings_language_follow_system">Follow system</string>
+
+    <!-- Navigation -->
+    <string name="nav_back">Back</string>
+
+    <!-- Home Screen -->
+    <string name="home_title">Period Tracker</string>
+    <string name="status_not_here">Nope</string>
+    <string name="status_waiting_desc">Waiting for news</string>
+    <string name="status_here">Here!</string>
+    <string name="status_here_desc">Stay warm and take care</string>
+    <string name="status_soon">Soon</string>
+    <string name="status_soon_desc">Just a couple of days away</string>
+    <string name="status_relax_desc">Enjoy the free time</string>
+    <string name="status_no_prediction">No prediction yet</string>
+    <string name="status_predicted_date">Expected %1$d/%2$d</string>
+    <string name="stat_cycle_length">Cycle Length</string>
+    <string name="stat_period_length">Period Length</string>
+    <string name="unit_days">days</string>
+    <string name="home_motivational_quote">\"Take care of yourself, stay hydrated.\"</string>
+    <string name="btn_record_period">Record Period</string>
+
+    <!-- Snackbar messages -->
+    <string name="record_save_success">Recorded successfully</string>
+    <string name="record_duplicate_date">A record already exists for this date</string>
+    <string name="record_too_close">Period records must be at least 15 days apart</string>
+    <string name="record_save_error">Failed to save</string>
+
+    <!-- Calendar History Screen -->
+    <string name="calendar_title">Calendar</string>
+    <string name="calendar_prev_month">Previous month</string>
+    <string name="calendar_next_month">Next month</string>
+    <string name="calendar_year_month">%1$d/%2$d</string>
+    <string name="calendar_month_overview">This Month</string>
+    <string name="calendar_period_days_count">Period days: %1$d days</string>
+    <string name="calendar_period_days_none">Period days: No records</string>
+    <string name="calendar_cycle_length_count">Cycle length: %1$d days</string>
+    <string name="calendar_cycle_length_none">Cycle length: No data</string>
+    <string name="calendar_history">History</string>
+    <string name="calendar_no_records">No records</string>
+    <string name="calendar_record_start_only">(start only)</string>
+    <string name="calendar_record_days">(%1$d days)</string>
+    <string name="date_month_day">%1$d/%2$d</string>
+    <string name="calendar_day_sun">Sun</string>
+    <string name="calendar_day_mon">Mon</string>
+    <string name="calendar_day_tue">Tue</string>
+    <string name="calendar_day_wed">Wed</string>
+    <string name="calendar_day_thu">Thu</string>
+    <string name="calendar_day_fri">Fri</string>
+    <string name="calendar_day_sat">Sat</string>
+
+    <!-- Record Today Dialog -->
+    <string name="record_dialog_title">Log Today</string>
+    <string name="record_today_label">TODAY</string>
+    <string name="record_flow_intensity">Flow Intensity</string>
+    <string name="intensity_light">Light</string>
+    <string name="intensity_medium">Medium</string>
+    <string name="intensity_heavy">Heavy</string>
+    <string name="record_mood">Mood Today</string>
+    <string name="mood_happy">Happy</string>
+    <string name="mood_neutral">Neutral</string>
+    <string name="mood_sad">Low</string>
+    <string name="mood_very_sad">Bad</string>
+    <string name="record_symptoms">Symptoms</string>
+    <string name="symptom_cramps">Cramps</string>
+    <string name="symptom_back_pain">Back pain</string>
+    <string name="symptom_headache">Headache</string>
+    <string name="symptom_breast_pain">Breast pain</string>
+    <string name="symptom_fatigue">Fatigue</string>
+    <string name="record_notes_hint">Write about your day...</string>
+    <string name="record_save_btn">Save Record</string>
+    <string name="dialog_confirm">OK</string>
+    <string name="dialog_cancel">Cancel</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_profile">My Profile</string>
+    <string name="settings_period_length">Period Length</string>
+    <string name="settings_period_length_value">5 days</string>
+    <string name="settings_cycle_length">Cycle Length</string>
+    <string name="settings_cycle_length_value">28 days</string>
+    <string name="settings_reminders">Reminders</string>
+    <string name="settings_reminders_on">On</string>
+    <string name="settings_privacy">Privacy Policy</string>
+    <string name="app_version">Version 1.0.0</string>
 </resources>

@@ -29,6 +29,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.haodong.yimalaile.data.*
 import com.haodong.yimalaile.ui.theme.AppShapes
+import org.jetbrains.compose.resources.stringResource
+import yimalaile.composeapp.generated.resources.Res
+import yimalaile.composeapp.generated.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,8 +48,11 @@ fun RecordTodayDialog(
     var selectedMood by remember { mutableStateOf<Mood?>(null) }
     var selectedSymptoms by remember { mutableStateOf(setOf<String>()) }
     var noteText by remember { mutableStateOf("") }
-    
+
     var showDatePicker by remember { mutableStateOf(false) }
+
+    val strConfirm = stringResource(Res.string.dialog_confirm)
+    val strCancel = stringResource(Res.string.dialog_cancel)
 
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState(
@@ -61,12 +67,12 @@ fun RecordTodayDialog(
                     }
                     showDatePicker = false
                 }) {
-                    Text("确定", color = colorPrimary)
+                    Text(strConfirm, color = colorPrimary)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text("取消", color = colorPrimary)
+                    Text(strCancel, color = colorPrimary)
                 }
             }
         ) {
@@ -104,7 +110,7 @@ fun RecordTodayDialog(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
-                    "记录今天",
+                    stringResource(Res.string.record_dialog_title),
                     style = TextStyle(
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
@@ -143,6 +149,7 @@ fun RecordTodayDialog(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Date selector (last 30 days)
+                val strTodayLabel = stringResource(Res.string.record_today_label)
                 Row(
                     modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -178,7 +185,7 @@ fun RecordTodayDialog(
                             )
                             if (isActuallyToday) {
                                 Text(
-                                    "TODAY",
+                                    strTodayLabel,
                                     style = TextStyle(
                                         fontSize = 8.sp,
                                         color = colorPrimary.copy(alpha = 0.4f),
@@ -193,18 +200,18 @@ fun RecordTodayDialog(
                 Spacer(modifier = Modifier.height(32.dp))
 
                 // Section: Flow Intensity
-                RecordSectionTitle("经量强度", Icons.Default.WaterDrop, colorPrimary)
+                RecordSectionTitle(stringResource(Res.string.record_flow_intensity), Icons.Default.WaterDrop, colorPrimary)
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
-                    IntensityItem("少量", Intensity.LIGHT, selectedIntensity == Intensity.LIGHT, colorPrimary, colorAccent, AppShapes.Blob1) {
+                    IntensityItem(stringResource(Res.string.intensity_light), Intensity.LIGHT, selectedIntensity == Intensity.LIGHT, colorPrimary, colorAccent, AppShapes.Blob1) {
                         selectedIntensity = Intensity.LIGHT
                     }
-                    IntensityItem("中量", Intensity.MEDIUM, selectedIntensity == Intensity.MEDIUM, colorPrimary, colorAccent, AppShapes.Blob2) {
+                    IntensityItem(stringResource(Res.string.intensity_medium), Intensity.MEDIUM, selectedIntensity == Intensity.MEDIUM, colorPrimary, colorAccent, AppShapes.Blob2) {
                         selectedIntensity = Intensity.MEDIUM
                     }
-                    IntensityItem("多量", Intensity.HEAVY, selectedIntensity == Intensity.HEAVY, colorPrimary, colorAccent, AppShapes.Blob3) {
+                    IntensityItem(stringResource(Res.string.intensity_heavy), Intensity.HEAVY, selectedIntensity == Intensity.HEAVY, colorPrimary, colorAccent, AppShapes.Blob3) {
                         selectedIntensity = Intensity.HEAVY
                     }
                 }
@@ -212,7 +219,7 @@ fun RecordTodayDialog(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Section: Mood
-                RecordSectionTitle("今日心情", Icons.Default.Mood, colorPrimary)
+                RecordSectionTitle(stringResource(Res.string.record_mood), Icons.Default.Mood, colorPrimary)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -227,16 +234,16 @@ fun RecordTodayDialog(
                         horizontalArrangement = Arrangement.SpaceAround,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        MoodItem("开心", Mood.HAPPY, Icons.Default.SentimentSatisfied, selectedMood == Mood.HAPPY, colorPrimary) {
+                        MoodItem(stringResource(Res.string.mood_happy), Mood.HAPPY, Icons.Default.SentimentSatisfied, selectedMood == Mood.HAPPY, colorPrimary) {
                             selectedMood = Mood.HAPPY
                         }
-                        MoodItem("一般", Mood.NEUTRAL, Icons.Default.SentimentNeutral, selectedMood == Mood.NEUTRAL, colorPrimary) {
+                        MoodItem(stringResource(Res.string.mood_neutral), Mood.NEUTRAL, Icons.Default.SentimentNeutral, selectedMood == Mood.NEUTRAL, colorPrimary) {
                             selectedMood = Mood.NEUTRAL
                         }
-                        MoodItem("低落", Mood.SAD, Icons.Default.SentimentDissatisfied, selectedMood == Mood.SAD, colorPrimary) {
+                        MoodItem(stringResource(Res.string.mood_sad), Mood.SAD, Icons.Default.SentimentDissatisfied, selectedMood == Mood.SAD, colorPrimary) {
                             selectedMood = Mood.SAD
                         }
-                        MoodItem("难受", Mood.VERY_SAD, Icons.Default.MoodBad, selectedMood == Mood.VERY_SAD, colorPrimary) {
+                        MoodItem(stringResource(Res.string.mood_very_sad), Mood.VERY_SAD, Icons.Default.MoodBad, selectedMood == Mood.VERY_SAD, colorPrimary) {
                             selectedMood = Mood.VERY_SAD
                         }
                     }
@@ -245,8 +252,14 @@ fun RecordTodayDialog(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Section: Symptoms
-                RecordSectionTitle("身体症状", Icons.Default.MedicalServices, colorPrimary)
-                val symptoms = listOf("腹痛", "腰酸", "头痛", "胸部胀痛", "疲倦")
+                RecordSectionTitle(stringResource(Res.string.record_symptoms), Icons.Default.MedicalServices, colorPrimary)
+                val symptoms = listOf(
+                    stringResource(Res.string.symptom_cramps),
+                    stringResource(Res.string.symptom_back_pain),
+                    stringResource(Res.string.symptom_headache),
+                    stringResource(Res.string.symptom_breast_pain),
+                    stringResource(Res.string.symptom_fatigue)
+                )
                 FlowRow(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
                     mainAxisSpacing = 8.dp,
@@ -267,6 +280,7 @@ fun RecordTodayDialog(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Section: Notes
+                val strNotesHint = stringResource(Res.string.record_notes_hint)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -286,7 +300,7 @@ fun RecordTodayDialog(
                 ) {
                     if (noteText.isEmpty()) {
                         Text(
-                            "写下今天的小心情...",
+                            strNotesHint,
                             style = TextStyle(color = colorPrimary.copy(alpha = 0.3f), fontSize = 16.sp)
                         )
                     }
@@ -321,14 +335,14 @@ fun RecordTodayDialog(
                     shape = RoundedCornerShape(40.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = colorPrimary)
                 ) {
-                    Text("保存记录", style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Black))
+                    Text(stringResource(Res.string.record_save_btn), style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Black))
                 }
 
                 TextButton(
                     onClick = onDismiss,
                     modifier = Modifier.padding(bottom = 16.dp)
                 ) {
-                    Text("取消", style = TextStyle(color = colorPrimary.copy(alpha = 0.5f), fontSize = 16.sp))
+                    Text(strCancel, style = TextStyle(color = colorPrimary.copy(alpha = 0.5f), fontSize = 16.sp))
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
