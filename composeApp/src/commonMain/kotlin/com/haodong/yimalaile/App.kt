@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.data.*
+import com.haodong.yimalaile.ui.PrivacyDisclaimerPlaceholder
 import com.haodong.yimalaile.ui.components.RecordTodayDialog
 import kotlinx.coroutines.launch
 import com.haodong.yimalaile.ui.components.StatCardNew
@@ -39,6 +40,24 @@ import yimalaile.composeapp.generated.resources.compose_multiplatform
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App() {
+    val settingsRepo = remember { AppSettings.requireRepository() }
+    var disclaimerAccepted by remember { mutableStateOf(settingsRepo.isDisclaimerAccepted()) }
+
+    if (!disclaimerAccepted) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(AppColors.BackgroundLight),
+            contentAlignment = Alignment.Center
+        ) {
+            PrivacyDisclaimerPlaceholder(onAccept = {
+                settingsRepo.setDisclaimerAccepted(true)
+                disclaimerAccepted = true
+            })
+        }
+        return
+    }
+
     val viewModel = remember { HomeViewModel(AppDatabase.requireRepository()) }
     DisposableEffect(Unit) { onDispose { viewModel.clear() } }
 
