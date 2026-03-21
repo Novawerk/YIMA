@@ -91,5 +91,7 @@
 | `statistics_loading_state/` | 统计 — 加载中 (Loading/Skeleton state) | Shimmer skeleton placeholders while data is loading |
 | `disclaimer_and_privacy_notice/` | 免责声明 / 隐私说明 | First-launch disclaimer + privacy notice |
 | `first_launch_empty_state_welcome/` | 首次使用 / 欢迎空状态 | Onboarding empty state — no period data recorded yet |
+| `home_empty_state/` | 首页空状态 | HomeScreen empty state — no records yet; flower illustration, "--" stat cards, CTA to record first period |
+| `calendar_empty_state/` | 日历空状态 | CalendarHistoryScreen empty state — muted calendar grid, heart-calendar illustration, CTA to add first record |
 
 > **Note:** Legacy named assets (`home-active-hugging-warm.html`, `history-list.html`, etc.) and their PNGs have been removed from the repo. All current designs live in the numbered/named folders above.
