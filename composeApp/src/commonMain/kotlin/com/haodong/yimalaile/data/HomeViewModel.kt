@@ -14,7 +14,9 @@ data class HomeState(
     val lastPeriodDate: LocalDateKey? = null,
     val averageCycleLength: Int? = null,
     val averagePeriodLength: Int? = null,
-    val predictedNextPeriod: LocalDateKey? = null
+    val predictedNextPeriod: LocalDateKey? = null,
+    val cycleLengths: List<Int> = emptyList(),
+    val periodLengths: List<Int> = emptyList()
 )
 
 class HomeViewModel(private val repository: SuspendRecordsRepository) {
@@ -40,7 +42,9 @@ class HomeViewModel(private val repository: SuspendRecordsRepository) {
             lastPeriodDate = records.maxByOrNull { it.startDate }?.startDate,
             averageCycleLength = calculator.calculateAverageCycleLength(records),
             averagePeriodLength = calculator.calculateAveragePeriodLength(records),
-            predictedNextPeriod = calculator.predictNextPeriod(records)
+            predictedNextPeriod = calculator.predictNextPeriod(records),
+            cycleLengths = calculator.getCycleLengths(records),
+            periodLengths = calculator.getPeriodLengths(records)
         )
     }
 

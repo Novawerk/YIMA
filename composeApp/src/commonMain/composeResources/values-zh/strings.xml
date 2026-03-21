@@ -81,6 +81,22 @@
     <string name="dialog_confirm">确定</string>
     <string name="dialog_cancel">取消</string>
 
+    <!-- Statistics Screen -->
+    <string name="stats_title">我的统计</string>
+    <string name="stats_avg_cycle">平均周期</string>
+    <string name="stats_avg_period">平均经期</string>
+    <string name="stats_cycle_trend">周期趋势</string>
+    <string name="stats_last_n_cycles">过去 %1$d 个周期</string>
+    <string name="stats_period_duration">经期时长</string>
+    <string name="stats_prediction_confidence">预测置信度</string>
+    <string name="stats_confidence_high">高</string>
+    <string name="stats_confidence_medium">中</string>
+    <string name="stats_confidence_low">低</string>
+    <string name="stats_encouragement">你的身体很有规律，继续保持记录吧</string>
+    <string name="stats_empty_message">记录至少 2 次月经，即可查看统计数据</string>
+    <string name="stats_empty_progress">当前: %1$d 个完整周期</string>
+    <string name="stats_see_more">查看统计</string>
+
     <!-- Settings Screen -->
     <string name="settings_profile">我的小档案</string>
     <string name="settings_period_length">经期长度</string>

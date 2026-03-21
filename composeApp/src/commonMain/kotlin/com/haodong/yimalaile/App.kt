@@ -31,6 +31,7 @@ import com.haodong.yimalaile.ui.components.RecordTodayDialog
 import kotlinx.coroutines.launch
 import com.haodong.yimalaile.ui.components.StatCardNew
 import com.haodong.yimalaile.ui.SettingsScreen
+import com.haodong.yimalaile.ui.StatisticsScreen
 import com.haodong.yimalaile.ui.theme.AppColors
 import com.haodong.yimalaile.ui.theme.AppShapes
 import org.jetbrains.compose.resources.painterResource
@@ -90,6 +91,7 @@ fun App() {
                         state = state,
                         onOpenSettings = { currentScreen = "settings" },
                         onOpenCalendar = { currentScreen = "calendar" },
+                        onOpenStats = { currentScreen = "stats" },
                         onShowRecordDialog = { showRecordDialog = true }
                     )
                 }
@@ -103,6 +105,20 @@ fun App() {
                         records = state.records,
                         averageCycleLength = state.averageCycleLength,
                         onClose = { currentScreen = "home" }
+                    )
+                }
+                "stats" -> {
+                    StatisticsScreen(
+                        records = state.records,
+                        averageCycleLength = state.averageCycleLength,
+                        averagePeriodLength = state.averagePeriodLength,
+                        cycleLengths = state.cycleLengths,
+                        periodLengths = state.periodLengths,
+                        onClose = { currentScreen = "home" },
+                        onGoRecord = {
+                            currentScreen = "home"
+                            showRecordDialog = true
+                        }
                     )
                 }
             }
@@ -145,6 +161,7 @@ fun HomeScreen(
     state: HomeState,
     onOpenSettings: () -> Unit,
     onOpenCalendar: () -> Unit,
+    onOpenStats: () -> Unit,
     onShowRecordDialog: () -> Unit
 ) {
     val today = remember { LocalDateKey.fromEpochMillis(currentEpochMillis()) }
@@ -330,6 +347,30 @@ fun HomeScreen(
                     textColor = AppColors.Primary,
                     shape = AppShapes.RightBlob,
                     modifier = Modifier.weight(1f)
+                )
+            }
+
+            // View Stats link
+            TextButton(
+                onClick = onOpenStats,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+            ) {
+                Text(
+                    text = stringResource(Res.string.stats_see_more),
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = AppColors.Primary.copy(alpha = 0.6f)
+                    )
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Icon(
+                    Icons.Default.ArrowForward,
+                    contentDescription = null,
+                    tint = AppColors.Primary.copy(alpha = 0.6f),
+                    modifier = Modifier.size(16.dp)
                 )
             }
 

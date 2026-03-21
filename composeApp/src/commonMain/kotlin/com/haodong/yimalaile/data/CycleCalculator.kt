@@ -39,6 +39,31 @@ class CycleCalculator {
     }
 
     /**
+     * Returns a list of cycle lengths (days between consecutive start dates), oldest first.
+     * Requires ≥ 2 records; returns empty list otherwise.
+     */
+    fun getCycleLengths(records: List<MenstrualRecord>): List<Int> {
+        val sorted = records
+            .filter { !it.isDeleted }
+            .sortedBy { it.startDate }
+        if (sorted.size < 2) return emptyList()
+        return sorted.zipWithNext().map { (a, b) ->
+            daysBetween(a.startDate, b.startDate)
+        }
+    }
+
+    /**
+     * Returns a list of period durations (inclusive days) for records with a non-null endDate,
+     * in the same order as the input.
+     */
+    fun getPeriodLengths(records: List<MenstrualRecord>): List<Int> {
+        return records
+            .filter { !it.isDeleted && it.endDate != null }
+            .sortedBy { it.startDate }
+            .map { daysBetween(it.startDate, it.endDate!!) + 1 }
+    }
+
+    /**
      * Predicts the next period start date as: lastStart + averageCycleLength.
      *
      * Returns null if there are fewer than 2 records (cannot compute average).

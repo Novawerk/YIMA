@@ -81,6 +81,22 @@
     <string name="dialog_confirm">OK</string>
     <string name="dialog_cancel">Cancel</string>
 
+    <!-- Statistics Screen -->
+    <string name="stats_title">My Stats</string>
+    <string name="stats_avg_cycle">Avg Cycle</string>
+    <string name="stats_avg_period">Avg Period</string>
+    <string name="stats_cycle_trend">Cycle Trend</string>
+    <string name="stats_last_n_cycles">Last %1$d cycles</string>
+    <string name="stats_period_duration">Period Duration</string>
+    <string name="stats_prediction_confidence">Prediction confidence</string>
+    <string name="stats_confidence_high">High</string>
+    <string name="stats_confidence_medium">Medium</string>
+    <string name="stats_confidence_low">Low</string>
+    <string name="stats_encouragement">Your body is regular — keep tracking!</string>
+    <string name="stats_empty_message">Record at least 2 periods to see your statistics</string>
+    <string name="stats_empty_progress">Current: %1$d complete cycle(s)</string>
+    <string name="stats_see_more">View Stats</string>
+
     <!-- Settings Screen -->
     <string name="settings_profile">My Profile</string>
     <string name="settings_period_length">Period Length</string>
