@@ -92,6 +92,8 @@ fun App() {
                 }
                 "calendar" -> {
                     CalendarHistoryScreen(
+                        records = state.records,
+                        averageCycleLength = state.averageCycleLength,
                         onClose = { currentScreen = "home" }
                     )
                 }
@@ -390,7 +392,46 @@ fun HomeScreen(
 }
 
 @Composable
-fun CalendarHistoryScreen(onClose: () -> Unit) {
+fun CalendarHistoryScreen(
+    records: List<MenstrualRecord>,
+    averageCycleLength: Int?,
+    onClose: () -> Unit
+) {
+    val today = LocalDateKey.fromEpochMillis(currentEpochMillis())
+    var displayYear by remember { mutableStateOf(today.year) }
+    var displayMonth by remember { mutableStateOf(today.month) }
+
+    val startDateSet = remember(records) { records.filter { !it.isDeleted }.map { it.startDate }.toSet() }
+    val periodDaySet = remember(records) {
+        val days = mutableSetOf<LocalDateKey>()
+        for (record in records.filter { !it.isDeleted }) {
+            val end = record.endDate ?: continue
+            var d = record.startDate.nextDay()
+            while (d <= end) { days.add(d); d = d.nextDay() }
+        }
+        days
+    }
+
+    val sortedRecords = remember(records) {
+        records.filter { !it.isDeleted }.sortedByDescending { it.startDate }
+    }
+
+    val daysInCurrentMonth = daysInMonth(displayYear, displayMonth)
+    val firstDayOffset = dayOfWeek(displayYear, displayMonth, 1)
+    val dayHeaders = listOf("日", "一", "二", "三", "四", "五", "六")
+
+    val periodDaysThisMonth = remember(records, displayYear, displayMonth) {
+        val monthStart = LocalDateKey(displayYear, displayMonth, 1)
+        val monthEnd = LocalDateKey(displayYear, displayMonth, daysInMonth(displayYear, displayMonth))
+        var count = 0
+        for (record in records.filter { !it.isDeleted }) {
+            val end = record.endDate ?: record.startDate
+            var d = record.startDate
+            while (d <= end) { if (d >= monthStart && d <= monthEnd) count++; d = d.nextDay() }
+        }
+        count
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -415,73 +456,112 @@ fun CalendarHistoryScreen(onClose: () -> Unit) {
             }
             Text(
                 text = "日历记录",
-                style = TextStyle(
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = AppColors.Primary
-                )
+                style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold, color = AppColors.Primary)
             )
             Spacer(modifier = Modifier.size(48.dp))
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Hand-drawn Month Header
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            contentAlignment = Alignment.Center
+        // Month Navigation
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            IconButton(
+                onClick = {
+                    if (displayMonth == 1) { displayMonth = 12; displayYear-- } else displayMonth--
+                },
+                modifier = Modifier.size(48.dp).background(AppColors.Accent.copy(alpha = 0.3f), CircleShape)
+            ) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "上个月", tint = AppColors.Primary)
+            }
             Box(
                 modifier = Modifier
-                    .size(width = 200.dp, height = 60.dp)
+                    .weight(1f)
+                    .padding(horizontal = 8.dp)
                     .clip(AppShapes.DateBlob)
                     .background(AppColors.Primary.copy(alpha = 0.1f))
-            )
-            Text(
-                text = "2026年 3月",
-                style = TextStyle(
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = AppColors.Primary
+                    .padding(vertical = 14.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "${displayYear}年 ${displayMonth}月",
+                    style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold, color = AppColors.Primary)
                 )
-            )
+            }
+            IconButton(
+                onClick = {
+                    if (displayMonth == 12) { displayMonth = 1; displayYear++ } else displayMonth++
+                },
+                modifier = Modifier.size(48.dp).background(AppColors.Accent.copy(alpha = 0.3f), CircleShape)
+            ) {
+                Icon(Icons.Default.ArrowForward, contentDescription = "下个月", tint = AppColors.Primary)
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Calendar Placeholder (Blob style)
+        // Calendar Grid
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(1f)
                 .clip(RoundedCornerShape(32.dp))
                 .background(AppColors.Accent.copy(alpha = 0.2f))
                 .padding(16.dp)
         ) {
-            Column(verticalArrangement = Arrangement.SpaceEvenly) {
-                // Simplified calendar grid representation
-                repeat(5) { rowIndex ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth().weight(1f),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                // Day-of-week headers
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    dayHeaders.forEach { header ->
+                        Box(modifier = Modifier.size(36.dp), contentAlignment = Alignment.Center) {
+                            Text(
+                                text = header,
+                                style = TextStyle(
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = AppColors.Primary.copy(alpha = 0.5f)
+                                )
+                            )
+                        }
+                    }
+                }
+
+                val totalCells = firstDayOffset + daysInCurrentMonth
+                val rows = (totalCells + 6) / 7
+                repeat(rows) { rowIndex ->
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                         repeat(7) { colIndex ->
-                            val day = rowIndex * 7 + colIndex + 1
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                                    .background(if (day == 14) AppColors.Primary.copy(alpha = 0.3f) else Color.Transparent),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                if (day <= 31) {
+                            val cellIndex = rowIndex * 7 + colIndex
+                            val day = cellIndex - firstDayOffset + 1
+                            if (day < 1 || day > daysInCurrentMonth) {
+                                Spacer(modifier = Modifier.size(36.dp))
+                            } else {
+                                val date = LocalDateKey(displayYear, displayMonth, day)
+                                val isStart = date in startDateSet
+                                val isPeriodDay = date in periodDaySet
+                                val isToday = date == today
+                                Box(
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape)
+                                        .background(
+                                            when {
+                                                isStart -> AppColors.Primary.copy(alpha = 0.85f)
+                                                isPeriodDay -> AppColors.Primary.copy(alpha = 0.25f)
+                                                isToday -> AppColors.Accent.copy(alpha = 0.6f)
+                                                else -> Color.Transparent
+                                            }
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
                                     Text(
                                         text = "$day",
                                         style = TextStyle(
                                             fontSize = 14.sp,
-                                            color = AppColors.Primary.copy(alpha = 0.6f)
+                                            fontWeight = if (isStart) FontWeight.Bold else FontWeight.Normal,
+                                            color = if (isStart) Color.White else AppColors.Primary.copy(alpha = 0.75f)
                                         )
                                     )
                                 }
@@ -492,9 +572,9 @@ fun CalendarHistoryScreen(onClose: () -> Unit) {
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        // Legend/Info
+        // 本月概览 stats
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
@@ -503,25 +583,89 @@ fun CalendarHistoryScreen(onClose: () -> Unit) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Text(
                     text = "本月概览",
-                    style = TextStyle(
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = AppColors.Primary
-                    )
+                    style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold, color = AppColors.Primary)
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(modifier = Modifier.size(12.dp).clip(CircleShape).background(AppColors.Primary.copy(alpha = 0.4f)))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("经期天数: 5天", color = AppColors.Primary.copy(alpha = 0.7f))
+                    Text(
+                        text = "经期天数: ${if (periodDaysThisMonth > 0) "${periodDaysThisMonth}天" else "暂无记录"}",
+                        color = AppColors.Primary.copy(alpha = 0.7f)
+                    )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(modifier = Modifier.size(12.dp).clip(CircleShape).background(AppColors.Success.copy(alpha = 0.4f)))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("周期长度: 28天", color = AppColors.Primary.copy(alpha = 0.7f))
+                    Text(
+                        text = "周期长度: ${if (averageCycleLength != null) "${averageCycleLength}天" else "暂无数据"}",
+                        color = AppColors.Primary.copy(alpha = 0.7f)
+                    )
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Period history list
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            color = AppColors.Primary.copy(alpha = 0.05f)
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text(
+                    text = "历史记录",
+                    style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold, color = AppColors.Primary)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                if (sortedRecords.isEmpty()) {
+                    Text(
+                        text = "暂无记录",
+                        style = TextStyle(fontSize = 14.sp, color = AppColors.Primary.copy(alpha = 0.5f)),
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                } else {
+                    sortedRecords.forEachIndexed { index, record ->
+                        if (index > 0) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(1.dp)
+                                    .background(AppColors.Primary.copy(alpha = 0.1f))
+                            )
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .clip(CircleShape)
+                                    .background(AppColors.Primary.copy(alpha = 0.5f))
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            val startStr = "${record.startDate.month}月${record.startDate.day}日"
+                            val label = if (record.endDate != null) {
+                                val endStr = "${record.endDate.month}月${record.endDate.day}日"
+                                val days = daysBetween(record.startDate, record.endDate) + 1
+                                "$startStr — $endStr (${days}天)"
+                            } else {
+                                "$startStr (仅开始日)"
+                            }
+                            Text(
+                                text = label,
+                                style = TextStyle(fontSize = 14.sp, color = AppColors.Primary.copy(alpha = 0.8f))
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }

@@ -147,3 +147,14 @@ data class DateRange(val start: LocalDateKey, val end: LocalDateKey) {
 }
 
 fun currentEpochMillis(): Long = Clock.System.now().toEpochMilliseconds()
+
+/**
+ * Returns day of week for the given date: 0=Sunday, 1=Monday, …, 6=Saturday.
+ * Uses Tomohiko Sakamoto's algorithm.
+ */
+fun dayOfWeek(year: Int, month: Int, day: Int): Int {
+    val t = intArrayOf(0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4)
+    var y = year
+    if (month < 3) y--
+    return (y + y / 4 - y / 100 + y / 400 + t[month - 1] + day) % 7
+}
