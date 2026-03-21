@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="app_name">姨妈来了</string>
+    <string name="disclaimer_title">隐私与非医疗免责声明</string>
+    <string name="disclaimer_body">本应用仅在您的设备本地存储数据，不会上传或分享任何信息。仅用于教育与计划参考，不构成医疗建议。请勿将其用于诊断或治疗。继续使用即表示您已阅读并接受以上条款。</string>
+    <string name="disclaimer_accept">我已理解</string>
+    <string name="disclaimer_view_again">查看免责声明</string>
+    <string name="settings_title">设置</string>
+    <string name="settings_language">语言</string>
+    <string name="settings_language_follow_system">跟随系统</string>
+</resources>
