@@ -15,6 +15,18 @@ class CycleCalculatorTest {
         updatedAtEpochMillis = 0,
     )
 
+    private fun recordWithEnd(
+        id: String,
+        startYear: Int, startMonth: Int, startDay: Int,
+        endYear: Int, endMonth: Int, endDay: Int
+    ) = MenstrualRecord(
+        id = id,
+        startDate = LocalDateKey(startYear, startMonth, startDay),
+        endDate = LocalDateKey(endYear, endMonth, endDay),
+        createdAtEpochMillis = 0,
+        updatedAtEpochMillis = 0,
+    )
+
     @Test
     fun returns_null_with_fewer_than_two_records() {
         assertNull(calc.calculateAverageCycleLength(emptyList()))
@@ -56,6 +68,49 @@ class CycleCalculatorTest {
     @Test
     fun predict_next_period_returns_null_for_single_record() {
         assertNull(calc.predictNextPeriod(listOf(record("1", 2025, 1, 1))))
+    }
+
+    // --- calculateAveragePeriodLength ---
+
+    @Test
+    fun period_length_returns_null_when_no_records_have_end_date() {
+        assertNull(calc.calculateAveragePeriodLength(emptyList()))
+        assertNull(calc.calculateAveragePeriodLength(listOf(record("1", 2025, 1, 1))))
+    }
+
+    @Test
+    fun period_length_counts_inclusive_days_for_single_record() {
+        // Jan 1 – Jan 5 = 5 days inclusive
+        val records = listOf(recordWithEnd("1", 2025, 1, 1, 2025, 1, 5))
+        assertEquals(5, calc.calculateAveragePeriodLength(records))
+    }
+
+    @Test
+    fun period_length_averages_multiple_records() {
+        // 5 days + 7 days = average 6
+        val records = listOf(
+            recordWithEnd("1", 2025, 1, 1, 2025, 1, 5),  // 5 days
+            recordWithEnd("2", 2025, 2, 1, 2025, 2, 7),  // 7 days
+        )
+        assertEquals(6, calc.calculateAveragePeriodLength(records))
+    }
+
+    @Test
+    fun period_length_ignores_records_without_end_date() {
+        val records = listOf(
+            record("1", 2025, 1, 1),                              // no endDate
+            recordWithEnd("2", 2025, 2, 1, 2025, 2, 5),          // 5 days
+        )
+        assertEquals(5, calc.calculateAveragePeriodLength(records))
+    }
+
+    @Test
+    fun period_length_ignores_deleted_records() {
+        val records = listOf(
+            recordWithEnd("1", 2025, 1, 1, 2025, 1, 10).copy(isDeleted = true), // 10 days, deleted
+            recordWithEnd("2", 2025, 2, 1, 2025, 2, 5),                         // 5 days
+        )
+        assertEquals(5, calc.calculateAveragePeriodLength(records))
     }
 
     @Test

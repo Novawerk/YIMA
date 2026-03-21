@@ -303,8 +303,8 @@ fun HomeScreen(
                 )
                 StatCardNew(
                     title = "经期时长",
-                    value = "5",
-                    unit = "天",
+                    value = state.averagePeriodLength?.toString() ?: "--",
+                    unit = if (state.averagePeriodLength != null) "天" else "",
                     backgroundColor = AppColors.CardBg2,
                     textColor = AppColors.Primary,
                     shape = AppShapes.RightBlob,

@@ -25,6 +25,20 @@ class CycleCalculator {
     }
 
     /**
+     * Calculates the average period length in days from records that have a non-null endDate.
+     * Each period's length = daysBetween(startDate, endDate) + 1 (inclusive).
+     *
+     * Returns null if no records have an endDate.
+     */
+    fun calculateAveragePeriodLength(records: List<MenstrualRecord>): Int? {
+        val lengths = records
+            .filter { !it.isDeleted && it.endDate != null }
+            .map { daysBetween(it.startDate, it.endDate!!) + 1 }
+        if (lengths.isEmpty()) return null
+        return lengths.sum() / lengths.size
+    }
+
+    /**
      * Predicts the next period start date as: lastStart + averageCycleLength.
      *
      * Returns null if there are fewer than 2 records (cannot compute average).
