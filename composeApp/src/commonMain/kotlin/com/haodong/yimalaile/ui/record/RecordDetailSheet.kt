@@ -41,7 +41,6 @@ import com.haodong.yimalaile.domain.menstrual.DailyRecord
 import com.haodong.yimalaile.domain.menstrual.Intensity
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.domain.menstrual.Mood
-import com.haodong.yimalaile.ui.theme.AppColors
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.until
 
@@ -61,7 +60,7 @@ fun RecordDetailSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = AppColors.SoftCream,
+        containerColor = MaterialTheme.colorScheme.background,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
         Column(
@@ -76,7 +75,7 @@ fun RecordDetailSheet(
                 Modifier
                     .size(120.dp)
                     .clip(CircleShape)
-                    .background(AppColors.BlushPink.copy(alpha = 0.5f)),
+                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)),
                 contentAlignment = Alignment.Center,
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -84,9 +83,9 @@ fun RecordDetailSheet(
                         if (days != null) "$days" else "~",
                         fontSize = 44.sp,
                         fontWeight = FontWeight.Bold,
-                        color = AppColors.DarkCoffee,
+                        color = MaterialTheme.colorScheme.onBackground,
                     )
-                    Text("天", style = MaterialTheme.typography.labelMedium, color = AppColors.DarkCoffee.copy(alpha = 0.5f))
+                    Text("天", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
@@ -98,12 +97,12 @@ fun RecordDetailSheet(
                     if (record.endDate != null) " — ${record.endDate.monthNumber}月${record.endDate.dayOfMonth}日"
                     else " — 进行中",
                 style = MaterialTheme.typography.titleMedium,
-                color = AppColors.DarkCoffee,
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Text(
                 "${record.startDate.year}",
                 style = MaterialTheme.typography.bodySmall,
-                color = AppColors.DarkCoffee.copy(alpha = 0.4f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
             )
 
             // Period dots — decorative arc
@@ -122,7 +121,7 @@ fun RecordDetailSheet(
                                 .padding(horizontal = 2.dp)
                                 .size(size)
                                 .clip(CircleShape)
-                                .background(AppColors.DeepRose.copy(alpha = alpha))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = alpha))
                         )
                     }
                 }
@@ -143,7 +142,7 @@ fun RecordDetailSheet(
                 Text(
                     "每日记录",
                     style = MaterialTheme.typography.titleMedium,
-                    color = AppColors.DarkCoffee,
+                    color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Spacer(Modifier.height(12.dp))
@@ -156,14 +155,14 @@ fun RecordDetailSheet(
                 Box(
                     Modifier.fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
-                        .background(AppColors.BlushPink.copy(alpha = 0.2f))
+                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f))
                         .padding(20.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         "还没有每日记录\n点击上方「补充记录」添加",
                         style = MaterialTheme.typography.bodySmall,
-                        color = AppColors.DarkCoffee.copy(alpha = 0.4f),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         textAlign = TextAlign.Center,
                     )
                 }
@@ -203,14 +202,14 @@ private fun ActionCard(emoji: String, label: String, onClick: () -> Unit, modifi
     Column(
         modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(AppColors.WarmPeach.copy(alpha = 0.25f))
+            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.25f))
             .clickable(onClick = onClick)
             .padding(vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(emoji, fontSize = 20.sp)
         Spacer(Modifier.height(4.dp))
-        Text(label, style = MaterialTheme.typography.labelSmall, color = AppColors.DeepRose)
+        Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
     }
 }
 
@@ -220,34 +219,34 @@ private fun DailyRecordRow(day: DailyRecord) {
     Box(
         Modifier.fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(AppColors.WarmPeach.copy(alpha = 0.15f))
+            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f))
             .padding(16.dp)
     ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
             // Day circle
             Box(
                 Modifier.size(36.dp).clip(CircleShape)
-                    .background(AppColors.BlushPink.copy(alpha = 0.5f)),
+                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     "${day.date.dayOfMonth}",
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
-                    color = AppColors.DarkCoffee,
+                    color = MaterialTheme.colorScheme.onBackground,
                 )
             }
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 // Tags row
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    if (day.intensity != null) InfoChip(intensityLabel(day.intensity), AppColors.DeepRose.copy(alpha = 0.15f))
-                    if (day.mood != null) InfoChip(moodLabel(day.mood), AppColors.WarmPeach.copy(alpha = 0.5f))
-                    day.symptoms.forEach { InfoChip(it, AppColors.BlushPink.copy(alpha = 0.5f)) }
+                    if (day.intensity != null) InfoChip(intensityLabel(day.intensity), MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                    if (day.mood != null) InfoChip(moodLabel(day.mood), MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f))
+                    day.symptoms.forEach { InfoChip(it, MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)) }
                 }
                 if (!day.notes.isNullOrBlank()) {
                     Spacer(Modifier.height(6.dp))
-                    Text(day.notes, style = MaterialTheme.typography.bodySmall, color = AppColors.DarkCoffee.copy(alpha = 0.5f))
+                    Text(day.notes, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
@@ -257,7 +256,7 @@ private fun DailyRecordRow(day: DailyRecord) {
 @Composable
 private fun InfoChip(text: String, bgColor: androidx.compose.ui.graphics.Color) {
     Box(Modifier.clip(RoundedCornerShape(8.dp)).background(bgColor).padding(horizontal = 10.dp, vertical = 4.dp)) {
-        Text(text, style = MaterialTheme.typography.labelSmall, color = AppColors.DarkCoffee)
+        Text(text, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onBackground)
     }
 }
 

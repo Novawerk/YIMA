@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.Intensity
 import com.haodong.yimalaile.domain.menstrual.Mood
 import com.haodong.yimalaile.ui.components.PrimaryCta
-import com.haodong.yimalaile.ui.theme.AppColors
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.Res
 import yimalaile.composeapp.generated.resources.intensity_heavy
@@ -72,7 +71,7 @@ fun LogDaySheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = AppColors.SoftCream,
+        containerColor = MaterialTheme.colorScheme.background,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
         Column(Modifier.padding(24.dp)) {
@@ -84,13 +83,13 @@ fun LogDaySheet(
             Text(
                 title,
                 style = MaterialTheme.typography.titleLarge,
-                color = AppColors.DarkCoffee,
+                color = MaterialTheme.colorScheme.onBackground,
             )
 
             Spacer(Modifier.height(24.dp))
 
             // Intensity
-            Text(stringResource(Res.string.record_flow_intensity), style = MaterialTheme.typography.titleMedium, color = AppColors.DarkCoffee)
+            Text(stringResource(Res.string.record_flow_intensity), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
             Spacer(Modifier.height(12.dp))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 listOf(
@@ -110,7 +109,7 @@ fun LogDaySheet(
             Spacer(Modifier.height(20.dp))
 
             // Mood
-            Text(stringResource(Res.string.record_mood), style = MaterialTheme.typography.titleMedium, color = AppColors.DarkCoffee)
+            Text(stringResource(Res.string.record_mood), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
             Spacer(Modifier.height(12.dp))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 listOf(
@@ -131,7 +130,7 @@ fun LogDaySheet(
             Spacer(Modifier.height(20.dp))
 
             // Symptoms
-            Text(stringResource(Res.string.record_symptoms), style = MaterialTheme.typography.titleMedium, color = AppColors.DarkCoffee)
+            Text(stringResource(Res.string.record_symptoms), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
             Spacer(Modifier.height(12.dp))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf(
@@ -182,7 +181,7 @@ private fun DotOption(dotSize: Dp, label: String, selected: Boolean, onClick: ()
             Modifier
                 .size(56.dp)
                 .clip(CircleShape)
-                .background(if (selected) AppColors.DeepRose.copy(alpha = 0.2f) else AppColors.BlushPink.copy(alpha = 0.4f))
+                .background(if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f))
                 .clickable(onClick = onClick),
             contentAlignment = Alignment.Center,
         ) {
@@ -190,7 +189,7 @@ private fun DotOption(dotSize: Dp, label: String, selected: Boolean, onClick: ()
                 Modifier
                     .size(dotSize)
                     .clip(CircleShape)
-                    .background(if (selected) AppColors.DeepRose else AppColors.DarkCoffee)
+                    .background(if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground)
             )
         }
         Spacer(Modifier.height(4.dp))
@@ -198,7 +197,7 @@ private fun DotOption(dotSize: Dp, label: String, selected: Boolean, onClick: ()
             label,
             style = if (selected) MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
                     else MaterialTheme.typography.labelMedium,
-            color = if (selected) AppColors.DarkCoffee else AppColors.DarkCoffee.copy(alpha = 0.6f),
+            color = if (selected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -210,7 +209,7 @@ private fun IconOption(icon: String, label: String, selected: Boolean, onClick: 
             Modifier
                 .size(56.dp)
                 .clip(CircleShape)
-                .background(if (selected) AppColors.DeepRose.copy(alpha = 0.2f) else AppColors.BlushPink.copy(alpha = 0.4f))
+                .background(if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f))
                 .clickable(onClick = onClick),
             contentAlignment = Alignment.Center,
         ) {
@@ -221,7 +220,7 @@ private fun IconOption(icon: String, label: String, selected: Boolean, onClick: 
             label,
             style = if (selected) MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
                     else MaterialTheme.typography.labelMedium,
-            color = if (selected) AppColors.DarkCoffee else AppColors.DarkCoffee.copy(alpha = 0.6f),
+            color = if (selected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -231,10 +230,10 @@ private fun PillChip(label: String, selected: Boolean, onClick: () -> Unit) {
     Box(
         Modifier
             .clip(RoundedCornerShape(50))
-            .background(if (selected) AppColors.WarmPeach else AppColors.BlushPink.copy(alpha = 0.4f))
+            .background(if (selected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f))
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
-        Text(label, style = MaterialTheme.typography.labelMedium, color = AppColors.DarkCoffee)
+        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onBackground)
     }
 }

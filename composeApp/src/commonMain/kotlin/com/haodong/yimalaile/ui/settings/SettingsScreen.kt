@@ -95,7 +95,7 @@ fun SettingsScreen(
             )
             PaletteCard(
                 name = "鲜明",
-                colors = listOf(Color(0xFFD32F2F), Color(0xFFFF7043), Color(0xFFFFFBF5)),
+                colors = listOf(Color(0xFFE91E63), Color(0xFFFFEB3B), Color(0xFFFFFDE7)),
                 selected = currentPalette == "vivid",
                 onClick = { onPaletteChange("vivid") },
                 modifier = Modifier.weight(1f),

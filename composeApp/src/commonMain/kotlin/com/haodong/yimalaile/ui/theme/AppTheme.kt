@@ -97,49 +97,49 @@ private val WarmExtraDark = AppExtraColors(
     pageBg = Color(0xFF2D2420),
 )
 
-// ---------- Palette: Vivid ----------
+// ---------- Palette: Vivid (Lemon Yellow + Hot Pink) ----------
 
 private val VividLight = lightColorScheme(
-    primary = Color(0xFFD32F2F),
+    primary = Color(0xFFE91E63),
     onPrimary = Color.White,
-    primaryContainer = Color(0xFFFFCDD2),
+    primaryContainer = Color(0xFFFCE4EC),
     onPrimaryContainer = Color(0xFF1A1A1A),
-    secondary = Color(0xFFFF7043),
-    secondaryContainer = Color(0xFFFFE0B2),
-    background = Color(0xFFFFFBF5),
-    surface = Color(0xFFFFFBF5),
-    surfaceVariant = Color(0xFFFFF3E0),
+    secondary = Color(0xFFFFEB3B),
+    secondaryContainer = Color(0xFFFFF9C4),
+    background = Color(0xFFFFFDE7),
+    surface = Color(0xFFFFFDE7),
+    surfaceVariant = Color(0xFFFFF9C4),
     onBackground = Color(0xFF1A1A1A),
     onSurface = Color(0xFF1A1A1A),
     onSurfaceVariant = Color(0xFF1A1A1A).copy(alpha = 0.6f),
-    outline = Color(0xFFD32F2F).copy(alpha = 0.15f),
+    outline = Color(0xFFE91E63).copy(alpha = 0.2f),
 )
 private val VividDark = darkColorScheme(
-    primary = Color(0xFFFF8A80),
+    primary = Color(0xFFFF80AB),
     onPrimary = Color(0xFF1A1A1A),
-    primaryContainer = Color(0xFFD32F2F).copy(alpha = 0.3f),
-    onPrimaryContainer = Color(0xFFFFCDD2),
-    secondary = Color(0xFFFF7043).copy(alpha = 0.8f),
-    secondaryContainer = Color(0xFFD32F2F).copy(alpha = 0.2f),
-    background = Color(0xFF1A1212),
-    surface = Color(0xFF1A1212),
-    surfaceVariant = Color(0xFF2A1A1A),
-    onBackground = Color(0xFFFFCDD2),
-    onSurface = Color(0xFFFFCDD2),
-    onSurfaceVariant = Color(0xFFFFCDD2).copy(alpha = 0.6f),
-    outline = Color(0xFFFF8A80).copy(alpha = 0.15f),
+    primaryContainer = Color(0xFFE91E63).copy(alpha = 0.25f),
+    onPrimaryContainer = Color(0xFFFCE4EC),
+    secondary = Color(0xFFFFEB3B).copy(alpha = 0.8f),
+    secondaryContainer = Color(0xFFE91E63).copy(alpha = 0.2f),
+    background = Color(0xFF1A1210),
+    surface = Color(0xFF1A1210),
+    surfaceVariant = Color(0xFF2A1A18),
+    onBackground = Color(0xFFFCE4EC),
+    onSurface = Color(0xFFFCE4EC),
+    onSurfaceVariant = Color(0xFFFCE4EC).copy(alpha = 0.6f),
+    outline = Color(0xFFFF80AB).copy(alpha = 0.15f),
 )
 private val VividExtraLight = AppExtraColors(
-    accent = Color(0xFFD32F2F), accentMuted = Color(0xFFFFCDD2),
-    cardBg = Color(0xFFFFCDD2).copy(alpha = 0.4f),
+    accent = Color(0xFFE91E63), accentMuted = Color(0xFFFCE4EC),
+    cardBg = Color(0xFFFCE4EC).copy(alpha = 0.5f),
     textPrimary = Color(0xFF1A1A1A), textSecondary = Color(0xFF1A1A1A).copy(alpha = 0.5f),
-    pageBg = Color(0xFFFFFBF5),
+    pageBg = Color(0xFFFFFDE7),
 )
 private val VividExtraDark = AppExtraColors(
-    accent = Color(0xFFFF8A80), accentMuted = Color(0xFFD32F2F).copy(alpha = 0.4f),
-    cardBg = Color(0xFFD32F2F).copy(alpha = 0.2f),
-    textPrimary = Color(0xFFFFCDD2), textSecondary = Color(0xFFFFCDD2).copy(alpha = 0.5f),
-    pageBg = Color(0xFF1A1212),
+    accent = Color(0xFFFF80AB), accentMuted = Color(0xFFE91E63).copy(alpha = 0.4f),
+    cardBg = Color(0xFFE91E63).copy(alpha = 0.2f),
+    textPrimary = Color(0xFFFCE4EC), textSecondary = Color(0xFFFCE4EC).copy(alpha = 0.5f),
+    pageBg = Color(0xFF1A1210),
 )
 
 // ---------- Palette: Mono ----------

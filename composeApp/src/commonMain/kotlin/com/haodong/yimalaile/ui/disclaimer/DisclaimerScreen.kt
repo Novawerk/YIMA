@@ -22,7 +22,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.ui.components.HeartDecoration
 import com.haodong.yimalaile.ui.components.PrimaryCta
-import com.haodong.yimalaile.ui.theme.AppColors
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.Res
 import yimalaile.composeapp.generated.resources.app_name
@@ -47,10 +46,10 @@ fun DisclaimerScreen(onAccept: () -> Unit) {
             Modifier
                 .size(56.dp)
                 .clip(CircleShape)
-                .background(AppColors.DeepRose),
+                .background(MaterialTheme.colorScheme.primary),
             contentAlignment = Alignment.Center,
         ) {
-            Text("♥", color = AppColors.SoftCream, style = MaterialTheme.typography.titleLarge)
+            Text("♥", color = MaterialTheme.colorScheme.background, style = MaterialTheme.typography.titleLarge)
         }
         Spacer(Modifier.height(16.dp))
 
@@ -58,7 +57,7 @@ fun DisclaimerScreen(onAccept: () -> Unit) {
         Text(
             stringResource(Res.string.app_name),
             style = MaterialTheme.typography.headlineMedium,
-            color = AppColors.DarkCoffee,
+            color = MaterialTheme.colorScheme.onBackground,
         )
 
         Spacer(Modifier.height(32.dp))
@@ -68,21 +67,21 @@ fun DisclaimerScreen(onAccept: () -> Unit) {
             Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(40.dp))
-                .background(AppColors.BlushPink.copy(alpha = 0.5f))
+                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f))
                 .padding(28.dp),
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     stringResource(Res.string.disclaimer_title),
                     style = MaterialTheme.typography.titleMedium,
-                    color = AppColors.DarkCoffee,
+                    color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center,
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(
                     stringResource(Res.string.disclaimer_body),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = AppColors.DarkCoffee.copy(alpha = 0.7f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                 )
             }

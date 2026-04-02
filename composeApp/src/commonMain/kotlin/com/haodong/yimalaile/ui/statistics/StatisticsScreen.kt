@@ -49,7 +49,6 @@ import com.haodong.yimalaile.ui.record.DayPickerSheet
 import com.haodong.yimalaile.ui.record.LogDaySheet
 import com.haodong.yimalaile.ui.record.RecordDetailSheet
 import com.haodong.yimalaile.ui.record.StartPeriodSheet
-import com.haodong.yimalaile.ui.theme.AppColors
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.plus
@@ -96,10 +95,10 @@ fun StatisticsScreen(
                         IconButton(
                             onClick = onBack,
                             modifier = Modifier.size(40.dp).clip(CircleShape)
-                                .background(AppColors.WarmPeach.copy(alpha = 0.5f)),
-                        ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = AppColors.DeepRose) }
+                                .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)),
+                        ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = MaterialTheme.colorScheme.primary) }
                         Spacer(Modifier.weight(1f))
-                        Text("历史记录", style = MaterialTheme.typography.titleLarge, color = AppColors.DarkCoffee)
+                        Text("历史记录", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
                         Spacer(Modifier.weight(1f))
                         Box(Modifier.size(40.dp))
                     }
@@ -111,7 +110,7 @@ fun StatisticsScreen(
                         Text(
                             stringResource(Res.string.stats_empty_message),
                             style = MaterialTheme.typography.bodyLarge,
-                            color = AppColors.DarkCoffee.copy(alpha = 0.6f),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(),
                         )
                     }
@@ -132,7 +131,7 @@ fun StatisticsScreen(
         ExtendedFloatingActionButton(
             onClick = { showBackfill = true },
             modifier = Modifier.align(Alignment.BottomEnd).padding(24.dp),
-            containerColor = AppColors.DeepRose, contentColor = AppColors.SoftCream,
+            containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.background,
             shape = RoundedCornerShape(28.dp),
             icon = { Icon(Icons.Default.Add, null) }, text = { Text("补录") },
         )
@@ -254,7 +253,7 @@ private fun RecordCard(record: MenstrualRecord, daysStr: String, onClick: () -> 
     Box(
         Modifier.fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(AppColors.BlushPink.copy(alpha = 0.25f))
+            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f))
             .clickable(onClick = onClick)
             .padding(20.dp),
     ) {
@@ -265,13 +264,13 @@ private fun RecordCard(record: MenstrualRecord, daysStr: String, onClick: () -> 
                         "${record.startDate.monthNumber}月${record.startDate.dayOfMonth}日",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = AppColors.DarkCoffee,
+                        color = MaterialTheme.colorScheme.onBackground,
                     )
                     if (record.endDate != null) {
                         Text(
                             " — ${record.endDate.monthNumber}月${record.endDate.dayOfMonth}日",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = AppColors.DarkCoffee.copy(alpha = 0.5f),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -280,11 +279,11 @@ private fun RecordCard(record: MenstrualRecord, daysStr: String, onClick: () -> 
                     val dotCount = (days ?: 1).coerceAtMost(10)
                     repeat(dotCount) { i ->
                         val alpha = 0.25f + (0.5f * (1f - i.toFloat() / dotCount))
-                        Box(Modifier.size(8.dp).clip(CircleShape).background(AppColors.DeepRose.copy(alpha = alpha)))
+                        Box(Modifier.size(8.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary.copy(alpha = alpha)))
                     }
                     if (record.dailyRecords.isNotEmpty()) {
                         Spacer(Modifier.width(6.dp))
-                        Text("${record.dailyRecords.size}条记录", style = MaterialTheme.typography.labelSmall, color = AppColors.DarkCoffee.copy(alpha = 0.4f))
+                        Text("${record.dailyRecords.size}条记录", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
                     }
                 }
             }
@@ -292,15 +291,15 @@ private fun RecordCard(record: MenstrualRecord, daysStr: String, onClick: () -> 
             if (isActive) {
                 Box(
                     Modifier.clip(RoundedCornerShape(8.dp))
-                        .background(AppColors.DeepRose.copy(alpha = 0.15f))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
-                    Text("进行中", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = AppColors.DeepRose)
+                    Text("进行中", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
                 }
             } else if (days != null) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("$days", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = AppColors.DarkCoffee)
-                    Text(daysStr, style = MaterialTheme.typography.labelSmall, color = AppColors.DarkCoffee.copy(alpha = 0.5f))
+                    Text("$days", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+                    Text(daysStr, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }

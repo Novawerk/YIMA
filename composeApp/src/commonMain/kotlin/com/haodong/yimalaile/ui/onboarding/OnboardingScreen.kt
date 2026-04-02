@@ -28,7 +28,6 @@ import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.ui.components.PrimaryCta
 import com.haodong.yimalaile.ui.components.RangeCalendar
-import com.haodong.yimalaile.ui.theme.AppColors
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 
@@ -63,7 +62,7 @@ fun OnboardingScreen(
             // Ask current period status
             0 -> {
                 Spacer(Modifier.weight(0.3f))
-                Text("你现在在经期中吗？", style = MaterialTheme.typography.headlineMedium, color = AppColors.DarkCoffee)
+                Text("你现在在经期中吗？", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
                 Spacer(Modifier.height(32.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     PrimaryCta("是的", onClick = { step = 1 }, modifier = Modifier.weight(1f))
@@ -76,7 +75,7 @@ fun OnboardingScreen(
 
             // Pick current period start date
             1 -> {
-                Text("哪天开始的？", style = MaterialTheme.typography.titleLarge, color = AppColors.DarkCoffee)
+                Text("哪天开始的？", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
                 Spacer(Modifier.height(8.dp))
                 RangeCalendar(
                     existingRecords = createdRecords,
@@ -107,13 +106,13 @@ fun OnboardingScreen(
                 Text(
                     if (backfillCount == 0) "你还记得上次经期吗？" else "继续补录？",
                     style = MaterialTheme.typography.headlineMedium,
-                    color = AppColors.DarkCoffee,
+                    color = MaterialTheme.colorScheme.onBackground,
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
                     "补录过去的记录可以帮助预测更准确",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = AppColors.DarkCoffee.copy(alpha = 0.6f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.height(32.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -129,7 +128,7 @@ fun OnboardingScreen(
 
             // RangeCalendar for past period
             3 -> {
-                Text("选择经期日期范围", style = MaterialTheme.typography.titleLarge, color = AppColors.DarkCoffee)
+                Text("选择经期日期范围", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
                 Spacer(Modifier.height(8.dp))
                 RangeCalendar(
                     existingRecords = createdRecords,

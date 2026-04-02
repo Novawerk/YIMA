@@ -2,6 +2,7 @@ package com.haodong.yimalaile.ui.home
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.domain.menstrual.CycleState
@@ -50,7 +52,6 @@ import com.haodong.yimalaile.ui.record.BackfillSheet
 import com.haodong.yimalaile.ui.record.EndPeriodSheet
 import com.haodong.yimalaile.ui.record.LogDaySheet
 import com.haodong.yimalaile.ui.record.StartPeriodSheet
-import com.haodong.yimalaile.ui.theme.AppColors
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
@@ -81,6 +82,7 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val successMsg = stringResource(Res.string.record_save_success)
 
+    var logSpecificDate by remember { mutableStateOf<LocalDate?>(null) }
     var showStartSheet by remember { mutableStateOf(false) }
     var showEndSheet by remember { mutableStateOf(false) }
     var showLogSheet by remember { mutableStateOf(false) }
@@ -97,6 +99,7 @@ fun HomeScreen(
                     onStartPeriod = { showStartSheet = true },
                     onEndPeriod = { showEndSheet = true },
                     onLogDay = { showLogSheet = true },
+                    onLogSpecificDay = { date -> logSpecificDate = date },
                     onBackfill = { showBackfillSheet = true },
                 )
             }
@@ -149,6 +152,19 @@ fun HomeScreen(
             }
         )
     }
+    if (logSpecificDate != null) {
+        val targetDate = logSpecificDate!!
+        LogDaySheet(
+            targetDate = targetDate,
+            onDismiss = { logSpecificDate = null },
+            onSave = { intensity, mood, symptoms, notes ->
+                viewModel.logDay(targetDate, intensity, mood, symptoms, notes) {
+                    logSpecificDate = null
+                    scope.launch { snackbar.showSnackbar(successMsg) }
+                }
+            }
+        )
+    }
     if (showBackfillSheet) {
         val records = (uiState as? HomeUiState.Ready)?.cycleState?.let {
             it.recentPeriods + listOfNotNull(it.activePeriod)
@@ -174,6 +190,7 @@ private fun HomeContent(
     onStartPeriod: () -> Unit,
     onEndPeriod: () -> Unit,
     onLogDay: () -> Unit,
+    onLogSpecificDay: (LocalDate) -> Unit,
     onBackfill: () -> Unit,
 ) {
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
@@ -194,9 +211,9 @@ private fun HomeContent(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(AppColors.WarmPeach.copy(alpha = 0.5f)),
+                    .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)),
             ) {
-                Icon(Icons.Outlined.History, null, tint = AppColors.DeepRose)
+                Icon(Icons.Outlined.History, null, tint = MaterialTheme.colorScheme.primary)
             }
             // Settings button
             IconButton(
@@ -204,9 +221,9 @@ private fun HomeContent(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(AppColors.WarmPeach.copy(alpha = 0.5f)),
+                    .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)),
             ) {
-                Icon(Icons.Outlined.Settings, null, tint = AppColors.DeepRose)
+                Icon(Icons.Outlined.Settings, null, tint = MaterialTheme.colorScheme.primary)
             }
         }
 
@@ -226,7 +243,7 @@ private fun HomeContent(
             Text(
                 "照顾好自己",
                 style = MaterialTheme.typography.bodyLarge,
-                color = AppColors.DarkCoffee.copy(alpha = 0.6f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(8.dp))
 
@@ -234,7 +251,7 @@ private fun HomeContent(
                 Text(
                     "经期中",
                     style = MaterialTheme.typography.headlineLarge,
-                    color = AppColors.DarkCoffee,
+                    color = MaterialTheme.colorScheme.onBackground,
                 )
                 HeartDecoration()
             }
@@ -250,13 +267,13 @@ private fun HomeContent(
                     Text(
                         "预计还有 ${remainingDays} 天结束",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = AppColors.DarkCoffee.copy(alpha = 0.5f),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 } else {
                     Text(
                         "已超过平均经期时长",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = AppColors.DeepRose.copy(alpha = 0.7f),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                     )
                 }
             }
@@ -267,6 +284,7 @@ private fun HomeContent(
                 activePeriod = state.activePeriod,
                 today = today,
                 onLogDay = onLogDay,
+                onLogSpecificDay = onLogSpecificDay,
             )
 
             Spacer(Modifier.weight(1f))
@@ -279,9 +297,9 @@ private fun HomeContent(
                 onClick = onEndPeriod,
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(28.dp),
-                border = BorderStroke(1.5.dp, AppColors.DeepRose.copy(alpha = 0.4f)),
+                border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)),
             ) {
-                Text("经期结束", style = MaterialTheme.typography.titleMedium, color = AppColors.DeepRose)
+                Text("经期结束", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
             }
 
         } else {
@@ -302,7 +320,7 @@ private fun HomeContent(
             Text(
                 question,
                 style = MaterialTheme.typography.bodyLarge,
-                color = AppColors.DarkCoffee.copy(alpha = 0.6f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(8.dp))
 
@@ -310,7 +328,7 @@ private fun HomeContent(
                 Text(
                     heroText,
                     style = MaterialTheme.typography.headlineLarge,
-                    color = AppColors.DarkCoffee,
+                    color = MaterialTheme.colorScheme.onBackground,
                 )
                 HeartDecoration()
             }
@@ -378,12 +396,12 @@ private fun HomeContent(
                 Row(
                     Modifier.fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
-                        .background(AppColors.WarmPeach.copy(alpha = 0.2f))
+                        .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f))
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text("预测置信度", style = MaterialTheme.typography.bodyMedium, color = AppColors.DarkCoffee.copy(alpha = 0.5f))
+                    Text("预测置信度", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     StatusPill(confidence)
                 }
             }
@@ -396,9 +414,9 @@ private fun HomeContent(
                     onClick = onBackfill,
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = RoundedCornerShape(28.dp),
-                    border = BorderStroke(1.5.dp, AppColors.DeepRose.copy(alpha = 0.4f)),
+                    border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)),
                 ) {
-                    Text("补录更多，开始预测", style = MaterialTheme.typography.titleMedium, color = AppColors.DeepRose)
+                    Text("补录更多，开始预测", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
                 }
                 Spacer(Modifier.height(12.dp))
             }
@@ -418,6 +436,7 @@ private fun DayTimeline(
     activePeriod: com.haodong.yimalaile.domain.menstrual.MenstrualRecord,
     today: LocalDate,
     onLogDay: () -> Unit,
+    onLogSpecificDay: (LocalDate) -> Unit = onLogDay.let { { _: LocalDate -> it() } },
 ) {
     val dailyMap = activePeriod.dailyRecords.associateBy { it.date }
     val days = buildList {
@@ -425,21 +444,13 @@ private fun DayTimeline(
         while (d <= today) { add(d); d = d.plus(1, DateTimeUnit.DAY) }
     }
 
-    val hasAnyRecord = dailyMap.isNotEmpty()
-
     Column(
         Modifier.fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
             .padding(16.dp),
     ) {
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text("这几天", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
+        Text("这几天", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.height(12.dp))
 
         Row(
@@ -448,18 +459,19 @@ private fun DayTimeline(
         ) {
             days.forEach { date ->
                 val record = dailyMap[date]
+                val isEmpty = record == null
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f, fill = false),
+                    modifier = Modifier.weight(1f, fill = false)
+                        .then(if (isEmpty) Modifier.clickable { onLogSpecificDay(date) } else Modifier),
                 ) {
-                    // Mood or empty circle
                     Box(
                         Modifier
                             .size(36.dp)
                             .clip(CircleShape)
                             .background(
                                 if (record != null) MaterialTheme.colorScheme.primaryContainer
-                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                else Color.Transparent
                             ),
                         contentAlignment = Alignment.Center,
                     ) {
@@ -474,19 +486,15 @@ private fun DayTimeline(
                                 fontSize = 16.sp,
                             )
                         } else if (record?.intensity != null) {
-                            // Show intensity dot if no mood
                             val dotSize = when (record.intensity) {
                                 com.haodong.yimalaile.domain.menstrual.Intensity.LIGHT -> 6.dp
                                 com.haodong.yimalaile.domain.menstrual.Intensity.MEDIUM -> 10.dp
                                 com.haodong.yimalaile.domain.menstrual.Intensity.HEAVY -> 14.dp
                             }
-                            Box(
-                                Modifier.size(dotSize).clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary)
-                            )
+                            Box(Modifier.size(dotSize).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
                         } else {
-                            // Empty — subtle dash
-                            Text("·", color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
+                            // Empty — subtle plus
+                            Text("+", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
                         }
                     }
                     Spacer(Modifier.height(2.dp))
@@ -498,20 +506,6 @@ private fun DayTimeline(
                     )
                 }
             }
-        }
-
-        // Hint if most days are empty
-        val emptyDays = days.count { it !in dailyMap }
-        if (emptyDays > 0) {
-            Spacer(Modifier.height(10.dp))
-            Text(
-                if (emptyDays == days.size) "点击「记录今天」补充每日情况"
-                else "还有 ${emptyDays} 天未记录",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-            )
         }
     }
 }

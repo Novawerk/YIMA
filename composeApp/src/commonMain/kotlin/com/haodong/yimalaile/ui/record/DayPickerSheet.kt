@@ -25,7 +25,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
-import com.haodong.yimalaile.ui.theme.AppColors
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
@@ -57,16 +56,16 @@ fun DayPickerSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(),
-        containerColor = AppColors.SoftCream,
+        containerColor = MaterialTheme.colorScheme.background,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
         Column(Modifier.padding(24.dp)) {
-            Text("选择日期", style = MaterialTheme.typography.titleLarge, color = AppColors.DarkCoffee)
+            Text("选择日期", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
             Spacer(Modifier.height(4.dp))
             Text(
                 "选择要补充记录的日期",
                 style = MaterialTheme.typography.bodySmall,
-                color = AppColors.DarkCoffee.copy(alpha = 0.5f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(20.dp))
 
@@ -101,8 +100,8 @@ private fun DayChip(day: Int, month: Int, hasRecord: Boolean, onClick: () -> Uni
                 .size(48.dp)
                 .clip(CircleShape)
                 .background(
-                    if (hasRecord) AppColors.DeepRose.copy(alpha = 0.2f)
-                    else AppColors.WarmPeach.copy(alpha = 0.4f)
+                    if (hasRecord) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                    else MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)
                 ),
             contentAlignment = Alignment.Center,
         ) {
@@ -110,16 +109,16 @@ private fun DayChip(day: Int, month: Int, hasRecord: Boolean, onClick: () -> Uni
                 "$day",
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold,
-                color = if (hasRecord) AppColors.DarkCoffee.copy(alpha = 0.4f) else AppColors.DarkCoffee,
+                color = if (hasRecord) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onBackground,
             )
         }
         Text(
             "${month}月",
             style = MaterialTheme.typography.labelSmall,
-            color = AppColors.DarkCoffee.copy(alpha = 0.4f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
         )
         if (hasRecord) {
-            Text("已记录", style = MaterialTheme.typography.labelSmall, color = AppColors.DeepRose.copy(alpha = 0.5f))
+            Text("已记录", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
         }
     }
 }

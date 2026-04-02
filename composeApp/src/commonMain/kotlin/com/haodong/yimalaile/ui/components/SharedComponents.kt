@@ -27,7 +27,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
-import com.haodong.yimalaile.ui.theme.AppColors
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.until
 
@@ -45,7 +44,7 @@ fun PrimaryCta(
         enabled = enabled,
         shape = RoundedCornerShape(28.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = AppColors.DeepRose,
+            containerColor = MaterialTheme.colorScheme.primary,
             contentColor = Color.White,
         ),
     ) {
@@ -59,14 +58,14 @@ fun StatusPill(text: String, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(50))
-            .background(AppColors.WarmPeach.copy(alpha = 0.4f))
+            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f))
             .padding(horizontal = 20.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text,
             style = MaterialTheme.typography.labelMedium,
-            color = AppColors.DarkCoffee.copy(alpha = 0.7f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -77,16 +76,16 @@ fun BigStatCard(label: String, value: String, unit: String, modifier: Modifier =
     Box(
         modifier
             .clip(RoundedCornerShape(24.dp))
-            .background(AppColors.BlushPink.copy(alpha = 0.45f))
+            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f))
             .padding(20.dp),
     ) {
         Column {
-            Text(label, style = MaterialTheme.typography.labelMedium, color = AppColors.DarkCoffee.copy(alpha = 0.5f))
+            Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.Bottom) {
-                Text(value, fontSize = 40.sp, fontWeight = FontWeight.Bold, color = AppColors.DarkCoffee)
+                Text(value, fontSize = 40.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
                 Spacer(Modifier.width(4.dp))
-                Text(unit, style = MaterialTheme.typography.bodyLarge, color = AppColors.DarkCoffee.copy(alpha = 0.5f),
+                Text(unit, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 4.dp))
             }
         }
@@ -107,7 +106,7 @@ fun PeriodDurationChart(
     Box(
         modifier.fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(AppColors.BlushPink.copy(alpha = 0.25f))
+            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f))
             .padding(20.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -117,18 +116,18 @@ fun PeriodDurationChart(
                     Text(
                         "${record.startDate.monthNumber}/${record.startDate.dayOfMonth}",
                         style = MaterialTheme.typography.labelMedium,
-                        color = AppColors.DarkCoffee.copy(alpha = 0.4f),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         modifier = Modifier.width(40.dp),
                     )
                     Spacer(Modifier.width(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                         repeat(days.coerceAtMost(10)) { i ->
                             val alpha = 0.3f + (0.5f * (1f - i.toFloat() / days.coerceAtMost(10)))
-                            Box(Modifier.size(14.dp).clip(CircleShape).background(AppColors.DeepRose.copy(alpha = alpha)))
+                            Box(Modifier.size(14.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary.copy(alpha = alpha)))
                         }
                     }
                     Spacer(Modifier.weight(1f))
-                    Text("$days$daysStr", style = MaterialTheme.typography.labelMedium, color = AppColors.DarkCoffee.copy(alpha = 0.5f))
+                    Text("$days$daysStr", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             if (hasMore && onViewAll != null) {
@@ -142,7 +141,7 @@ fun PeriodDurationChart(
                     Text(
                         "查看全部 ${records.size} 条记录 →",
                         style = MaterialTheme.typography.labelMedium,
-                        color = AppColors.DeepRose.copy(alpha = 0.7f),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                     )
                 }
             }
@@ -157,17 +156,19 @@ fun IllustrationPlaceholder(modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
-            .background(AppColors.BlushPink.copy(alpha = 0.3f))
+            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
             .padding(32.dp),
         contentAlignment = Alignment.Center,
     ) {
+        val secondary = MaterialTheme.colorScheme.secondary
+        val primary = MaterialTheme.colorScheme.primary
         Row(horizontalArrangement = Arrangement.spacedBy((-8).dp)) {
             listOf(
-                AppColors.WarmPeach.copy(alpha = 0.6f),
-                AppColors.DeepRose.copy(alpha = 0.25f),
-                AppColors.WarmPeach.copy(alpha = 0.4f),
-                AppColors.DeepRose.copy(alpha = 0.15f),
-                AppColors.WarmPeach.copy(alpha = 0.5f),
+                secondary.copy(alpha = 0.6f),
+                primary.copy(alpha = 0.25f),
+                secondary.copy(alpha = 0.4f),
+                primary.copy(alpha = 0.15f),
+                secondary.copy(alpha = 0.5f),
             ).forEach { color ->
                 Box(Modifier.size(40.dp).clip(CircleShape).background(color))
             }
@@ -177,6 +178,7 @@ fun IllustrationPlaceholder(modifier: Modifier = Modifier) {
 
 /** Small heart decoration. */
 @Composable
-fun HeartDecoration(modifier: Modifier = Modifier, color: Color = AppColors.DeepRose.copy(alpha = 0.4f)) {
-    Text("♥", color = color, style = MaterialTheme.typography.titleLarge, modifier = modifier)
+fun HeartDecoration(modifier: Modifier = Modifier, color: Color = Color.Unspecified) {
+    val resolvedColor = if (color == Color.Unspecified) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) else color
+    Text("♥", color = resolvedColor, style = MaterialTheme.typography.titleLarge, modifier = modifier)
 }
