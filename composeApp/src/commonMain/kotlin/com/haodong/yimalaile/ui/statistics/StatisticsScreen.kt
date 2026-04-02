@@ -228,6 +228,7 @@ fun StatisticsScreen(
         val targetDate = logDayDate!!
         val targetId = logDayRecordId!!
         LogDaySheet(
+            targetDate = targetDate,
             onDismiss = { logDayDate = null; logDayRecordId = null },
             onSave = { intensity, mood, symptoms, notes ->
                 scope.launch {

@@ -60,6 +60,7 @@ import yimalaile.composeapp.generated.resources.symptom_headache
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun LogDaySheet(
+    targetDate: kotlinx.datetime.LocalDate? = null,
     onDismiss: () -> Unit,
     onSave: (Intensity?, Mood?, List<String>, String?) -> Unit,
 ) {
@@ -75,8 +76,13 @@ fun LogDaySheet(
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
         Column(Modifier.padding(24.dp)) {
+            val title = if (targetDate != null) {
+                "记录 ${targetDate.monthNumber}月${targetDate.dayOfMonth}日"
+            } else {
+                stringResource(Res.string.record_dialog_title)
+            }
             Text(
-                stringResource(Res.string.record_dialog_title),
+                title,
                 style = MaterialTheme.typography.titleLarge,
                 color = AppColors.DarkCoffee,
             )
