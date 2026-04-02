@@ -101,8 +101,13 @@ fun HomeScreen(
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
     }
 
+    val allRecords = (uiState as? HomeUiState.Ready)?.cycleState?.let {
+        it.recentPeriods + listOfNotNull(it.activePeriod)
+    } ?: emptyList()
+
     if (showStartSheet) {
         StartPeriodSheet(
+            existingRecords = allRecords,
             onDismiss = { showStartSheet = false },
             onConfirm = { date ->
                 viewModel.startPeriod(date) {
@@ -118,6 +123,7 @@ fun HomeScreen(
             EndPeriodSheet(
                 startDate = active.startDate,
                 dailyRecords = active.dailyRecords,
+                existingRecords = allRecords,
                 onDismiss = { showEndSheet = false },
                 onConfirm = { date ->
                     viewModel.endPeriod(date) {

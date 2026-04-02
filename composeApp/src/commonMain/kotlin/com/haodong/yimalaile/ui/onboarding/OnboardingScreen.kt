@@ -9,19 +9,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDefaults
-import androidx.compose.material3.DateRangePicker
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -30,22 +24,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.domain.menstrual.AddRecordResult
+import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.ui.components.PrimaryCta
+import com.haodong.yimalaile.ui.components.RangeCalendar
 import com.haodong.yimalaile.ui.theme.AppColors
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.LocalDate
 
-@OptIn(ExperimentalMaterial3Api::class)
-private val PastOnlyDates = object : SelectableDates {
-    override fun isSelectableDate(utcTimeMillis: Long): Boolean =
-        utcTimeMillis <= Clock.System.now().toEpochMilliseconds()
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OnboardingScreen(
     service: MenstrualService,
@@ -55,8 +41,15 @@ fun OnboardingScreen(
     var step by remember { mutableStateOf(0) }
     var backfillCount by remember { mutableStateOf(0) }
 
-    val startPickerState = rememberDatePickerState(selectableDates = PastOnlyDates)
-    val rangePickerState = rememberDateRangePickerState(selectableDates = PastOnlyDates)
+    // Track records created during onboarding so calendar shows them
+    val createdRecords = remember { mutableStateListOf<MenstrualRecord>() }
+
+    // Single date selection state (for step 1: start period)
+    var selectedSingle by remember { mutableStateOf<LocalDate?>(null) }
+
+    // Range selection state (for step 3: backfill)
+    var rangeStart by remember { mutableStateOf<LocalDate?>(null) }
+    var rangeEnd by remember { mutableStateOf<LocalDate?>(null) }
 
     Column(
         modifier = Modifier
@@ -81,27 +74,30 @@ fun OnboardingScreen(
                 Spacer(Modifier.weight(1f))
             }
 
-            // Pick current period start date (past only)
+            // Pick current period start date
             1 -> {
                 Text("哪天开始的？", style = MaterialTheme.typography.titleLarge, color = AppColors.DarkCoffee)
                 Spacer(Modifier.height(8.dp))
-                DatePicker(
-                    state = startPickerState,
-                    title = null, headline = null, showModeToggle = false,
-                    colors = DatePickerDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
+                RangeCalendar(
+                    existingRecords = createdRecords,
+                    selectedStart = selectedSingle,
+                    selectedEnd = selectedSingle,
+                    onDateClick = { selectedSingle = it },
+                    singleSelectMode = true,
                     modifier = Modifier.weight(1f),
                 )
                 PrimaryCta(
                     text = "确认",
                     onClick = {
-                        val millis = startPickerState.selectedDateMillis ?: return@PrimaryCta
-                        val date = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.UTC).date
                         scope.launch {
-                            service.startPeriod(date)
+                            val result = service.startPeriod(selectedSingle!!)
+                            if (result is AddRecordResult.Success) {
+                                createdRecords.add(result.record)
+                            }
                             step = 2
                         }
                     },
-                    enabled = startPickerState.selectedDateMillis != null,
+                    enabled = selectedSingle != null,
                 )
             }
 
@@ -121,7 +117,9 @@ fun OnboardingScreen(
                 )
                 Spacer(Modifier.height(32.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    PrimaryCta("补录", onClick = { step = 3 }, modifier = Modifier.weight(1f))
+                    PrimaryCta("补录", onClick = {
+                        rangeStart = null; rangeEnd = null; step = 3
+                    }, modifier = Modifier.weight(1f))
                     OutlinedButton(onClick = onComplete, modifier = Modifier.weight(1f).height(56.dp)) {
                         Text(if (backfillCount == 0) "跳过" else "完成")
                     }
@@ -129,16 +127,25 @@ fun OnboardingScreen(
                 Spacer(Modifier.weight(1f))
             }
 
-            // DateRangePicker for past period (start + end in one view, past only)
+            // RangeCalendar for past period
             3 -> {
                 Text("选择经期日期范围", style = MaterialTheme.typography.titleLarge, color = AppColors.DarkCoffee)
                 Spacer(Modifier.height(8.dp))
-                DateRangePicker(
-                    state = rangePickerState,
-                    title = null,
-                    headline = null,
-                    showModeToggle = false,
-                    colors = DatePickerDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
+                RangeCalendar(
+                    existingRecords = createdRecords,
+                    selectedStart = rangeStart,
+                    selectedEnd = rangeEnd,
+                    onDateClick = { date ->
+                        if (rangeStart == null || rangeEnd != null) {
+                            rangeStart = date; rangeEnd = null
+                        } else {
+                            if (date < rangeStart!!) {
+                                rangeEnd = rangeStart; rangeStart = date
+                            } else {
+                                rangeEnd = date
+                            }
+                        }
+                    },
                     modifier = Modifier.weight(1f),
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -146,19 +153,17 @@ fun OnboardingScreen(
                     PrimaryCta(
                         text = "保存",
                         onClick = {
-                            val startMillis = rangePickerState.selectedStartDateMillis ?: return@PrimaryCta
-                            val endMillis = rangePickerState.selectedEndDateMillis ?: return@PrimaryCta
-                            val start = Instant.fromEpochMilliseconds(startMillis).toLocalDateTime(TimeZone.UTC).date
-                            val end = Instant.fromEpochMilliseconds(endMillis).toLocalDateTime(TimeZone.UTC).date
                             scope.launch {
-                                val result = service.backfillPeriod(start, end)
-                                if (result is AddRecordResult.Success) backfillCount++
+                                val result = service.backfillPeriod(rangeStart!!, rangeEnd!!)
+                                if (result is AddRecordResult.Success) {
+                                    backfillCount++
+                                    createdRecords.add(result.record)
+                                }
                                 step = 2
                             }
                         },
                         modifier = Modifier.weight(1f),
-                        enabled = rangePickerState.selectedStartDateMillis != null
-                                && rangePickerState.selectedEndDateMillis != null,
+                        enabled = rangeStart != null && rangeEnd != null,
                     )
                 }
             }

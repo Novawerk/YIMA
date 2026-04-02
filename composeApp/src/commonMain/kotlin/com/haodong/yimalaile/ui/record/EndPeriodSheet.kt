@@ -6,15 +6,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,14 +20,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.domain.menstrual.DailyRecord
+import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.ui.components.PrimaryCta
+import com.haodong.yimalaile.ui.components.RangeCalendar
 import com.haodong.yimalaile.ui.theme.AppColors
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.atStartOfDayIn
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.Res
 import yimalaile.composeapp.generated.resources.dialog_cancel
@@ -43,18 +36,11 @@ import yimalaile.composeapp.generated.resources.record_end_date
 fun EndPeriodSheet(
     startDate: LocalDate,
     dailyRecords: List<DailyRecord>,
+    existingRecords: List<MenstrualRecord> = emptyList(),
     onDismiss: () -> Unit,
     onConfirm: (LocalDate) -> Unit,
 ) {
-    val startMillis = startDate.atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds()
-    val nowMillis = Clock.System.now().toEpochMilliseconds()
-    val dateState = rememberDatePickerState(
-        selectableDates = object : SelectableDates {
-            override fun isSelectableDate(utcTimeMillis: Long) =
-                utcTimeMillis in startMillis..nowMillis
-        }
-    )
-
+    var selected by remember { mutableStateOf<LocalDate?>(null) }
     var pendingEndDate by remember { mutableStateOf<LocalDate?>(null) }
 
     ModalBottomSheet(
@@ -63,24 +49,28 @@ fun EndPeriodSheet(
         containerColor = AppColors.SoftCream,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
-        Column(Modifier.padding(24.dp)) {
+        Column(Modifier.padding(horizontal = 16.dp)) {
             Text(
                 stringResource(Res.string.record_end_date),
                 style = MaterialTheme.typography.titleLarge,
                 color = AppColors.DarkCoffee,
+                modifier = Modifier.padding(horizontal = 8.dp),
             )
             Spacer(Modifier.height(8.dp))
-            DatePicker(
-                state = dateState,
-                title = null, headline = null, showModeToggle = false,
-                colors = DatePickerDefaults.colors(containerColor = AppColors.SoftCream),
+            RangeCalendar(
+                existingRecords = existingRecords,
+                selectedStart = selected,
+                selectedEnd = selected,
+                onDateClick = { selected = it },
+                singleSelectMode = true,
+                minDate = startDate,
+                modifier = Modifier.weight(1f),
             )
             Spacer(Modifier.height(8.dp))
             PrimaryCta(
                 text = stringResource(Res.string.dialog_confirm),
                 onClick = {
-                    val millis = dateState.selectedDateMillis ?: return@PrimaryCta
-                    val endDate = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.UTC).date
+                    val endDate = selected!!
                     val overflow = dailyRecords.count { it.date > endDate }
                     if (overflow > 0) {
                         pendingEndDate = endDate
@@ -88,13 +78,12 @@ fun EndPeriodSheet(
                         onConfirm(endDate)
                     }
                 },
-                enabled = dateState.selectedDateMillis != null,
+                enabled = selected != null,
             )
             Spacer(Modifier.height(16.dp))
         }
     }
 
-    // Confirmation dialog when daily records would be truncated
     val pending = pendingEndDate
     if (pending != null) {
         val overflow = dailyRecords.count { it.date > pending }
@@ -106,9 +95,7 @@ fun EndPeriodSheet(
                 TextButton(onClick = {
                     pendingEndDate = null
                     onConfirm(pending)
-                }) {
-                    Text(stringResource(Res.string.dialog_confirm))
-                }
+                }) { Text(stringResource(Res.string.dialog_confirm)) }
             },
             dismissButton = {
                 TextButton(onClick = { pendingEndDate = null }) {
