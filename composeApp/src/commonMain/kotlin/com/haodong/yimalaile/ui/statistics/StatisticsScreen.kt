@@ -1,6 +1,7 @@
 package com.haodong.yimalaile.ui.statistics
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,8 +44,8 @@ import com.haodong.yimalaile.domain.menstrual.AddRecordResult
 import com.haodong.yimalaile.domain.menstrual.CycleState
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
-import com.haodong.yimalaile.ui.components.StatusPill
 import com.haodong.yimalaile.ui.record.BackfillSheet
+import com.haodong.yimalaile.ui.record.RecordDetailSheet
 import com.haodong.yimalaile.ui.theme.AppColors
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
@@ -62,6 +63,7 @@ fun StatisticsScreen(
 ) {
     var state by remember { mutableStateOf<CycleState?>(null) }
     var showBackfill by remember { mutableStateOf(false) }
+    var detailRecord by remember { mutableStateOf<MenstrualRecord?>(null) }
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val successMsg = stringResource(Res.string.record_save_success)
@@ -108,14 +110,18 @@ fun StatisticsScreen(
                         )
                     }
                 } else {
-                    // Active period at top
+                    // Active period
                     if (s.activePeriod != null) {
                         item {
-                            RecordCard(s.activePeriod, daysStr, isActive = true)
+                            RecordCard(
+                                record = s.activePeriod,
+                                daysStr = daysStr,
+                                isActive = true,
+                                onClick = { detailRecord = s.activePeriod },
+                            )
                         }
                     }
 
-                    // Completed periods
                     if (allRecords.isNotEmpty()) {
                         item {
                             Text(
@@ -126,8 +132,12 @@ fun StatisticsScreen(
                         }
                     }
 
-                    itemsIndexed(allRecords) { index, record ->
-                        RecordCard(record, daysStr)
+                    itemsIndexed(allRecords) { _, record ->
+                        RecordCard(
+                            record = record,
+                            daysStr = daysStr,
+                            onClick = { detailRecord = record },
+                        )
                     }
                 }
 
@@ -135,7 +145,6 @@ fun StatisticsScreen(
             }
         }
 
-        // Extended FAB with text
         ExtendedFloatingActionButton(
             onClick = { showBackfill = true },
             modifier = Modifier.align(Alignment.BottomEnd).padding(24.dp),
@@ -166,52 +175,89 @@ fun StatisticsScreen(
             }
         )
     }
+
+    if (detailRecord != null) {
+        RecordDetailSheet(
+            record = detailRecord!!,
+            onDismiss = { detailRecord = null },
+        )
+    }
 }
 
 @Composable
-private fun RecordCard(record: MenstrualRecord, daysStr: String, isActive: Boolean = false) {
+private fun RecordCard(
+    record: MenstrualRecord,
+    daysStr: String,
+    isActive: Boolean = false,
+    onClick: () -> Unit,
+) {
+    val days = record.endDate?.let { record.startDate.until(it, DateTimeUnit.DAY) + 1 }
+
     Box(
         Modifier.fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
             .background(
-                if (isActive) AppColors.WarmPeach.copy(alpha = 0.35f)
-                else AppColors.BlushPink.copy(alpha = 0.3f)
+                if (isActive) AppColors.WarmPeach.copy(alpha = 0.3f)
+                else AppColors.BlushPink.copy(alpha = 0.25f)
             )
+            .clickable(onClick = onClick)
             .padding(20.dp),
     ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            // Date info
+            // Left: colored indicator bar
+            Box(
+                Modifier
+                    .width(4.dp)
+                    .height(40.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(if (isActive) AppColors.DeepRose else AppColors.DeepRose.copy(alpha = 0.4f))
+            )
+            Spacer(Modifier.width(16.dp))
+
+            // Middle: date info + mini dots
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (isActive) {
-                        Box(
-                            Modifier.size(8.dp).clip(CircleShape)
-                                .background(AppColors.DeepRose)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                    }
                     Text(
-                        "${record.startDate.year}/${record.startDate.monthNumber}/${record.startDate.dayOfMonth}",
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Medium,
+                        "${record.startDate.monthNumber}月${record.startDate.dayOfMonth}日",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
                         color = AppColors.DarkCoffee,
                     )
+                    if (record.endDate != null) {
+                        Text(
+                            " — ${record.endDate.monthNumber}月${record.endDate.dayOfMonth}日",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = AppColors.DarkCoffee.copy(alpha = 0.5f),
+                        )
+                    }
                 }
-                if (record.endDate != null) {
-                    Text(
-                        "→ ${record.endDate.year}/${record.endDate.monthNumber}/${record.endDate.dayOfMonth}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = AppColors.DarkCoffee.copy(alpha = 0.4f),
-                    )
+                Spacer(Modifier.height(6.dp))
+                // Mini period dots
+                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                    val dotCount = (days ?: 1).coerceAtMost(10)
+                    repeat(dotCount) { i ->
+                        val alpha = 0.25f + (0.5f * (1f - i.toFloat() / dotCount))
+                        Box(Modifier.size(8.dp).clip(CircleShape).background(AppColors.DeepRose.copy(alpha = alpha)))
+                    }
+                    if (record.dailyRecords.isNotEmpty()) {
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            "${record.dailyRecords.size}条记录",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = AppColors.DarkCoffee.copy(alpha = 0.4f),
+                        )
+                    }
                 }
             }
 
-            // Duration or status
-            if (isActive) {
-                StatusPill("进行中")
-            } else if (record.endDate != null) {
-                val days = record.startDate.until(record.endDate, DateTimeUnit.DAY) + 1
-                StatusPill("$days $daysStr")
+            // Right: duration or status
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                if (isActive) {
+                    Text("进行中", style = MaterialTheme.typography.labelMedium, color = AppColors.DeepRose)
+                } else if (days != null) {
+                    Text("$days", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = AppColors.DarkCoffee)
+                    Text(daysStr, style = MaterialTheme.typography.labelSmall, color = AppColors.DarkCoffee.copy(alpha = 0.5f))
+                }
             }
         }
     }
