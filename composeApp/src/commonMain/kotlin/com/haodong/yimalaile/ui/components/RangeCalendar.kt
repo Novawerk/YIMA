@@ -9,13 +9,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,8 +30,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
-import com.haodong.yimalaile.ui.theme.AppColors
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
@@ -41,11 +44,6 @@ import kotlinx.datetime.todayIn
 
 private val WEEKDAY_LABELS = listOf("一", "二", "三", "四", "五", "六", "日")
 
-/**
- * Custom calendar with period record highlights and date selection.
- *
- * @param singleSelectMode true = single date pick, false = range pick (two taps)
- */
 @Composable
 fun RangeCalendar(
     existingRecords: List<MenstrualRecord>,
@@ -57,56 +55,62 @@ fun RangeCalendar(
     minDate: LocalDate? = null,
 ) {
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+    val primary = MaterialTheme.colorScheme.primary
+    val primaryContainer = MaterialTheme.colorScheme.primaryContainer
+    val onPrimary = MaterialTheme.colorScheme.onPrimary
+    val surface = MaterialTheme.colorScheme.onSurface
+    val surfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
+    val rangeBand = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+    val occupiedColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
 
-    // Build set of occupied dates from existing records
     val occupiedDates = buildSet {
         existingRecords.forEach { record ->
-            val end = record.endDate ?: today // active period extends to today
+            val end = record.endDate ?: today
             var d = record.startDate
-            while (d <= end) {
-                add(d)
-                d = d.plus(1, DateTimeUnit.DAY)
-            }
+            while (d <= end) { add(d); d = d.plus(1, DateTimeUnit.DAY) }
         }
     }
 
-    // Generate months in chronological order (oldest first, newest last)
     val months = (11 downTo 0).map { offset ->
         val d = today.minus(offset, DateTimeUnit.MONTH)
         YearMonth(d.year, d.month)
     }
 
-    // Start scrolled to bottom (current month)
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = months.size - 1)
-    LaunchedEffect(Unit) {
-        listState.scrollToItem(months.size - 1)
-    }
+    LaunchedEffect(Unit) { listState.scrollToItem(months.size - 1) }
 
     Column(modifier) {
         // Weekday header
-        Row(Modifier.fillMaxWidth()) {
-            WEEKDAY_LABELS.forEach { label ->
+        Row(
+            Modifier.fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                .padding(vertical = 8.dp),
+        ) {
+            WEEKDAY_LABELS.forEachIndexed { i, label ->
                 Text(
                     label,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.labelMedium,
-                    color = AppColors.DarkCoffee.copy(alpha = 0.5f),
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (i >= 5) primary.copy(alpha = 0.7f) else surfaceVariant,
                 )
             }
         }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(4.dp))
 
         LazyColumn(state = listState) {
             items(months, key = { "${it.year}-${it.month}" }) { ym ->
                 MonthGrid(
-                    yearMonth = ym,
-                    today = today,
+                    yearMonth = ym, today = today,
                     occupiedDates = occupiedDates,
-                    selectedStart = selectedStart,
-                    selectedEnd = selectedEnd,
-                    onDateClick = onDateClick,
-                    minDate = minDate,
+                    selectedStart = selectedStart, selectedEnd = selectedEnd,
+                    onDateClick = onDateClick, minDate = minDate,
+                    primary = primary, onPrimary = onPrimary,
+                    primaryContainer = primaryContainer,
+                    rangeBand = rangeBand, occupiedColor = occupiedColor,
+                    surface = surface, surfaceVariant = surfaceVariant,
                 )
             }
         }
@@ -124,10 +128,12 @@ private fun MonthGrid(
     selectedEnd: LocalDate?,
     onDateClick: (LocalDate) -> Unit,
     minDate: LocalDate?,
+    primary: Color, onPrimary: Color, primaryContainer: Color,
+    rangeBand: Color, occupiedColor: Color,
+    surface: Color, surfaceVariant: Color,
 ) {
     val firstDay = LocalDate(yearMonth.year, yearMonth.month, 1)
-    // dayOfWeek: Monday=1 ... Sunday=7
-    val startOffset = (firstDay.dayOfWeek.ordinal) // Monday=0
+    val startOffset = firstDay.dayOfWeek.ordinal
     val daysInMonth = when (yearMonth.month) {
         Month.JANUARY, Month.MARCH, Month.MAY, Month.JULY,
         Month.AUGUST, Month.OCTOBER, Month.DECEMBER -> 31
@@ -135,27 +141,35 @@ private fun MonthGrid(
         Month.FEBRUARY -> if (yearMonth.year % 4 == 0 && (yearMonth.year % 100 != 0 || yearMonth.year % 400 == 0)) 29 else 28
         else -> 30
     }
-    val totalCells = startOffset + daysInMonth
-    val rows = (totalCells + 6) / 7
+    val rows = (startOffset + daysInMonth + 6) / 7
 
-    Column(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+    Column(Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
         // Month label
-        Text(
-            "${yearMonth.year}年${yearMonth.month.number}月",
-            style = MaterialTheme.typography.labelLarge,
-            color = AppColors.DarkCoffee.copy(alpha = 0.6f),
-            modifier = Modifier.padding(start = 4.dp, top = 12.dp, bottom = 8.dp),
-        )
+        Row(
+            Modifier.fillMaxWidth().padding(start = 4.dp, top = 16.dp, bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                "${yearMonth.month.number}月",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = surface,
+            )
+            Spacer(Modifier.padding(start = 4.dp))
+            Text(
+                "${yearMonth.year}",
+                style = MaterialTheme.typography.bodySmall,
+                color = surfaceVariant.copy(alpha = 0.5f),
+            )
+        }
 
         for (row in 0 until rows) {
-            Row(Modifier.fillMaxWidth()) {
+            Row(Modifier.fillMaxWidth().height(44.dp)) {
                 for (col in 0 until 7) {
-                    val cellIndex = row * 7 + col
-                    val dayNum = cellIndex - startOffset + 1
+                    val dayNum = row * 7 + col - startOffset + 1
 
                     if (dayNum < 1 || dayNum > daysInMonth) {
-                        // Empty cell
-                        Box(Modifier.weight(1f).aspectRatio(1f))
+                        Box(Modifier.weight(1f).fillMaxHeight())
                     } else {
                         val date = LocalDate(yearMonth.year, yearMonth.month, dayNum)
                         val isFuture = date > today
@@ -163,49 +177,72 @@ private fun MonthGrid(
                         val isBelowMin = minDate != null && date < minDate
                         val isDisabled = isFuture || isOccupied || isBelowMin
                         val isToday = date == today
+                        val isWeekend = col >= 5
 
-                        val isSelectedStart = date == selectedStart
-                        val isSelectedEnd = date == selectedEnd
+                        val isStart = date == selectedStart
+                        val isEnd = date == selectedEnd
                         val isInRange = selectedStart != null && selectedEnd != null &&
                                 date > selectedStart && date < selectedEnd
 
-                        val bgColor = when {
-                            isSelectedStart || isSelectedEnd -> AppColors.DeepRose
-                            isInRange -> AppColors.WarmPeach.copy(alpha = 0.6f)
-                            isOccupied -> AppColors.DeepRose.copy(alpha = 0.2f)
-                            else -> Color.Transparent
-                        }
-                        val textColor = when {
-                            isSelectedStart || isSelectedEnd -> Color.White
-                            isDisabled -> AppColors.DarkCoffee.copy(alpha = 0.2f)
-                            isToday -> AppColors.DeepRose
-                            else -> AppColors.DarkCoffee
+                        // Background band for range continuity
+                        val bandModifier = when {
+                            isStart && selectedEnd != null && selectedStart != selectedEnd ->
+                                Modifier.background(rangeBand, RoundedCornerShape(topStartPercent = 50, bottomStartPercent = 50))
+                            isEnd && selectedStart != null && selectedStart != selectedEnd ->
+                                Modifier.background(rangeBand, RoundedCornerShape(topEndPercent = 50, bottomEndPercent = 50))
+                            isInRange -> Modifier.background(rangeBand)
+                            else -> Modifier
                         }
 
                         Box(
-                            Modifier
-                                .weight(1f)
-                                .aspectRatio(1f)
-                                .padding(2.dp)
-                                .clip(CircleShape)
-                                .background(bgColor)
-                                .then(
-                                    if (isToday && !isSelectedStart && !isSelectedEnd && !isOccupied)
-                                        Modifier.border(1.5.dp, AppColors.DeepRose, CircleShape)
-                                    else Modifier
-                                )
-                                .then(
-                                    if (!isDisabled) Modifier.clickable { onDateClick(date) }
-                                    else Modifier
-                                ),
+                            Modifier.weight(1f).fillMaxHeight().then(bandModifier),
                             contentAlignment = Alignment.Center,
                         ) {
-                            Text(
-                                "$dayNum",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = if (isSelectedStart || isSelectedEnd) FontWeight.Bold else FontWeight.Normal,
-                                color = textColor,
-                            )
+                            // Circle
+                            val circleBg = when {
+                                isStart || isEnd -> primary
+                                isOccupied -> occupiedColor
+                                else -> Color.Transparent
+                            }
+                            val textColor = when {
+                                isStart || isEnd -> onPrimary
+                                isDisabled -> surfaceVariant.copy(alpha = 0.25f)
+                                isToday -> primary
+                                isWeekend -> primary.copy(alpha = 0.6f)
+                                else -> surface
+                            }
+
+                            Box(
+                                Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(circleBg)
+                                    .then(
+                                        if (isToday && !isStart && !isEnd)
+                                            Modifier.border(1.5.dp, primary, CircleShape)
+                                        else Modifier
+                                    )
+                                    .then(if (!isDisabled) Modifier.clickable { onDateClick(date) } else Modifier),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    "$dayNum",
+                                    fontSize = 14.sp,
+                                    fontWeight = if (isStart || isEnd || isToday) FontWeight.Bold else FontWeight.Normal,
+                                    color = textColor,
+                                )
+                            }
+
+                            // Occupied dot indicator below number
+                            if (isOccupied && !isStart && !isEnd) {
+                                Box(
+                                    Modifier.align(Alignment.BottomCenter)
+                                        .padding(bottom = 2.dp)
+                                        .size(4.dp)
+                                        .clip(CircleShape)
+                                        .background(primary.copy(alpha = 0.4f))
+                                )
+                            }
                         }
                     }
                 }
