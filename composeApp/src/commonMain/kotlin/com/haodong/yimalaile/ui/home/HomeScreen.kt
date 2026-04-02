@@ -16,6 +16,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Settings
@@ -52,7 +54,9 @@ import com.haodong.yimalaile.ui.theme.AppColors
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import kotlinx.datetime.until
 import org.jetbrains.compose.resources.stringResource
@@ -122,7 +126,7 @@ fun HomeScreen(
             EndPeriodSheet(
                 startDate = active.startDate,
                 dailyRecords = active.dailyRecords,
-                existingRecords = allRecords,
+                existingRecords = allRecords.filter { it.id != active.id },
                 onDismiss = { showEndSheet = false },
                 onConfirm = { date ->
                     viewModel.endPeriod(date) {
@@ -256,6 +260,14 @@ private fun HomeContent(
                     )
                 }
             }
+
+            // Day-by-day timeline
+            Spacer(Modifier.height(24.dp))
+            DayTimeline(
+                activePeriod = state.activePeriod,
+                today = today,
+                onLogDay = onLogDay,
+            )
 
             Spacer(Modifier.weight(1f))
 
@@ -398,5 +410,108 @@ private fun HomeContent(
         }
 
         Spacer(Modifier.height(16.dp))
+    }
+}
+
+@Composable
+private fun DayTimeline(
+    activePeriod: com.haodong.yimalaile.domain.menstrual.MenstrualRecord,
+    today: LocalDate,
+    onLogDay: () -> Unit,
+) {
+    val dailyMap = activePeriod.dailyRecords.associateBy { it.date }
+    val days = buildList {
+        var d = activePeriod.startDate
+        while (d <= today) { add(d); d = d.plus(1, DateTimeUnit.DAY) }
+    }
+
+    val hasAnyRecord = dailyMap.isNotEmpty()
+
+    Column(
+        Modifier.fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
+            .padding(16.dp),
+    ) {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("这几天", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Spacer(Modifier.height(12.dp))
+
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            days.forEach { date ->
+                val record = dailyMap[date]
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.weight(1f, fill = false),
+                ) {
+                    // Mood or empty circle
+                    Box(
+                        Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (record != null) MaterialTheme.colorScheme.primaryContainer
+                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            ),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (record?.mood != null) {
+                            Text(
+                                when (record.mood) {
+                                    com.haodong.yimalaile.domain.menstrual.Mood.HAPPY -> "😊"
+                                    com.haodong.yimalaile.domain.menstrual.Mood.NEUTRAL -> "😐"
+                                    com.haodong.yimalaile.domain.menstrual.Mood.SAD -> "😔"
+                                    com.haodong.yimalaile.domain.menstrual.Mood.VERY_SAD -> "😢"
+                                },
+                                fontSize = 16.sp,
+                            )
+                        } else if (record?.intensity != null) {
+                            // Show intensity dot if no mood
+                            val dotSize = when (record.intensity) {
+                                com.haodong.yimalaile.domain.menstrual.Intensity.LIGHT -> 6.dp
+                                com.haodong.yimalaile.domain.menstrual.Intensity.MEDIUM -> 10.dp
+                                com.haodong.yimalaile.domain.menstrual.Intensity.HEAVY -> 14.dp
+                            }
+                            Box(
+                                Modifier.size(dotSize).clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary)
+                            )
+                        } else {
+                            // Empty — subtle dash
+                            Text("·", color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
+                        }
+                    }
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        "${date.dayOfMonth}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (date == today) MaterialTheme.colorScheme.primary
+                               else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    )
+                }
+            }
+        }
+
+        // Hint if most days are empty
+        val emptyDays = days.count { it !in dailyMap }
+        if (emptyDays > 0) {
+            Spacer(Modifier.height(10.dp))
+            Text(
+                if (emptyDays == days.size) "点击「记录今天」补充每日情况"
+                else "还有 ${emptyDays} 天未记录",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+            )
+        }
     }
 }
