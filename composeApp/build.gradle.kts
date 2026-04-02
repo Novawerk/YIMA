@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.ksp)
     alias(libs.plugins.sqldelight)
 }
 
@@ -54,6 +55,7 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.sqldelight.runtime)
             implementation(libs.sqldelight.coroutines)
+            implementation(libs.kotlin.inject.runtime)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -91,6 +93,10 @@ android {
 dependencies {
     debugImplementation(compose.uiTooling)
     testImplementation(libs.sqldelight.sqlite.driver)
+    add("kspAndroid", libs.kotlin.inject.compiler)
+    add("kspIosX64", libs.kotlin.inject.compiler)
+    add("kspIosArm64", libs.kotlin.inject.compiler)
+    add("kspIosSimulatorArm64", libs.kotlin.inject.compiler)
 }
 
 sqldelight {
