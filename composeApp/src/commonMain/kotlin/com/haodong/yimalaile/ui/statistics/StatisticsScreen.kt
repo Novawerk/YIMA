@@ -150,7 +150,9 @@ fun StatisticsScreen(
     }
 
     if (showBackfill) {
+        val allRecords = state?.let { it.recentPeriods + listOfNotNull(it.activePeriod) } ?: emptyList()
         BackfillSheet(
+            existingRecords = allRecords,
             onDismiss = { showBackfill = false },
             onSave = { start, end ->
                 scope.launch {

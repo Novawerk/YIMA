@@ -141,7 +141,11 @@ fun HomeScreen(
         )
     }
     if (showBackfillSheet) {
+        val records = (uiState as? HomeUiState.Ready)?.cycleState?.let {
+            it.recentPeriods + listOfNotNull(it.activePeriod)
+        } ?: emptyList()
         BackfillSheet(
+            existingRecords = records,
             onDismiss = { showBackfillSheet = false },
             onSave = { start, end ->
                 viewModel.backfillPeriod(start, end) {
