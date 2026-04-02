@@ -11,12 +11,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
+import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,9 +37,16 @@ import com.haodong.yimalaile.ui.components.PrimaryCta
 import com.haodong.yimalaile.ui.components.StatusPill
 import com.haodong.yimalaile.ui.theme.AppColors
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+
+@OptIn(ExperimentalMaterial3Api::class)
+private val PastOnlyDates = object : SelectableDates {
+    override fun isSelectableDate(utcTimeMillis: Long): Boolean =
+        utcTimeMillis <= Clock.System.now().toEpochMilliseconds()
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,11 +56,10 @@ fun OnboardingScreen(
 ) {
     val scope = rememberCoroutineScope()
     var step by remember { mutableStateOf(0) }
-    val startPickerState = rememberDatePickerState()
-    val pastStartState = rememberDatePickerState()
-    val pastEndState = rememberDatePickerState()
-    var pastStartDate by remember { mutableStateOf<kotlinx.datetime.LocalDate?>(null) }
     var backfillCount by remember { mutableStateOf(0) }
+
+    val startPickerState = rememberDatePickerState(selectableDates = PastOnlyDates)
+    val rangePickerState = rememberDateRangePickerState(selectableDates = PastOnlyDates)
 
     Column(
         modifier = Modifier
@@ -61,7 +70,7 @@ fun OnboardingScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         when (step) {
-            // Welcome + ask if in period
+            // Welcome
             0 -> {
                 Spacer(Modifier.weight(0.3f))
                 Row(verticalAlignment = Alignment.Top) {
@@ -81,6 +90,7 @@ fun OnboardingScreen(
                 Spacer(Modifier.weight(1f))
                 PrimaryCta("✦ 开始第一次记录", onClick = { step = 1 })
             }
+
             // Ask current period status
             1 -> {
                 Spacer(Modifier.weight(0.3f))
@@ -88,13 +98,14 @@ fun OnboardingScreen(
                 Spacer(Modifier.height(32.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     PrimaryCta("是的", onClick = { step = 2 }, modifier = Modifier.weight(1f))
-                    OutlinedButton(onClick = { step = 4 }, modifier = Modifier.weight(1f).height(56.dp)) {
+                    OutlinedButton(onClick = { step = 3 }, modifier = Modifier.weight(1f).height(56.dp)) {
                         Text("不在")
                     }
                 }
                 Spacer(Modifier.weight(1f))
             }
-            // Pick current period start date
+
+            // Pick current period start date (past only)
             2 -> {
                 Text("哪天开始的？", style = MaterialTheme.typography.titleLarge, color = AppColors.DarkCoffee)
                 Spacer(Modifier.height(8.dp))
@@ -111,14 +122,15 @@ fun OnboardingScreen(
                         val date = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.UTC).date
                         scope.launch {
                             service.startPeriod(date)
-                            step = 4
+                            step = 3
                         }
                     },
                     enabled = startPickerState.selectedDateMillis != null,
                 )
             }
+
             // Ask about past periods
-            4 -> {
+            3 -> {
                 Spacer(Modifier.weight(0.3f))
                 Text(
                     if (backfillCount == 0) "你还记得上次经期吗？" else "继续补录？",
@@ -133,62 +145,44 @@ fun OnboardingScreen(
                 )
                 Spacer(Modifier.height(32.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    PrimaryCta("补录", onClick = { step = 5 }, modifier = Modifier.weight(1f))
+                    PrimaryCta("补录", onClick = { step = 4 }, modifier = Modifier.weight(1f))
                     OutlinedButton(onClick = onComplete, modifier = Modifier.weight(1f).height(56.dp)) {
                         Text(if (backfillCount == 0) "跳过" else "完成")
                     }
                 }
                 Spacer(Modifier.weight(1f))
             }
-            // Pick past start date
-            5 -> {
-                Text("开始日期", style = MaterialTheme.typography.titleLarge, color = AppColors.DarkCoffee)
+
+            // DateRangePicker for past period (start + end in one view, past only)
+            4 -> {
+                Text("选择经期日期范围", style = MaterialTheme.typography.titleLarge, color = AppColors.DarkCoffee)
                 Spacer(Modifier.height(8.dp))
-                DatePicker(
-                    state = pastStartState,
-                    title = null, headline = null, showModeToggle = false,
+                DateRangePicker(
+                    state = rangePickerState,
+                    title = null,
+                    headline = null,
+                    showModeToggle = false,
                     colors = DatePickerDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
                     modifier = Modifier.weight(1f),
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = { step = 4 }, Modifier.weight(1f)) { Text("返回") }
-                    PrimaryCta(
-                        text = "下一步",
-                        onClick = {
-                            val millis = pastStartState.selectedDateMillis ?: return@PrimaryCta
-                            pastStartDate = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.UTC).date
-                            step = 6
-                        },
-                        modifier = Modifier.weight(1f),
-                        enabled = pastStartState.selectedDateMillis != null,
-                    )
-                }
-            }
-            // Pick past end date
-            6 -> {
-                Text("结束日期", style = MaterialTheme.typography.titleLarge, color = AppColors.DarkCoffee)
-                Spacer(Modifier.height(8.dp))
-                DatePicker(
-                    state = pastEndState,
-                    title = null, headline = null, showModeToggle = false,
-                    colors = DatePickerDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
-                    modifier = Modifier.weight(1f),
-                )
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = { step = 5 }, Modifier.weight(1f)) { Text("返回") }
+                    TextButton(onClick = { step = 3 }, Modifier.weight(1f)) { Text("返回") }
                     PrimaryCta(
                         text = "保存",
                         onClick = {
-                            val millis = pastEndState.selectedDateMillis ?: return@PrimaryCta
-                            val end = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.UTC).date
+                            val startMillis = rangePickerState.selectedStartDateMillis ?: return@PrimaryCta
+                            val endMillis = rangePickerState.selectedEndDateMillis ?: return@PrimaryCta
+                            val start = Instant.fromEpochMilliseconds(startMillis).toLocalDateTime(TimeZone.UTC).date
+                            val end = Instant.fromEpochMilliseconds(endMillis).toLocalDateTime(TimeZone.UTC).date
                             scope.launch {
-                                val result = service.backfillPeriod(pastStartDate!!, end)
+                                val result = service.backfillPeriod(start, end)
                                 if (result is AddRecordResult.Success) backfillCount++
-                                step = 4
+                                step = 3
                             }
                         },
                         modifier = Modifier.weight(1f),
-                        enabled = pastEndState.selectedDateMillis != null,
+                        enabled = rangePickerState.selectedStartDateMillis != null
+                                && rangePickerState.selectedEndDateMillis != null,
                     )
                 }
             }
