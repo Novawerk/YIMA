@@ -4,9 +4,6 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.haodong.yimalaile.domain.common.LocalDateKey
-import com.haodong.yimalaile.domain.common.currentEpochMillis
-import com.haodong.yimalaile.domain.common.daysBetween
 import com.haodong.yimalaile.domain.menstrual.AddRecordResult
 import com.haodong.yimalaile.domain.menstrual.DailyRecord
 import com.haodong.yimalaile.domain.menstrual.Intensity
@@ -15,6 +12,10 @@ import com.haodong.yimalaile.domain.menstrual.Mood
 import com.haodong.yimalaile.domain.menstrual.RecordSource
 import com.haodong.yimalaile.domain.menstrual.RecordsRepository
 import kotlinx.coroutines.flow.first
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.until
 import me.tatarka.inject.annotations.Inject
 import kotlin.math.abs
 
@@ -33,7 +34,7 @@ class DataStoreRecordsRepository(
             return AddRecordResult.DuplicateStartDate
         }
 
-        val tooClose = active.any { abs(daysBetween(it.startDate, record.startDate)) < 15 }
+        val tooClose = active.any { abs(it.startDate.until(record.startDate, DateTimeUnit.DAY)) < 15 }
         if (tooClose) return AddRecordResult.TooCloseToOtherRecord
 
         saveRecords(existing + record)
@@ -60,7 +61,7 @@ class DataStoreRecordsRepository(
         val updated = existing.toMutableList()
         updated[index] = updated[index].copy(
             isDeleted = true,
-            updatedAtEpochMillis = currentEpochMillis()
+            updatedAtEpochMillis = Clock.System.now().toEpochMilliseconds()
         )
         saveRecords(updated)
         return true
@@ -99,8 +100,6 @@ private fun String.toRecordList(): List<MenstrualRecord> {
         val content = removeSurrounding("[", "]")
         if (content.isBlank()) return emptyList()
 
-        // Split top-level records by "},{ but only at the record boundary
-        // Records contain nested dailyRecords arrays, so we need bracket-aware splitting
         val records = mutableListOf<String>()
         var depth = 0
         var start = 0
@@ -111,7 +110,7 @@ private fun String.toRecordList(): List<MenstrualRecord> {
             }
             if (depth == 0 && i > start) {
                 records.add(content.substring(start, i + 1))
-                start = i + 2 // skip the comma
+                start = i + 2
             }
         }
 
@@ -124,13 +123,11 @@ private fun String.toRecordList(): List<MenstrualRecord> {
 private fun String.parseRecord(): MenstrualRecord {
     val s = removeSurrounding("{", "}")
 
-    // Extract dailyRecords array first (it contains nested objects)
     val dailyStart = s.indexOf("\"dailyRecords\":[") + "\"dailyRecords\":[".length
     val dailyEnd = findMatchingBracket(s, dailyStart - 1)
     val dailyJson = s.substring(dailyStart, dailyEnd)
     val dailyRecords = dailyJson.parseDailyRecords()
 
-    // Remove dailyRecords section to parse flat fields
     val flat = s.removeRange(s.indexOf("\"dailyRecords\":"), dailyEnd + 1)
         .replace(",,", ",").trim(',')
 
@@ -142,8 +139,8 @@ private fun String.parseRecord(): MenstrualRecord {
 
     return MenstrualRecord(
         id = map["id"] ?: "",
-        startDate = LocalDateKey.fromString(map["startDate"] ?: ""),
-        endDate = map["endDate"]?.takeIf { it.isNotBlank() }?.let { LocalDateKey.fromString(it) },
+        startDate = LocalDate.parse(map["startDate"] ?: ""),
+        endDate = map["endDate"]?.takeIf { it.isNotBlank() }?.let { LocalDate.parse(it) },
         dailyRecords = dailyRecords,
         createdAtEpochMillis = map["createdAt"]?.toLongOrNull() ?: 0L,
         updatedAtEpochMillis = map["updatedAt"]?.toLongOrNull() ?: 0L,
@@ -176,7 +173,7 @@ private fun String.parseDailyRecords(): List<DailyRecord> {
                     key to value
                 }
                 DailyRecord(
-                    date = LocalDateKey.fromString(map["date"] ?: ""),
+                    date = LocalDate.parse(map["date"] ?: ""),
                     intensity = map["intensity"]?.takeIf { it.isNotBlank() }?.let { Intensity.valueOf(it) },
                     mood = map["mood"]?.takeIf { it.isNotBlank() }?.let { Mood.valueOf(it) },
                     symptoms = map["symptoms"]?.takeIf { it.isNotBlank() }?.split("|") ?: emptyList(),

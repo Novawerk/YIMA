@@ -1,23 +1,14 @@
 package com.haodong.yimalaile.domain.menstrual
 
-import com.haodong.yimalaile.domain.common.LocalDateKey
-import com.haodong.yimalaile.domain.common.daysBetween
-import com.haodong.yimalaile.domain.common.plusDays
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.plus
+import kotlinx.datetime.until
 import me.tatarka.inject.annotations.Inject
 
-/**
- * Pure functions for cycle length calculation and next-period prediction.
- * All calculations use the existing LocalDateKey math (daysBetween, plusDays).
- */
 @Inject
 class CycleCalculator {
 
-    /**
-     * Calculates the average cycle length in days from consecutive period start dates.
-     *
-     * Algorithm: sort non-deleted records by start date, compute gaps between each
-     * adjacent pair, return the mean. Requires ≥ 2 records; returns null otherwise.
-     */
     fun calculateAverageCycleLength(records: List<MenstrualRecord>): Int? {
         val sorted = records
             .filter { !it.isDeleted }
@@ -25,36 +16,25 @@ class CycleCalculator {
         if (sorted.size < 2) return null
 
         val gaps = sorted.zipWithNext().map { (a, b) ->
-            daysBetween(a.startDate, b.startDate)
+            a.startDate.until(b.startDate, DateTimeUnit.DAY)
         }
         return gaps.sum() / gaps.size
     }
 
-    /**
-     * Calculates the average period length in days from records that have a non-null endDate.
-     * Each period's length = daysBetween(startDate, endDate) + 1 (inclusive).
-     *
-     * Returns null if no records have an endDate.
-     */
     fun calculateAveragePeriodLength(records: List<MenstrualRecord>): Int? {
         val lengths = records
             .filter { !it.isDeleted && it.endDate != null }
-            .map { daysBetween(it.startDate, it.endDate!!) + 1 }
+            .map { it.startDate.until(it.endDate!!, DateTimeUnit.DAY) + 1 }
         if (lengths.isEmpty()) return null
         return lengths.sum() / lengths.size
     }
 
-    /**
-     * Predicts the next period start date as: lastStart + averageCycleLength.
-     *
-     * Returns null if there are fewer than 2 records (cannot compute average).
-     */
-    fun predictNextPeriod(records: List<MenstrualRecord>): LocalDateKey? {
+    fun predictNextPeriod(records: List<MenstrualRecord>): LocalDate? {
         val avgLength = calculateAverageCycleLength(records) ?: return null
         val lastStart = records
             .filter { !it.isDeleted }
             .maxByOrNull { it.startDate }
             ?.startDate ?: return null
-        return lastStart.plusDays(avgLength)
+        return lastStart.plus(avgLength, DateTimeUnit.DAY)
     }
 }
