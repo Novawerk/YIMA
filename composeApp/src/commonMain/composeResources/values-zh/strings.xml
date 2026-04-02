@@ -8,6 +8,8 @@
     <string name="settings_title">设置</string>
     <string name="settings_language">语言</string>
     <string name="settings_language_follow_system">跟随系统</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_zh">中文</string>
 
     <!-- Navigation -->
     <string name="nav_back">返回</string>
@@ -78,6 +80,9 @@
     <string name="symptom_fatigue">疲倦</string>
     <string name="record_notes_hint">写下今天的小心情...</string>
     <string name="record_save_btn">保存记录</string>
+    <string name="record_start_date">开始日期</string>
+    <string name="record_end_date">结束日期</string>
+    <string name="record_date_range_error">结束日期不能早于开始日期</string>
     <string name="dialog_confirm">确定</string>
     <string name="dialog_cancel">取消</string>
 

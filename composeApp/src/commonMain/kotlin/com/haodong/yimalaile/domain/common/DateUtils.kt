@@ -1,4 +1,4 @@
-package com.haodong.yimalaile.data
+package com.haodong.yimalaile.domain.common
 
 import kotlin.math.abs
 import kotlinx.datetime.Clock
@@ -12,35 +12,9 @@ data class LocalDateKey(val year: Int, val month: Int, val day: Int) : Comparabl
 
     override fun toString(): String = "$year-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}"
 
-    fun getMonthName(): String {
-        return when (month) {
-            1 -> "JAN"
-            2 -> "FEB"
-            3 -> "MAR"
-            4 -> "APR"
-            5 -> "MAY"
-            6 -> "JUN"
-            7 -> "JUL"
-            8 -> "AUG"
-            9 -> "SEP"
-            10 -> "OCT"
-            11 -> "NOV"
-            12 -> "DEC"
-            else -> ""
-        }
-    }
 
-    fun toEpochMillis(): Long {
-        // Simplified conversion assuming UTC
-        val daysSinceEpoch = daysBetween(LocalDateKey(1970, 1, 1), this)
-        return daysSinceEpoch * 24L * 60 * 60 * 1000
-    }
 
     companion object {
-        fun fromEpochMillis(millis: Long): LocalDateKey {
-            val daysSinceEpoch = (millis / (24L * 60 * 60 * 1000)).toInt()
-            return LocalDateKey(1970, 1, 1).plusDays(daysSinceEpoch)
-        }
 
         /** Parse an ISO date string "YYYY-MM-DD". */
         fun fromString(iso: String): LocalDateKey {
@@ -127,34 +101,5 @@ fun LocalDateKey.plusDays(days: Int): LocalDateKey {
     return current
 }
 
-data class DateRange(val start: LocalDateKey, val end: LocalDateKey) {
-    fun overlaps(other: DateRange): Boolean {
-        return this.start <= other.end && other.start <= this.end
-    }
-
-    fun isContiguousWith(other: DateRange): Boolean {
-        return this.end.nextDay() == other.start || other.end.nextDay() == this.start
-    }
-
-    fun mergeIfMergeable(other: DateRange): DateRange? {
-        if (overlaps(other) || isContiguousWith(other)) {
-            val minStart = if (this.start < other.start) this.start else other.start
-            val maxEnd = if (this.end > other.end) this.end else other.end
-            return DateRange(minStart, maxEnd)
-        }
-        return null
-    }
-}
-
 fun currentEpochMillis(): Long = Clock.System.now().toEpochMilliseconds()
 
-/**
- * Returns day of week for the given date: 0=Sunday, 1=Monday, …, 6=Saturday.
- * Uses Tomohiko Sakamoto's algorithm.
- */
-fun dayOfWeek(year: Int, month: Int, day: Int): Int {
-    val t = intArrayOf(0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4)
-    var y = year
-    if (month < 3) y--
-    return (y + y / 4 - y / 100 + y / 400 + t[month - 1] + day) % 7
-}

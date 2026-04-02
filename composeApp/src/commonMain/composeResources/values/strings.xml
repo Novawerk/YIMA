@@ -8,6 +8,8 @@
     <string name="settings_title">Settings</string>
     <string name="settings_language">Language</string>
     <string name="settings_language_follow_system">Follow system</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_zh">中文</string>
 
     <!-- Navigation -->
     <string name="nav_back">Back</string>
@@ -78,6 +80,9 @@
     <string name="symptom_fatigue">Fatigue</string>
     <string name="record_notes_hint">Write about your day...</string>
     <string name="record_save_btn">Save Record</string>
+    <string name="record_start_date">Start Date</string>
+    <string name="record_end_date">End Date</string>
+    <string name="record_date_range_error">End date cannot be before start date</string>
     <string name="dialog_confirm">OK</string>
     <string name="dialog_cancel">Cancel</string>
 
