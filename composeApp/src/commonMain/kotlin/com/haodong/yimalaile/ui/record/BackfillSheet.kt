@@ -10,10 +10,12 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,7 +43,7 @@ fun BackfillSheet(
     var selectedEnd by remember { mutableStateOf<LocalDate?>(null) }
 
     Scaffold(
-        containerColor = AppColors.SoftCream,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text("补录经期") },
@@ -53,7 +55,31 @@ fun BackfillSheet(
             )
         },
     ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)) {
+        Column(
+            Modifier.fillMaxSize().padding(padding).padding(horizontal = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                "选择开始和结束日期",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (selectedStart != null && selectedEnd == null) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "已选开始：${selectedStart!!.monthNumber}月${selectedStart!!.dayOfMonth}日，再选结束日期",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            } else if (selectedStart != null && selectedEnd != null) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "${selectedStart!!.monthNumber}月${selectedStart!!.dayOfMonth}日 — ${selectedEnd!!.monthNumber}月${selectedEnd!!.dayOfMonth}日",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+            Spacer(Modifier.height(12.dp))
             RangeCalendar(
                 existingRecords = existingRecords,
                 selectedStart = selectedStart,
