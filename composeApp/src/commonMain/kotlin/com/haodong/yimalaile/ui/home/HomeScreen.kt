@@ -1,5 +1,6 @@
 package com.haodong.yimalaile.ui.home
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,12 +14,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -186,7 +189,7 @@ private fun HomeContent(
             }
 
             Text(
-                stringResource(Res.string.status_here_desc),
+                "照顾好自己",
                 style = MaterialTheme.typography.bodyLarge,
                 color = AppColors.DarkCoffee.copy(alpha = 0.6f),
             )
@@ -194,7 +197,7 @@ private fun HomeContent(
 
             Row(verticalAlignment = Alignment.Top) {
                 Text(
-                    "抱抱",
+                    "经期中",
                     style = MaterialTheme.typography.headlineLarge,
                     color = AppColors.DarkCoffee,
                 )
@@ -203,16 +206,24 @@ private fun HomeContent(
 
             Spacer(Modifier.height(16.dp))
 
-            StatusPill("经期第 ${dayCount} 天")
+            StatusPill("第 ${dayCount} 天")
 
             Spacer(Modifier.height(32.dp))
             IllustrationPlaceholder()
             Spacer(Modifier.weight(1f))
 
-            // Two actions: log today + end period
-            PrimaryCta(text = "记录今天", onClick = onLogDay)
+            // Primary action: log today
+            PrimaryCta(text = "✦ 记录今天", onClick = onLogDay)
             Spacer(Modifier.height(12.dp))
-            PrimaryCta(text = "经期结束", onClick = onEndPeriod)
+            // Secondary action: end period — outlined style
+            OutlinedButton(
+                onClick = onEndPeriod,
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                shape = RoundedCornerShape(28.dp),
+                border = BorderStroke(1.5.dp, AppColors.DeepRose.copy(alpha = 0.4f)),
+            ) {
+                Text("经期结束", style = MaterialTheme.typography.titleMedium, color = AppColors.DeepRose)
+            }
 
         } else {
             // ---- Not in period state ----
