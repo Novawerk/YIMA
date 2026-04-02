@@ -38,9 +38,13 @@ class MenstrualService(private val repository: RecordsRepository) {
     suspend fun endPeriod(recordId: String, endDate: LocalDate): Boolean {
         val record = repository.getAllRecords().find { it.id == recordId } ?: return false
         if (endDate < record.startDate) return false
+        val trimmedDailyRecords = record.dailyRecords.filter { it.date <= endDate }
         return repository.updateRecord(
-            record.copy(endDate = endDate,
-                updatedAtEpochMillis = Clock.System.now().toEpochMilliseconds())
+            record.copy(
+                endDate = endDate,
+                dailyRecords = trimmedDailyRecords,
+                updatedAtEpochMillis = Clock.System.now().toEpochMilliseconds(),
+            )
         )
     }
 

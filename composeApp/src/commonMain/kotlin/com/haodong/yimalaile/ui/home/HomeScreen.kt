@@ -113,6 +113,7 @@ fun HomeScreen(
         if (active != null) {
             EndPeriodSheet(
                 startDate = active.startDate,
+                dailyRecords = active.dailyRecords,
                 onDismiss = { showEndSheet = false },
                 onConfirm = { date ->
                     viewModel.endPeriod(date) {
