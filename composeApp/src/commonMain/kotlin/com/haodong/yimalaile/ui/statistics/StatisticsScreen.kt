@@ -128,16 +128,6 @@ fun StatisticsScreen(
                         }
                     }
 
-                    // Cycle trend
-                    if (sorted.size >= 2) {
-                        item {
-                            SectionHeader("周期趋势", "过去 ${sorted.size} 个周期")
-                        }
-                        item {
-                            CycleTrendChart(sorted, avgCycle)
-                        }
-                    }
-
                     // Period duration
                     val withEnd = records.filter { it.endDate != null }.sortedBy { it.startDate }
                     if (withEnd.isNotEmpty()) {
@@ -149,7 +139,7 @@ fun StatisticsScreen(
                         }
                     }
 
-                    // Confidence
+                    // Confidence — compact inline
                     if (avgCycle != null) {
                         item {
                             val gaps = sorted.zipWithNext().map { (a, b) -> a.startDate.until(b.startDate, DateTimeUnit.DAY) }
@@ -159,37 +149,17 @@ fun StatisticsScreen(
                                 sorted.size >= 3 -> "中"
                                 else -> "低"
                             }
-                            Box(
+                            Row(
                                 Modifier.fillMaxWidth()
-                                    .clip(RoundedCornerShape(20.dp))
-                                    .background(AppColors.WarmPeach.copy(alpha = 0.25f))
-                                    .padding(20.dp),
-                                contentAlignment = Alignment.Center,
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(AppColors.WarmPeach.copy(alpha = 0.2f))
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text("预测置信度", style = MaterialTheme.typography.labelMedium, color = AppColors.DarkCoffee.copy(alpha = 0.5f))
-                                    Spacer(Modifier.height(4.dp))
-                                    Text(confidence, style = MaterialTheme.typography.titleLarge, color = AppColors.DeepRose, fontWeight = FontWeight.Bold)
-                                }
+                                Text("预测置信度", style = MaterialTheme.typography.bodyMedium, color = AppColors.DarkCoffee.copy(alpha = 0.5f))
+                                StatusPill(confidence)
                             }
-                        }
-                    }
-
-                    // Encouragement
-                    item {
-                        Box(
-                            Modifier.fillMaxWidth()
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(AppColors.BlushPink.copy(alpha = 0.3f))
-                                .padding(20.dp),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Text(
-                                "\"你的身体很有规律，继续保持记录吧\"",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = AppColors.DarkCoffee.copy(alpha = 0.5f),
-                                textAlign = TextAlign.Center,
-                            )
                         }
                     }
 
