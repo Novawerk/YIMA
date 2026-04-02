@@ -4,13 +4,11 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
+import kotlinx.datetime.until
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-class MenstrualService(
-    private val repository: RecordsRepository,
-    private val calculator: CycleCalculator
-) {
+class MenstrualService(private val repository: RecordsRepository) {
 
     // ---------- Scenario 1: Normal recording ----------
 
@@ -19,7 +17,6 @@ class MenstrualService(
 
         if (all.any { it.endDate == null }) return AddRecordResult.ActivePeriodExists
 
-        // Overlap: existing completed period's range contains or touches startDate
         if (all.any { startDate <= it.endDate!! }) return AddRecordResult.OverlappingPeriod
 
         val now = Clock.System.now().toEpochMilliseconds()
@@ -33,10 +30,8 @@ class MenstrualService(
         val record = repository.getAllRecords().find { it.id == recordId } ?: return false
         val updatedDaily = record.dailyRecords.filter { it.date != day.date } + day
         return repository.updateRecord(
-            record.copy(
-                dailyRecords = updatedDaily,
-                updatedAtEpochMillis = Clock.System.now().toEpochMilliseconds()
-            )
+            record.copy(dailyRecords = updatedDaily,
+                updatedAtEpochMillis = Clock.System.now().toEpochMilliseconds())
         )
     }
 
@@ -44,10 +39,8 @@ class MenstrualService(
         val record = repository.getAllRecords().find { it.id == recordId } ?: return false
         if (endDate < record.startDate) return false
         return repository.updateRecord(
-            record.copy(
-                endDate = endDate,
-                updatedAtEpochMillis = Clock.System.now().toEpochMilliseconds()
-            )
+            record.copy(endDate = endDate,
+                updatedAtEpochMillis = Clock.System.now().toEpochMilliseconds())
         )
     }
 
@@ -57,9 +50,6 @@ class MenstrualService(
         if (endDate < startDate) return AddRecordResult.InvalidDateRange
 
         val all = repository.getAllRecords()
-
-        // Overlap: [startDate, endDate] intersects any existing completed period
-        // Active periods (no endDate) are excluded — backfill is for past data
         val overlaps = all.filter { it.endDate != null }
             .any { it.startDate <= endDate && startDate <= it.endDate!! }
         if (overlaps) return AddRecordResult.OverlappingPeriod
@@ -76,41 +66,43 @@ class MenstrualService(
     suspend fun getCycleState(): CycleState {
         val all = repository.getAllRecords()
         val sorted = all.sortedByDescending { it.startDate }
-
-        // Active = the most recent record with no end date
-        val active = sorted.firstOrNull { it.endDate == null }
-
-        // Recent = last 10 completed periods (have an end date), newest first
-        val recent = sorted.filter { it.endDate != null }.take(10)
-
-        val predictions = predictNextCycles(records = all)
-
         return CycleState(
-            activePeriod = active,
-            recentPeriods = recent,
-            predictions = predictions
+            activePeriod = sorted.firstOrNull { it.endDate == null },
+            recentPeriods = sorted.filter { it.endDate != null }.take(10),
+            predictions = predictNextCycles(all)
         )
     }
 
     // ---------- Prediction ----------
 
     suspend fun predictNextCycles(count: Int = 3): List<PredictedCycle> =
-        predictNextCycles(count, repository.getAllRecords())
+        predictNextCycles(repository.getAllRecords(), count)
 
-    private fun predictNextCycles(count: Int = 3, records: List<MenstrualRecord>): List<PredictedCycle> {
-        val avgCycleLength = calculator.calculateAverageCycleLength(records) ?: return emptyList()
-        val avgPeriodLength = calculator.calculateAveragePeriodLength(records)
+    // ---------- Private ----------
+
+    private fun predictNextCycles(records: List<MenstrualRecord>, count: Int = 3): List<PredictedCycle> {
+        val avgCycleLength = averageCycleLength(records) ?: return emptyList()
+        val avgPeriodLength = averagePeriodLength(records)
         val lastStart = records.maxByOrNull { it.startDate }?.startDate ?: return emptyList()
-
         return (1..count).map { i ->
-            val predictedStart = lastStart.plus(avgCycleLength * i, DateTimeUnit.DAY)
-            val predictedEnd = avgPeriodLength?.let {
-                predictedStart.plus(it - 1, DateTimeUnit.DAY)
-            }
-            PredictedCycle(predictedStart, predictedEnd)
+            val start = lastStart.plus(avgCycleLength * i, DateTimeUnit.DAY)
+            PredictedCycle(start, avgPeriodLength?.let { start.plus(it - 1, DateTimeUnit.DAY) })
         }
     }
 
-    private fun newId() =
-        "record_${Clock.System.now().toEpochMilliseconds()}_${(0..9999).random()}"
+    private fun averageCycleLength(records: List<MenstrualRecord>): Int? {
+        val sorted = records.filter { !it.isDeleted }.sortedBy { it.startDate }
+        if (sorted.size < 2) return null
+        val gaps = sorted.zipWithNext().map { (a, b) -> a.startDate.until(b.startDate, DateTimeUnit.DAY) }
+        return gaps.sum() / gaps.size
+    }
+
+    private fun averagePeriodLength(records: List<MenstrualRecord>): Int? {
+        val lengths = records
+            .filter { !it.isDeleted && it.endDate != null }
+            .map { it.startDate.until(it.endDate!!, DateTimeUnit.DAY) + 1 }
+        return if (lengths.isEmpty()) null else lengths.sum() / lengths.size
+    }
+
+    private fun newId() = "record_${Clock.System.now().toEpochMilliseconds()}_${(0..9999).random()}"
 }
