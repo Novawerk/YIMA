@@ -45,6 +45,7 @@ import com.haodong.yimalaile.domain.menstrual.CycleState
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.ui.record.BackfillSheet
+import com.haodong.yimalaile.ui.record.DayPickerSheet
 import com.haodong.yimalaile.ui.record.LogDaySheet
 import com.haodong.yimalaile.ui.record.RecordDetailSheet
 import com.haodong.yimalaile.ui.record.StartPeriodSheet
@@ -70,6 +71,8 @@ fun StatisticsScreen(
     var editStartFor by remember { mutableStateOf<MenstrualRecord?>(null) }
     var editEndFor by remember { mutableStateOf<MenstrualRecord?>(null) }
     var logDayFor by remember { mutableStateOf<MenstrualRecord?>(null) }
+    var logDayDate by remember { mutableStateOf<kotlinx.datetime.LocalDate?>(null) }
+    var logDayRecordId by remember { mutableStateOf<String?>(null) }
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val successMsg = stringResource(Res.string.record_save_success)
@@ -206,26 +209,34 @@ fun StatisticsScreen(
         )
     }
 
-    // Log day for specific record
+    // Log day — step 1: pick which day
     if (logDayFor != null) {
         val rec = logDayFor!!
-        LogDaySheet(
+        DayPickerSheet(
+            record = rec,
             onDismiss = { logDayFor = null },
+            onDaySelected = { date ->
+                logDayDate = date
+                logDayRecordId = rec.id
+                logDayFor = null
+            },
+        )
+    }
+
+    // Log day — step 2: fill in details
+    if (logDayDate != null && logDayRecordId != null) {
+        val targetDate = logDayDate!!
+        val targetId = logDayRecordId!!
+        LogDaySheet(
+            onDismiss = { logDayDate = null; logDayRecordId = null },
             onSave = { intensity, mood, symptoms, notes ->
                 scope.launch {
-                    // Pick the first day without a record, or the start date
-                    val existingDates = rec.dailyRecords.map { it.date }.toSet()
-                    var targetDate = rec.startDate
-                    val end = rec.endDate ?: rec.startDate
-                    while (targetDate <= end && targetDate in existingDates) {
-                        targetDate = targetDate.plus(1, DateTimeUnit.DAY)
-                    }
                     val day = com.haodong.yimalaile.domain.menstrual.DailyRecord(
                         date = targetDate, intensity = intensity, mood = mood,
                         symptoms = symptoms, notes = notes,
                     )
-                    service.logDay(rec.id, day)
-                    logDayFor = null
+                    service.logDay(targetId, day)
+                    logDayDate = null; logDayRecordId = null
                     refresh()
                     snackbar.showSnackbar(successMsg)
                 }
