@@ -70,13 +70,17 @@ fun RangeCalendar(
         }
     }
 
-    // Generate months: current month + 11 months back
-    val months = (0..11).map { offset ->
+    // Generate months in chronological order (oldest first, newest last)
+    val months = (11 downTo 0).map { offset ->
         val d = today.minus(offset, DateTimeUnit.MONTH)
         YearMonth(d.year, d.month)
     }
 
-    val listState = rememberLazyListState()
+    // Start scrolled to bottom (current month)
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = months.size - 1)
+    LaunchedEffect(Unit) {
+        listState.scrollToItem(months.size - 1)
+    }
 
     Column(modifier) {
         // Weekday header
