@@ -41,7 +41,6 @@ import com.haodong.yimalaile.domain.menstrual.CycleState
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.ui.components.BigStatCard
 import com.haodong.yimalaile.ui.components.HeartDecoration
-import com.haodong.yimalaile.ui.components.IllustrationPlaceholder
 import com.haodong.yimalaile.ui.components.PeriodDurationChart
 import com.haodong.yimalaile.ui.components.PrimaryCta
 import com.haodong.yimalaile.ui.components.StatusPill
@@ -258,8 +257,6 @@ private fun HomeContent(
                 }
             }
 
-            Spacer(Modifier.height(32.dp))
-            IllustrationPlaceholder()
             Spacer(Modifier.weight(1f))
 
             // Primary action: log today
