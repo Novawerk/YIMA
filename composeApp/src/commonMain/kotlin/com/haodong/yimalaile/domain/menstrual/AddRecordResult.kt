@@ -2,7 +2,7 @@ package com.haodong.yimalaile.domain.menstrual
 
 sealed class AddRecordResult {
     data class Success(val record: MenstrualRecord) : AddRecordResult()
-    object DuplicateStartDate : AddRecordResult()
-    object TooCloseToOtherRecord : AddRecordResult()
-    object InvalidDateRange : AddRecordResult()
+    object ActivePeriodExists : AddRecordResult()   // an ongoing period must be ended first
+    object OverlappingPeriod : AddRecordResult()    // date range overlaps an existing record
+    object InvalidDateRange : AddRecordResult()     // endDate < startDate
 }

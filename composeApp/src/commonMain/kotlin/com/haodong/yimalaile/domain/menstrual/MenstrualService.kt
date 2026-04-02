@@ -15,14 +15,18 @@ class MenstrualService(
     // ---------- Scenario 1: Normal recording ----------
 
     suspend fun startPeriod(startDate: LocalDate): AddRecordResult {
+        val all = repository.getAllRecords()
+
+        if (all.any { it.endDate == null }) return AddRecordResult.ActivePeriodExists
+
+        // Overlap: existing completed period's range contains or touches startDate
+        if (all.any { startDate <= it.endDate!! }) return AddRecordResult.OverlappingPeriod
+
         val now = Clock.System.now().toEpochMilliseconds()
-        val record = MenstrualRecord(
-            id = newId(),
-            startDate = startDate,
-            createdAtEpochMillis = now,
-            updatedAtEpochMillis = now,
+        return repository.insertRecord(
+            MenstrualRecord(id = newId(), startDate = startDate,
+                createdAtEpochMillis = now, updatedAtEpochMillis = now)
         )
-        return repository.insertRecord(record)
     }
 
     suspend fun logDay(recordId: String, day: DailyRecord): Boolean {
@@ -51,15 +55,20 @@ class MenstrualService(
 
     suspend fun backfillPeriod(startDate: LocalDate, endDate: LocalDate): AddRecordResult {
         if (endDate < startDate) return AddRecordResult.InvalidDateRange
+
+        val all = repository.getAllRecords()
+
+        if (all.any { it.endDate == null }) return AddRecordResult.ActivePeriodExists
+
+        // Overlap: [startDate, endDate] intersects any existing [existStart, existEnd]
+        val overlaps = all.any { it.startDate <= endDate && startDate <= it.endDate!! }
+        if (overlaps) return AddRecordResult.OverlappingPeriod
+
         val now = Clock.System.now().toEpochMilliseconds()
-        val record = MenstrualRecord(
-            id = newId(),
-            startDate = startDate,
-            endDate = endDate,
-            createdAtEpochMillis = now,
-            updatedAtEpochMillis = now,
+        return repository.insertRecord(
+            MenstrualRecord(id = newId(), startDate = startDate, endDate = endDate,
+                createdAtEpochMillis = now, updatedAtEpochMillis = now)
         )
-        return repository.insertRecord(record)
     }
 
     // ---------- State ----------

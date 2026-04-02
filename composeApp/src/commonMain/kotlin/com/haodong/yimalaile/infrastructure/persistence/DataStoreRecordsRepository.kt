@@ -13,11 +13,8 @@ import com.haodong.yimalaile.domain.menstrual.RecordSource
 import com.haodong.yimalaile.domain.menstrual.RecordsRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.Clock
-import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.until
 import me.tatarka.inject.annotations.Inject
-import kotlin.math.abs
 
 private val RECORDS_KEY = stringPreferencesKey("menstrual_records")
 
@@ -28,15 +25,6 @@ class DataStoreRecordsRepository(
 
     override suspend fun insertRecord(record: MenstrualRecord): AddRecordResult {
         val existing = loadRecords()
-        val active = existing.filter { !it.isDeleted }
-
-        if (active.any { it.startDate == record.startDate }) {
-            return AddRecordResult.DuplicateStartDate
-        }
-
-        val tooClose = active.any { abs(it.startDate.until(record.startDate, DateTimeUnit.DAY)) < 15 }
-        if (tooClose) return AddRecordResult.TooCloseToOtherRecord
-
         saveRecords(existing + record)
         return AddRecordResult.Success(record)
     }
