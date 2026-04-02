@@ -28,7 +28,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.Intensity
 import com.haodong.yimalaile.domain.menstrual.Mood
 import com.haodong.yimalaile.ui.components.PrimaryCta
@@ -85,11 +87,12 @@ fun LogDaySheet(
             Spacer(Modifier.height(12.dp))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 listOf(
-                    Intensity.LIGHT to stringResource(Res.string.intensity_light),
-                    Intensity.MEDIUM to stringResource(Res.string.intensity_medium),
-                    Intensity.HEAVY to stringResource(Res.string.intensity_heavy),
-                ).forEach { (value, label) ->
-                    CircleOption(
+                    Triple(Intensity.LIGHT, stringResource(Res.string.intensity_light), "◦"),
+                    Triple(Intensity.MEDIUM, stringResource(Res.string.intensity_medium), "●"),
+                    Triple(Intensity.HEAVY, stringResource(Res.string.intensity_heavy), "⬤"),
+                ).forEach { (value, label, icon) ->
+                    IconOption(
+                        icon = icon,
                         label = label,
                         selected = selectedIntensity == value,
                         onClick = { selectedIntensity = if (selectedIntensity == value) null else value },
@@ -102,14 +105,15 @@ fun LogDaySheet(
             // Mood
             Text(stringResource(Res.string.record_mood), style = MaterialTheme.typography.titleMedium, color = AppColors.DarkCoffee)
             Spacer(Modifier.height(12.dp))
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 listOf(
-                    Mood.HAPPY to stringResource(Res.string.mood_happy),
-                    Mood.NEUTRAL to stringResource(Res.string.mood_neutral),
-                    Mood.SAD to stringResource(Res.string.mood_sad),
-                    Mood.VERY_SAD to stringResource(Res.string.mood_very_sad),
-                ).forEach { (value, label) ->
-                    CircleOption(
+                    Triple(Mood.HAPPY, stringResource(Res.string.mood_happy), "😊"),
+                    Triple(Mood.NEUTRAL, stringResource(Res.string.mood_neutral), "😐"),
+                    Triple(Mood.SAD, stringResource(Res.string.mood_sad), "😔"),
+                    Triple(Mood.VERY_SAD, stringResource(Res.string.mood_very_sad), "😢"),
+                ).forEach { (value, label, icon) ->
+                    IconOption(
+                        icon = icon,
                         label = label,
                         selected = selectedMood == value,
                         onClick = { selectedMood = if (selectedMood == value) null else value },
@@ -165,25 +169,25 @@ fun LogDaySheet(
 }
 
 @Composable
-private fun CircleOption(label: String, selected: Boolean, onClick: () -> Unit) {
+private fun IconOption(icon: String, label: String, selected: Boolean, onClick: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             Modifier
                 .size(56.dp)
                 .clip(CircleShape)
-                .background(if (selected) AppColors.DeepRose.copy(alpha = 0.25f) else AppColors.BlushPink.copy(alpha = 0.4f))
+                .background(if (selected) AppColors.DeepRose.copy(alpha = 0.2f) else AppColors.BlushPink.copy(alpha = 0.4f))
                 .clickable(onClick = onClick),
             contentAlignment = Alignment.Center,
         ) {
-            Box(
-                Modifier
-                    .size(if (selected) 20.dp else 12.dp)
-                    .clip(CircleShape)
-                    .background(if (selected) AppColors.DeepRose else AppColors.DeepRose.copy(alpha = 0.3f))
-            )
+            Text(icon, fontSize = 24.sp)
         }
         Spacer(Modifier.height(4.dp))
-        Text(label, style = MaterialTheme.typography.labelMedium, color = AppColors.DarkCoffee.copy(alpha = 0.6f))
+        Text(
+            label,
+            style = if (selected) MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                    else MaterialTheme.typography.labelMedium,
+            color = if (selected) AppColors.DarkCoffee else AppColors.DarkCoffee.copy(alpha = 0.6f),
+        )
     }
 }
 
