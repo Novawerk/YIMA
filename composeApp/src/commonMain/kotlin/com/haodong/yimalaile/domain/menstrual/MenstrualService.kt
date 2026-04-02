@@ -77,6 +77,27 @@ class MenstrualService(private val repository: RecordsRepository) {
         )
     }
 
+    // ---------- Edit / Delete ----------
+
+    suspend fun editRecordDates(recordId: String, newStart: LocalDate?, newEnd: LocalDate?): Boolean {
+        val record = repository.getAllRecords().find { it.id == recordId } ?: return false
+        val start = newStart ?: record.startDate
+        val end = newEnd ?: record.endDate
+        if (end != null && end < start) return false
+        val trimmedDaily = if (end != null) record.dailyRecords.filter { it.date in start..end } else record.dailyRecords
+        return repository.updateRecord(
+            record.copy(
+                startDate = start,
+                endDate = end,
+                dailyRecords = trimmedDaily,
+                updatedAtEpochMillis = Clock.System.now().toEpochMilliseconds(),
+            )
+        )
+    }
+
+    suspend fun deleteRecord(recordId: String): Boolean =
+        repository.deleteRecord(recordId)
+
     // ---------- Data management ----------
 
     suspend fun clearAllData() {
