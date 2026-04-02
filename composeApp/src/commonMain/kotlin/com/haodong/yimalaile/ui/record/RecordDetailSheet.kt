@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,7 +34,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.DailyRecord
 import com.haodong.yimalaile.domain.menstrual.Intensity
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
@@ -66,83 +69,114 @@ fun RecordDetailSheet(
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 24.dp)
                 .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text("经期详情", style = MaterialTheme.typography.titleLarge, color = AppColors.DarkCoffee)
-            Spacer(Modifier.height(20.dp))
-
-            // Date range card
+            // Hero duration circle
             Box(
-                Modifier.fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(AppColors.BlushPink.copy(alpha = 0.35f))
-                    .padding(20.dp)
+                Modifier
+                    .size(120.dp)
+                    .clip(CircleShape)
+                    .background(AppColors.BlushPink.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center,
             ) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Column {
-                        Text(
-                            "${record.startDate.year}/${record.startDate.monthNumber}/${record.startDate.dayOfMonth}",
-                            style = MaterialTheme.typography.titleMedium, color = AppColors.DarkCoffee,
-                        )
-                        if (record.endDate != null) {
-                            Text(
-                                "→ ${record.endDate.year}/${record.endDate.monthNumber}/${record.endDate.dayOfMonth}",
-                                style = MaterialTheme.typography.bodyMedium, color = AppColors.DarkCoffee.copy(alpha = 0.5f),
-                            )
-                        } else {
-                            Text("进行中", style = MaterialTheme.typography.bodyMedium, color = AppColors.DeepRose)
-                        }
-                    }
-                    if (days != null) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("$days", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = AppColors.DarkCoffee)
-                            Text("天", style = MaterialTheme.typography.labelMedium, color = AppColors.DarkCoffee.copy(alpha = 0.5f))
-                        }
-                    }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        if (days != null) "$days" else "~",
+                        fontSize = 44.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = AppColors.DarkCoffee,
+                    )
+                    Text("天", style = MaterialTheme.typography.labelMedium, color = AppColors.DarkCoffee.copy(alpha = 0.5f))
                 }
             }
 
-            // Duration dots
-            if (days != null) {
-                Spacer(Modifier.height(12.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Spacer(Modifier.height(16.dp))
+
+            // Date range
+            Text(
+                "${record.startDate.monthNumber}月${record.startDate.dayOfMonth}日" +
+                    if (record.endDate != null) " — ${record.endDate.monthNumber}月${record.endDate.dayOfMonth}日"
+                    else " — 进行中",
+                style = MaterialTheme.typography.titleMedium,
+                color = AppColors.DarkCoffee,
+            )
+            Text(
+                "${record.startDate.year}",
+                style = MaterialTheme.typography.bodySmall,
+                color = AppColors.DarkCoffee.copy(alpha = 0.4f),
+            )
+
+            // Period dots — decorative arc
+            if (days != null && days > 0) {
+                Spacer(Modifier.height(16.dp))
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
                     repeat(days.coerceAtMost(14)) { i ->
-                        val alpha = 0.3f + (0.5f * (1f - i.toFloat() / days.coerceAtMost(14)))
-                        Box(Modifier.size(16.dp).clip(CircleShape).background(AppColors.DeepRose.copy(alpha = alpha)))
+                        val progress = i.toFloat() / days.coerceAtMost(14)
+                        val alpha = 0.7f - (0.5f * progress)
+                        val size = (14 - 4 * progress).dp
+                        Box(
+                            Modifier
+                                .padding(horizontal = 2.dp)
+                                .size(size)
+                                .clip(CircleShape)
+                                .background(AppColors.DeepRose.copy(alpha = alpha))
+                        )
                     }
                 }
             }
 
-            // Actions
-            Spacer(Modifier.height(20.dp))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ActionChip("修改开始日期", onClick = onEditStart, modifier = Modifier.weight(1f))
-                ActionChip("修改结束日期", onClick = onEditEnd, modifier = Modifier.weight(1f))
+            Spacer(Modifier.height(24.dp))
+
+            // Action buttons — two rows, rounded cards
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                ActionCard("📅", "修改开始", onClick = onEditStart, modifier = Modifier.weight(1f))
+                ActionCard("🏁", "修改结束", onClick = onEditEnd, modifier = Modifier.weight(1f))
+                ActionCard("📝", "补充记录", onClick = onLogDay, modifier = Modifier.weight(1f))
             }
-            Spacer(Modifier.height(8.dp))
-            ActionChip("补充每日记录", onClick = onLogDay, modifier = Modifier.fillMaxWidth())
 
             // Daily records
             if (record.dailyRecords.isNotEmpty()) {
                 Spacer(Modifier.height(24.dp))
-                Text("每日记录", style = MaterialTheme.typography.titleMedium, color = AppColors.DarkCoffee)
+                Text(
+                    "每日记录",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = AppColors.DarkCoffee,
+                    modifier = Modifier.fillMaxWidth(),
+                )
                 Spacer(Modifier.height(12.dp))
                 record.dailyRecords.sortedBy { it.date }.forEach { day ->
                     DailyRecordRow(day)
                     Spacer(Modifier.height(8.dp))
                 }
+            } else {
+                Spacer(Modifier.height(20.dp))
+                Box(
+                    Modifier.fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(AppColors.BlushPink.copy(alpha = 0.2f))
+                        .padding(20.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        "还没有每日记录\n点击上方「补充记录」添加",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = AppColors.DarkCoffee.copy(alpha = 0.4f),
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
 
             // Delete
-            Spacer(Modifier.height(24.dp))
-            Box(
-                Modifier.fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .clickable { showDeleteConfirm = true }
-                    .padding(vertical = 12.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text("删除此记录", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
-            }
+            Spacer(Modifier.height(32.dp))
+            Text(
+                "删除此记录",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error.copy(alpha = 0.6f),
+                modifier = Modifier.clickable { showDeleteConfirm = true }.padding(8.dp),
+            )
             Spacer(Modifier.height(8.dp))
         }
     }
@@ -165,16 +199,18 @@ fun RecordDetailSheet(
 }
 
 @Composable
-private fun ActionChip(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Box(
+private fun ActionCard(emoji: String, label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Column(
         modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(AppColors.WarmPeach.copy(alpha = 0.3f))
+            .clip(RoundedCornerShape(16.dp))
+            .background(AppColors.WarmPeach.copy(alpha = 0.25f))
             .clickable(onClick = onClick)
-            .padding(vertical = 12.dp),
-        contentAlignment = Alignment.Center,
+            .padding(vertical = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(text, style = MaterialTheme.typography.labelMedium, color = AppColors.DeepRose)
+        Text(emoji, fontSize = 20.sp)
+        Spacer(Modifier.height(4.dp))
+        Text(label, style = MaterialTheme.typography.labelSmall, color = AppColors.DeepRose)
     }
 }
 
@@ -184,28 +220,35 @@ private fun DailyRecordRow(day: DailyRecord) {
     Box(
         Modifier.fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(AppColors.WarmPeach.copy(alpha = 0.2f))
+            .background(AppColors.WarmPeach.copy(alpha = 0.15f))
             .padding(16.dp)
     ) {
-        Column {
-            Text(
-                "${day.date.monthNumber}月${day.date.dayOfMonth}日",
-                style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = AppColors.DarkCoffee,
-            )
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (day.intensity != null) InfoChip(intensityLabel(day.intensity), AppColors.DeepRose.copy(alpha = 0.15f))
-                if (day.mood != null) InfoChip(moodLabel(day.mood), AppColors.WarmPeach.copy(alpha = 0.5f))
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+            // Day circle
+            Box(
+                Modifier.size(36.dp).clip(CircleShape)
+                    .background(AppColors.BlushPink.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    "${day.date.dayOfMonth}",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = AppColors.DarkCoffee,
+                )
             }
-            if (day.symptoms.isNotEmpty()) {
-                Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                // Tags row
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (day.intensity != null) InfoChip(intensityLabel(day.intensity), AppColors.DeepRose.copy(alpha = 0.15f))
+                    if (day.mood != null) InfoChip(moodLabel(day.mood), AppColors.WarmPeach.copy(alpha = 0.5f))
                     day.symptoms.forEach { InfoChip(it, AppColors.BlushPink.copy(alpha = 0.5f)) }
                 }
-            }
-            if (!day.notes.isNullOrBlank()) {
-                Spacer(Modifier.height(8.dp))
-                Text(day.notes, style = MaterialTheme.typography.bodySmall, color = AppColors.DarkCoffee.copy(alpha = 0.6f))
+                if (!day.notes.isNullOrBlank()) {
+                    Spacer(Modifier.height(6.dp))
+                    Text(day.notes, style = MaterialTheme.typography.bodySmall, color = AppColors.DarkCoffee.copy(alpha = 0.5f))
+                }
             }
         }
     }
