@@ -62,10 +62,33 @@ class MenstrualService(
         return repository.insertRecord(record)
     }
 
+    // ---------- State ----------
+
+    suspend fun getCycleState(): CycleState {
+        val all = repository.getAllRecords()
+        val sorted = all.sortedByDescending { it.startDate }
+
+        // Active = the most recent record with no end date
+        val active = sorted.firstOrNull { it.endDate == null }
+
+        // Recent = last 10 completed periods (have an end date), newest first
+        val recent = sorted.filter { it.endDate != null }.take(10)
+
+        val predictions = predictNextCycles(records = all)
+
+        return CycleState(
+            activePeriod = active,
+            recentPeriods = recent,
+            predictions = predictions
+        )
+    }
+
     // ---------- Prediction ----------
 
-    suspend fun predictNextCycles(count: Int = 3): List<PredictedCycle> {
-        val records = repository.getAllRecords()
+    suspend fun predictNextCycles(count: Int = 3): List<PredictedCycle> =
+        predictNextCycles(count, repository.getAllRecords())
+
+    private fun predictNextCycles(count: Int = 3, records: List<MenstrualRecord>): List<PredictedCycle> {
         val avgCycleLength = calculator.calculateAverageCycleLength(records) ?: return emptyList()
         val avgPeriodLength = calculator.calculateAveragePeriodLength(records)
         val lastStart = records.maxByOrNull { it.startDate }?.startDate ?: return emptyList()
