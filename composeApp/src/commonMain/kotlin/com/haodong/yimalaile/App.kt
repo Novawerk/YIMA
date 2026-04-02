@@ -28,10 +28,19 @@ import kotlinx.coroutines.launch
 fun App(component: AppComponent) {
     val service = component.menstrualService
     val settings = component.settingsRepository
+    val scope = rememberCoroutineScope()
 
+    // Theme state
+    var palette by remember { mutableStateOf("warm") }
+    var darkMode by remember { mutableStateOf("system") }
+
+    // Startup: load settings + determine start route
     var startRoute by remember { mutableStateOf<Any?>(null) }
 
     LaunchedEffect(Unit) {
+        palette = settings.getColorPalette()
+        darkMode = settings.getDarkMode()
+
         val disclaimerAccepted = settings.isDisclaimerAccepted()
         val state = service.getCycleState()
         val hasData = state.recentPeriods.isNotEmpty() || state.activePeriod != null
@@ -44,9 +53,8 @@ fun App(component: AppComponent) {
 
     val route = startRoute ?: return
 
-    AppTheme {
+    AppTheme(palette = palette, darkMode = darkMode) {
         val navController = rememberNavController()
-        val scope = rememberCoroutineScope()
 
         NavHost(navController = navController, startDestination = route) {
             composable<DisclaimerRoute> {
@@ -86,6 +94,16 @@ fun App(component: AppComponent) {
 
             composable<SettingsRoute> {
                 SettingsScreen(
+                    currentPalette = palette,
+                    currentDarkMode = darkMode,
+                    onPaletteChange = { newPalette ->
+                        palette = newPalette
+                        scope.launch { settings.setColorPalette(newPalette) }
+                    },
+                    onDarkModeChange = { newMode ->
+                        darkMode = newMode
+                        scope.launch { settings.setDarkMode(newMode) }
+                    },
                     onBack = { navController.popBackStack() },
                     onClearData = {
                         scope.launch {
