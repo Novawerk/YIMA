@@ -55,6 +55,10 @@ class DataStoreRecordsRepository(
         return true
     }
 
+    override suspend fun clearAll() {
+        dataStore.edit { prefs -> prefs.remove(RECORDS_KEY) }
+    }
+
     private suspend fun loadRecords(): List<MenstrualRecord> {
         val json = dataStore.data.first()[RECORDS_KEY] ?: return emptyList()
         return json.toRecordList()

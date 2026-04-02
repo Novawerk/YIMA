@@ -87,6 +87,15 @@ fun App(component: AppComponent) {
             composable<SettingsRoute> {
                 SettingsScreen(
                     onBack = { navController.popBackStack() },
+                    onClearData = {
+                        scope.launch {
+                            service.clearAllData()
+                            settings.setDisclaimerAccepted(false)
+                        }
+                        navController.navigate(DisclaimerRoute) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
                 )
             }
         }

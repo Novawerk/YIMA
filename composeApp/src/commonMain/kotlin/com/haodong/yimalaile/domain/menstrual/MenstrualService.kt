@@ -73,6 +73,12 @@ class MenstrualService(private val repository: RecordsRepository) {
         )
     }
 
+    // ---------- Data management ----------
+
+    suspend fun clearAllData() {
+        repository.clearAll()
+    }
+
     // ---------- Prediction ----------
 
     suspend fun predictNextCycles(count: Int = 3): List<PredictedCycle> =
