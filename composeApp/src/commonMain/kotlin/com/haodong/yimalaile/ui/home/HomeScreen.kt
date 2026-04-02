@@ -212,9 +212,13 @@ private fun HomeContent(
         if (state.activePeriod != null) {
             // ---- In period state ----
             val dayCount = state.activePeriod.startDate.until(today, DateTimeUnit.DAY) + 1
-            val avgPeriod = state.predictions.firstOrNull()?.predictedEnd?.let { end ->
-                state.activePeriod.startDate.until(end, DateTimeUnit.DAY) + 1
-            }
+
+            // Compute average period length from history
+            val completedPeriods = state.recentPeriods.filter { it.endDate != null }
+            val avgPeriodLen = if (completedPeriods.isNotEmpty()) {
+                completedPeriods.sumOf { it.startDate.until(it.endDate!!, DateTimeUnit.DAY) + 1 } / completedPeriods.size
+            } else null
+            val remainingDays = avgPeriodLen?.let { (it - dayCount).coerceAtLeast(0) }
 
             Text(
                 "照顾好自己",
@@ -235,6 +239,24 @@ private fun HomeContent(
             Spacer(Modifier.height(16.dp))
 
             StatusPill("第 ${dayCount} 天")
+
+            // Estimated remaining
+            if (remainingDays != null) {
+                Spacer(Modifier.height(8.dp))
+                if (remainingDays > 0) {
+                    Text(
+                        "预计还有 ${remainingDays} 天结束",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = AppColors.DarkCoffee.copy(alpha = 0.5f),
+                    )
+                } else {
+                    Text(
+                        "已超过平均经期时长",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = AppColors.DeepRose.copy(alpha = 0.7f),
+                    )
+                }
+            }
 
             Spacer(Modifier.height(32.dp))
             IllustrationPlaceholder()
