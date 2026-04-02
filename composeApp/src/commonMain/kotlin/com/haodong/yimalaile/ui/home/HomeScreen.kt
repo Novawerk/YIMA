@@ -330,7 +330,7 @@ private fun HomeContent(
             val withEnd = records.filter { it.endDate != null }.sortedBy { it.startDate }
             if (withEnd.isNotEmpty()) {
                 Spacer(Modifier.height(16.dp))
-                PeriodDurationChart(withEnd, daysStr)
+                PeriodDurationChart(withEnd, daysStr, onViewAll = onNavigateStatistics)
             }
 
             // Confidence

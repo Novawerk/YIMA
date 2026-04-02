@@ -1,6 +1,7 @@
 package com.haodong.yimalaile.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -92,9 +93,17 @@ fun BigStatCard(label: String, value: String, unit: String, modifier: Modifier =
     }
 }
 
-/** Period duration dots chart. */
+/** Period duration dots chart — shows up to 3 records, with "view all" link. */
 @Composable
-fun PeriodDurationChart(records: List<MenstrualRecord>, daysStr: String, modifier: Modifier = Modifier) {
+fun PeriodDurationChart(
+    records: List<MenstrualRecord>,
+    daysStr: String,
+    onViewAll: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
+) {
+    val shown = records.takeLast(3)
+    val hasMore = records.size > 3
+
     Box(
         modifier.fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
@@ -102,7 +111,7 @@ fun PeriodDurationChart(records: List<MenstrualRecord>, daysStr: String, modifie
             .padding(20.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            records.takeLast(6).forEach { record ->
+            shown.forEach { record ->
                 val days = record.startDate.until(record.endDate!!, DateTimeUnit.DAY) + 1
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
@@ -120,6 +129,21 @@ fun PeriodDurationChart(records: List<MenstrualRecord>, daysStr: String, modifie
                     }
                     Spacer(Modifier.weight(1f))
                     Text("$days$daysStr", style = MaterialTheme.typography.labelMedium, color = AppColors.DarkCoffee.copy(alpha = 0.5f))
+                }
+            }
+            if (hasMore && onViewAll != null) {
+                Box(
+                    Modifier.fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable(onClick = onViewAll)
+                        .padding(vertical = 4.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        "查看全部 ${records.size} 条记录 →",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = AppColors.DeepRose.copy(alpha = 0.7f),
+                    )
                 }
             }
         }
