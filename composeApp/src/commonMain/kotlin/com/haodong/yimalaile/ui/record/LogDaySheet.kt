@@ -1,6 +1,9 @@
 package com.haodong.yimalaile.ui.record
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -8,9 +11,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -21,10 +25,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.domain.menstrual.Intensity
 import com.haodong.yimalaile.domain.menstrual.Mood
+import com.haodong.yimalaile.ui.components.PrimaryCta
+import com.haodong.yimalaile.ui.theme.AppColors
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.Res
 import yimalaile.composeapp.generated.resources.intensity_heavy
@@ -34,6 +42,7 @@ import yimalaile.composeapp.generated.resources.mood_happy
 import yimalaile.composeapp.generated.resources.mood_neutral
 import yimalaile.composeapp.generated.resources.mood_sad
 import yimalaile.composeapp.generated.resources.mood_very_sad
+import yimalaile.composeapp.generated.resources.record_dialog_title
 import yimalaile.composeapp.generated.resources.record_flow_intensity
 import yimalaile.composeapp.generated.resources.record_mood
 import yimalaile.composeapp.generated.resources.record_notes_hint
@@ -56,103 +65,137 @@ fun LogDaySheet(
     var selectedSymptoms by remember { mutableStateOf(setOf<String>()) }
     var notes by remember { mutableStateOf("") }
 
-    val intensityLabels = listOf(
-        Intensity.LIGHT to Res.string.intensity_light,
-        Intensity.MEDIUM to Res.string.intensity_medium,
-        Intensity.HEAVY to Res.string.intensity_heavy,
-    )
-    val moodLabels = listOf(
-        Mood.HAPPY to Res.string.mood_happy,
-        Mood.NEUTRAL to Res.string.mood_neutral,
-        Mood.SAD to Res.string.mood_sad,
-        Mood.VERY_SAD to Res.string.mood_very_sad,
-    )
-    val symptomLabels = listOf(
-        "cramps" to Res.string.symptom_cramps,
-        "back_pain" to Res.string.symptom_back_pain,
-        "headache" to Res.string.symptom_headache,
-        "breast_pain" to Res.string.symptom_breast_pain,
-        "fatigue" to Res.string.symptom_fatigue,
-    )
-
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = AppColors.SoftCream,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
-        Column(Modifier.padding(16.dp)) {
+        Column(Modifier.padding(24.dp)) {
+            Text(
+                stringResource(Res.string.record_dialog_title),
+                style = MaterialTheme.typography.titleLarge,
+                color = AppColors.DarkCoffee,
+            )
+
+            Spacer(Modifier.height(24.dp))
+
             // Intensity
-            Text(stringResource(Res.string.record_flow_intensity), style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.height(8.dp))
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                intensityLabels.forEach { (value, labelRes) ->
-                    FilterChip(
+            Text(stringResource(Res.string.record_flow_intensity), style = MaterialTheme.typography.titleMedium, color = AppColors.DarkCoffee)
+            Spacer(Modifier.height(12.dp))
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                listOf(
+                    Intensity.LIGHT to stringResource(Res.string.intensity_light),
+                    Intensity.MEDIUM to stringResource(Res.string.intensity_medium),
+                    Intensity.HEAVY to stringResource(Res.string.intensity_heavy),
+                ).forEach { (value, label) ->
+                    CircleOption(
+                        label = label,
                         selected = selectedIntensity == value,
                         onClick = { selectedIntensity = if (selectedIntensity == value) null else value },
-                        label = { Text(stringResource(labelRes)) },
                     )
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(20.dp))
 
             // Mood
-            Text(stringResource(Res.string.record_mood), style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.height(8.dp))
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                moodLabels.forEach { (value, labelRes) ->
-                    FilterChip(
+            Text(stringResource(Res.string.record_mood), style = MaterialTheme.typography.titleMedium, color = AppColors.DarkCoffee)
+            Spacer(Modifier.height(12.dp))
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                listOf(
+                    Mood.HAPPY to stringResource(Res.string.mood_happy),
+                    Mood.NEUTRAL to stringResource(Res.string.mood_neutral),
+                    Mood.SAD to stringResource(Res.string.mood_sad),
+                    Mood.VERY_SAD to stringResource(Res.string.mood_very_sad),
+                ).forEach { (value, label) ->
+                    CircleOption(
+                        label = label,
                         selected = selectedMood == value,
                         onClick = { selectedMood = if (selectedMood == value) null else value },
-                        label = { Text(stringResource(labelRes)) },
                     )
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(20.dp))
 
             // Symptoms
-            Text(stringResource(Res.string.record_symptoms), style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.height(8.dp))
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                symptomLabels.forEach { (key, labelRes) ->
-                    FilterChip(
+            Text(stringResource(Res.string.record_symptoms), style = MaterialTheme.typography.titleMedium, color = AppColors.DarkCoffee)
+            Spacer(Modifier.height(12.dp))
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(
+                    "cramps" to stringResource(Res.string.symptom_cramps),
+                    "back_pain" to stringResource(Res.string.symptom_back_pain),
+                    "headache" to stringResource(Res.string.symptom_headache),
+                    "breast_pain" to stringResource(Res.string.symptom_breast_pain),
+                    "fatigue" to stringResource(Res.string.symptom_fatigue),
+                ).forEach { (key, label) ->
+                    PillChip(
+                        label = label,
                         selected = key in selectedSymptoms,
                         onClick = {
-                            selectedSymptoms = if (key in selectedSymptoms)
-                                selectedSymptoms - key else selectedSymptoms + key
+                            selectedSymptoms = if (key in selectedSymptoms) selectedSymptoms - key else selectedSymptoms + key
                         },
-                        label = { Text(stringResource(labelRes)) },
                     )
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(20.dp))
 
-            // Notes
             OutlinedTextField(
                 value = notes,
                 onValueChange = { notes = it },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text(stringResource(Res.string.record_notes_hint)) },
                 minLines = 2,
+                shape = RoundedCornerShape(16.dp),
             )
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(24.dp))
 
-            Button(
+            PrimaryCta(
+                text = stringResource(Res.string.record_save_btn),
                 onClick = {
-                    onSave(
-                        selectedIntensity,
-                        selectedMood,
-                        selectedSymptoms.toList(),
-                        notes.takeIf { it.isNotBlank() },
-                    )
+                    onSave(selectedIntensity, selectedMood, selectedSymptoms.toList(), notes.takeIf { it.isNotBlank() })
                 },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(stringResource(Res.string.record_save_btn))
-            }
+            )
             Spacer(Modifier.height(16.dp))
         }
+    }
+}
+
+@Composable
+private fun CircleOption(label: String, selected: Boolean, onClick: () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            Modifier
+                .size(56.dp)
+                .clip(CircleShape)
+                .background(if (selected) AppColors.DeepRose.copy(alpha = 0.25f) else AppColors.BlushPink.copy(alpha = 0.4f))
+                .clickable(onClick = onClick),
+            contentAlignment = Alignment.Center,
+        ) {
+            Box(
+                Modifier
+                    .size(if (selected) 20.dp else 12.dp)
+                    .clip(CircleShape)
+                    .background(if (selected) AppColors.DeepRose else AppColors.DeepRose.copy(alpha = 0.3f))
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(label, style = MaterialTheme.typography.labelMedium, color = AppColors.DarkCoffee.copy(alpha = 0.6f))
+    }
+}
+
+@Composable
+private fun PillChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    Box(
+        Modifier
+            .clip(RoundedCornerShape(50))
+            .background(if (selected) AppColors.WarmPeach else AppColors.BlushPink.copy(alpha = 0.4f))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+    ) {
+        Text(label, style = MaterialTheme.typography.labelMedium, color = AppColors.DarkCoffee)
     }
 }

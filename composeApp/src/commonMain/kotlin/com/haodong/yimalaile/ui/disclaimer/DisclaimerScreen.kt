@@ -1,60 +1,100 @@
 package com.haodong.yimalaile.ui.disclaimer
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.haodong.yimalaile.ui.components.HeartDecoration
+import com.haodong.yimalaile.ui.components.PrimaryCta
+import com.haodong.yimalaile.ui.theme.AppColors
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.Res
+import yimalaile.composeapp.generated.resources.app_name
 import yimalaile.composeapp.generated.resources.disclaimer_accept
 import yimalaile.composeapp.generated.resources.disclaimer_body
 import yimalaile.composeapp.generated.resources.disclaimer_title
 
 @Composable
 fun DisclaimerScreen(onAccept: () -> Unit) {
-    Scaffold { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(24.dp),
-            verticalArrangement = Arrangement.SpaceBetween
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Spacer(Modifier.weight(0.5f))
+
+        // Heart icon
+        Box(
+            Modifier
+                .size(56.dp)
+                .clip(CircleShape)
+                .background(AppColors.DeepRose),
+            contentAlignment = Alignment.Center,
         ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
-            ) {
+            Text("♥", color = AppColors.SoftCream, style = MaterialTheme.typography.titleLarge)
+        }
+        Spacer(Modifier.height(16.dp))
+
+        // App name
+        Text(
+            stringResource(Res.string.app_name),
+            style = MaterialTheme.typography.headlineMedium,
+            color = AppColors.DarkCoffee,
+        )
+
+        Spacer(Modifier.height(32.dp))
+
+        // Disclaimer card — blob-like rounded shape
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(40.dp))
+                .background(AppColors.BlushPink.copy(alpha = 0.5f))
+                .padding(28.dp),
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = stringResource(Res.string.disclaimer_title),
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.primary,
+                    stringResource(Res.string.disclaimer_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = AppColors.DarkCoffee,
+                    textAlign = TextAlign.Center,
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    text = stringResource(Res.string.disclaimer_body),
+                    stringResource(Res.string.disclaimer_body),
                     style = MaterialTheme.typography.bodyLarge,
+                    color = AppColors.DarkCoffee.copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center,
                 )
             }
-            Spacer(Modifier.height(16.dp))
-            Button(
-                onClick = onAccept,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(Res.string.disclaimer_accept))
-            }
         }
+
+        Spacer(Modifier.weight(1f))
+
+        PrimaryCta(
+            text = stringResource(Res.string.disclaimer_accept),
+            onClick = onAccept,
+        )
+
+        Spacer(Modifier.height(32.dp))
     }
 }
