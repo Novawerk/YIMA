@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.Intensity
@@ -87,12 +88,12 @@ fun LogDaySheet(
             Spacer(Modifier.height(12.dp))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 listOf(
-                    Triple(Intensity.LIGHT, stringResource(Res.string.intensity_light), "◦"),
-                    Triple(Intensity.MEDIUM, stringResource(Res.string.intensity_medium), "●"),
-                    Triple(Intensity.HEAVY, stringResource(Res.string.intensity_heavy), "⬤"),
-                ).forEach { (value, label, icon) ->
-                    IconOption(
-                        icon = icon,
+                    Triple(Intensity.LIGHT, stringResource(Res.string.intensity_light), 10.dp),
+                    Triple(Intensity.MEDIUM, stringResource(Res.string.intensity_medium), 18.dp),
+                    Triple(Intensity.HEAVY, stringResource(Res.string.intensity_heavy), 26.dp),
+                ).forEach { (value, label, dotSize) ->
+                    DotOption(
+                        dotSize = dotSize,
                         label = label,
                         selected = selectedIntensity == value,
                         onClick = { selectedIntensity = if (selectedIntensity == value) null else value },
@@ -165,6 +166,34 @@ fun LogDaySheet(
             )
             Spacer(Modifier.height(16.dp))
         }
+    }
+}
+
+@Composable
+private fun DotOption(dotSize: Dp, label: String, selected: Boolean, onClick: () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            Modifier
+                .size(56.dp)
+                .clip(CircleShape)
+                .background(if (selected) AppColors.DeepRose.copy(alpha = 0.2f) else AppColors.BlushPink.copy(alpha = 0.4f))
+                .clickable(onClick = onClick),
+            contentAlignment = Alignment.Center,
+        ) {
+            Box(
+                Modifier
+                    .size(dotSize)
+                    .clip(CircleShape)
+                    .background(if (selected) AppColors.DeepRose else AppColors.DarkCoffee)
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            label,
+            style = if (selected) MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                    else MaterialTheme.typography.labelMedium,
+            color = if (selected) AppColors.DarkCoffee else AppColors.DarkCoffee.copy(alpha = 0.6f),
+        )
     }
 }
 
