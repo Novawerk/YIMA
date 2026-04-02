@@ -58,10 +58,10 @@ class MenstrualService(
 
         val all = repository.getAllRecords()
 
-        if (all.any { it.endDate == null }) return AddRecordResult.ActivePeriodExists
-
-        // Overlap: [startDate, endDate] intersects any existing [existStart, existEnd]
-        val overlaps = all.any { it.startDate <= endDate && startDate <= it.endDate!! }
+        // Overlap: [startDate, endDate] intersects any existing completed period
+        // Active periods (no endDate) are excluded — backfill is for past data
+        val overlaps = all.filter { it.endDate != null }
+            .any { it.startDate <= endDate && startDate <= it.endDate!! }
         if (overlaps) return AddRecordResult.OverlappingPeriod
 
         val now = Clock.System.now().toEpochMilliseconds()
