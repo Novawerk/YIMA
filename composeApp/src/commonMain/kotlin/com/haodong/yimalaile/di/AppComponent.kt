@@ -2,7 +2,7 @@ package com.haodong.yimalaile.di
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import com.haodong.yimalaile.domain.menstrual.CycleCalculator
+import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.domain.menstrual.RecordsRepository
 import com.haodong.yimalaile.infrastructure.persistence.DataStoreRecordsRepository
 import com.haodong.yimalaile.domain.settings.SettingsRepository
@@ -14,9 +14,8 @@ import me.tatarka.inject.annotations.Provides
 abstract class AppComponent(
     @get:Provides protected val dataStore: DataStore<Preferences>
 ) {
-    abstract val recordsRepository: RecordsRepository
+    abstract val menstrualService: MenstrualService
     abstract val settingsRepository: SettingsRepository
-    abstract val cycleCalculator: CycleCalculator
 
     // Bind the interface to its @Inject-annotated implementation
     @Provides

@@ -4,4 +4,5 @@ sealed class AddRecordResult {
     data class Success(val record: MenstrualRecord) : AddRecordResult()
     object DuplicateStartDate : AddRecordResult()
     object TooCloseToOtherRecord : AddRecordResult()
+    object InvalidDateRange : AddRecordResult()
 }
