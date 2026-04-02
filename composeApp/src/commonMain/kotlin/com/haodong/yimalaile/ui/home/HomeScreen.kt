@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -165,7 +166,7 @@ private fun HomeContent(
                     .clip(CircleShape)
                     .background(AppColors.WarmPeach.copy(alpha = 0.5f)),
             ) {
-                Text("📊", style = MaterialTheme.typography.bodyLarge)
+                Icon(Icons.Outlined.BarChart, null, tint = AppColors.DeepRose)
             }
             // Settings button
             IconButton(

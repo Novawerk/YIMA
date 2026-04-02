@@ -31,10 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.domain.menstrual.AddRecordResult
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
-import com.haodong.yimalaile.ui.components.HeartDecoration
-import com.haodong.yimalaile.ui.components.IllustrationPlaceholder
 import com.haodong.yimalaile.ui.components.PrimaryCta
-import com.haodong.yimalaile.ui.components.StatusPill
 import com.haodong.yimalaile.ui.theme.AppColors
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -70,35 +67,14 @@ fun OnboardingScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         when (step) {
-            // Welcome
-            0 -> {
-                Spacer(Modifier.weight(0.3f))
-                Row(verticalAlignment = Alignment.Top) {
-                    Text("你好", style = MaterialTheme.typography.headlineLarge, color = AppColors.DarkCoffee)
-                    HeartDecoration()
-                }
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    "让我们开始记录你的故事",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = AppColors.DarkCoffee.copy(alpha = 0.6f),
-                )
-                Spacer(Modifier.height(32.dp))
-                IllustrationPlaceholder()
-                Spacer(Modifier.height(32.dp))
-                StatusPill("还没有任何记录")
-                Spacer(Modifier.weight(1f))
-                PrimaryCta("✦ 开始第一次记录", onClick = { step = 1 })
-            }
-
             // Ask current period status
-            1 -> {
+            0 -> {
                 Spacer(Modifier.weight(0.3f))
                 Text("你现在在经期中吗？", style = MaterialTheme.typography.headlineMedium, color = AppColors.DarkCoffee)
                 Spacer(Modifier.height(32.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    PrimaryCta("是的", onClick = { step = 2 }, modifier = Modifier.weight(1f))
-                    OutlinedButton(onClick = { step = 3 }, modifier = Modifier.weight(1f).height(56.dp)) {
+                    PrimaryCta("是的", onClick = { step = 1 }, modifier = Modifier.weight(1f))
+                    OutlinedButton(onClick = { step = 2 }, modifier = Modifier.weight(1f).height(56.dp)) {
                         Text("不在")
                     }
                 }
@@ -106,7 +82,7 @@ fun OnboardingScreen(
             }
 
             // Pick current period start date (past only)
-            2 -> {
+            1 -> {
                 Text("哪天开始的？", style = MaterialTheme.typography.titleLarge, color = AppColors.DarkCoffee)
                 Spacer(Modifier.height(8.dp))
                 DatePicker(
@@ -122,7 +98,7 @@ fun OnboardingScreen(
                         val date = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.UTC).date
                         scope.launch {
                             service.startPeriod(date)
-                            step = 3
+                            step = 2
                         }
                     },
                     enabled = startPickerState.selectedDateMillis != null,
@@ -130,7 +106,7 @@ fun OnboardingScreen(
             }
 
             // Ask about past periods
-            3 -> {
+            2 -> {
                 Spacer(Modifier.weight(0.3f))
                 Text(
                     if (backfillCount == 0) "你还记得上次经期吗？" else "继续补录？",
@@ -145,7 +121,7 @@ fun OnboardingScreen(
                 )
                 Spacer(Modifier.height(32.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    PrimaryCta("补录", onClick = { step = 4 }, modifier = Modifier.weight(1f))
+                    PrimaryCta("补录", onClick = { step = 3 }, modifier = Modifier.weight(1f))
                     OutlinedButton(onClick = onComplete, modifier = Modifier.weight(1f).height(56.dp)) {
                         Text(if (backfillCount == 0) "跳过" else "完成")
                     }
@@ -154,7 +130,7 @@ fun OnboardingScreen(
             }
 
             // DateRangePicker for past period (start + end in one view, past only)
-            4 -> {
+            3 -> {
                 Text("选择经期日期范围", style = MaterialTheme.typography.titleLarge, color = AppColors.DarkCoffee)
                 Spacer(Modifier.height(8.dp))
                 DateRangePicker(
@@ -166,7 +142,7 @@ fun OnboardingScreen(
                     modifier = Modifier.weight(1f),
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = { step = 3 }, Modifier.weight(1f)) { Text("返回") }
+                    TextButton(onClick = { step = 2 }, Modifier.weight(1f)) { Text("返回") }
                     PrimaryCta(
                         text = "保存",
                         onClick = {
@@ -177,7 +153,7 @@ fun OnboardingScreen(
                             scope.launch {
                                 val result = service.backfillPeriod(start, end)
                                 if (result is AddRecordResult.Success) backfillCount++
-                                step = 3
+                                step = 2
                             }
                         },
                         modifier = Modifier.weight(1f),
