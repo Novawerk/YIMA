@@ -40,6 +40,14 @@ class HomeViewModel(private val service: MenstrualService) : ViewModel() {
         }
     }
 
+    fun backfillPeriod(start: LocalDate, end: LocalDate, onResult: (AddRecordResult) -> Unit) {
+        viewModelScope.launch {
+            val result = service.backfillPeriod(start, end)
+            onResult(result)
+            if (result is AddRecordResult.Success) refresh()
+        }
+    }
+
     fun logDay(
         date: LocalDate,
         intensity: com.haodong.yimalaile.domain.menstrual.Intensity?,

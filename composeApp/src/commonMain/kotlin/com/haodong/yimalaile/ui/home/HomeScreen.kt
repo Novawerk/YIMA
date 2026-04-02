@@ -17,7 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.BarChart
+import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,11 +39,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.domain.menstrual.CycleState
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
+import com.haodong.yimalaile.ui.components.BigStatCard
 import com.haodong.yimalaile.ui.components.HeartDecoration
 import com.haodong.yimalaile.ui.components.IllustrationPlaceholder
+import com.haodong.yimalaile.ui.components.PeriodDurationChart
 import com.haodong.yimalaile.ui.components.PrimaryCta
-import com.haodong.yimalaile.ui.components.StatCardsRow
 import com.haodong.yimalaile.ui.components.StatusPill
+import com.haodong.yimalaile.ui.record.BackfillSheet
 import com.haodong.yimalaile.ui.record.EndPeriodSheet
 import com.haodong.yimalaile.ui.record.LogDaySheet
 import com.haodong.yimalaile.ui.record.StartPeriodSheet
@@ -79,6 +81,7 @@ fun HomeScreen(
     var showStartSheet by remember { mutableStateOf(false) }
     var showEndSheet by remember { mutableStateOf(false) }
     var showLogSheet by remember { mutableStateOf(false) }
+    var showBackfillSheet by remember { mutableStateOf(false) }
 
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         when (val s = uiState) {
@@ -91,6 +94,7 @@ fun HomeScreen(
                     onStartPeriod = { showStartSheet = true },
                     onEndPeriod = { showEndSheet = true },
                     onLogDay = { showLogSheet = true },
+                    onBackfill = { showBackfillSheet = true },
                 )
             }
         }
@@ -136,6 +140,17 @@ fun HomeScreen(
             }
         )
     }
+    if (showBackfillSheet) {
+        BackfillSheet(
+            onDismiss = { showBackfillSheet = false },
+            onSave = { start, end ->
+                viewModel.backfillPeriod(start, end) {
+                    showBackfillSheet = false
+                    scope.launch { snackbar.showSnackbar(successMsg) }
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -146,6 +161,7 @@ private fun HomeContent(
     onStartPeriod: () -> Unit,
     onEndPeriod: () -> Unit,
     onLogDay: () -> Unit,
+    onBackfill: () -> Unit,
 ) {
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
@@ -167,7 +183,7 @@ private fun HomeContent(
                     .clip(CircleShape)
                     .background(AppColors.WarmPeach.copy(alpha = 0.5f)),
             ) {
-                Icon(Icons.Outlined.BarChart, null, tint = AppColors.DeepRose)
+                Icon(Icons.Outlined.History, null, tint = AppColors.DeepRose)
             }
             // Settings button
             IconButton(
@@ -273,31 +289,78 @@ private fun HomeContent(
             Spacer(Modifier.height(24.dp))
 
             // Stat cards
-            val cycleLenStr = stringResource(Res.string.stat_cycle_length)
-            val periodLenStr = stringResource(Res.string.stat_period_length)
             val daysStr = stringResource(Res.string.unit_days)
-            // Compute from recent periods
             val records = state.recentPeriods
             val avgCycle = if (records.size >= 2) {
                 val sorted = records.sortedBy { it.startDate }
                 val gaps = sorted.zipWithNext().map { (a, b) ->
                     a.startDate.until(b.startDate, DateTimeUnit.DAY)
                 }
-                (gaps.sum() / gaps.size).toString()
-            } else "--"
+                gaps.sum() / gaps.size
+            } else null
             val avgPeriod = records.filter { it.endDate != null }.let { list ->
-                if (list.isEmpty()) "--"
-                else (list.sumOf { it.startDate.until(it.endDate!!, DateTimeUnit.DAY) + 1 } / list.size).toString()
+                if (list.isEmpty()) null
+                else list.sumOf { it.startDate.until(it.endDate!!, DateTimeUnit.DAY) + 1 } / list.size
             }
 
-            StatCardsRow(
-                label1 = cycleLenStr, value1 = avgCycle, unit1 = daysStr,
-                label2 = periodLenStr, value2 = avgPeriod, unit2 = daysStr,
-            )
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                BigStatCard(
+                    stringResource(Res.string.stat_cycle_length),
+                    avgCycle?.toString() ?: "--", daysStr,
+                    Modifier.weight(1f),
+                )
+                BigStatCard(
+                    stringResource(Res.string.stat_period_length),
+                    avgPeriod?.toString() ?: "--", daysStr,
+                    Modifier.weight(1f),
+                )
+            }
 
-            Spacer(Modifier.height(24.dp))
-            IllustrationPlaceholder()
+            // Period duration dots
+            val withEnd = records.filter { it.endDate != null }.sortedBy { it.startDate }
+            if (withEnd.isNotEmpty()) {
+                Spacer(Modifier.height(16.dp))
+                PeriodDurationChart(withEnd, daysStr)
+            }
+
+            // Confidence
+            if (avgCycle != null && records.size >= 2) {
+                Spacer(Modifier.height(12.dp))
+                val sorted = records.sortedBy { it.startDate }
+                val gaps = sorted.zipWithNext().map { (a, b) -> a.startDate.until(b.startDate, DateTimeUnit.DAY) }
+                val variance = gaps.map { (it - avgCycle) * (it - avgCycle) }.average()
+                val confidence = when {
+                    sorted.size >= 6 && variance < 9 -> "高"
+                    sorted.size >= 3 -> "中"
+                    else -> "低"
+                }
+                Row(
+                    Modifier.fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(AppColors.WarmPeach.copy(alpha = 0.2f))
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text("预测置信度", style = MaterialTheme.typography.bodyMedium, color = AppColors.DarkCoffee.copy(alpha = 0.5f))
+                    StatusPill(confidence)
+                }
+            }
+
             Spacer(Modifier.weight(1f))
+
+            // Secondary: backfill more history to unlock predictions
+            if (avgCycle == null) {
+                OutlinedButton(
+                    onClick = onBackfill,
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(28.dp),
+                    border = BorderStroke(1.5.dp, AppColors.DeepRose.copy(alpha = 0.4f)),
+                ) {
+                    Text("补录更多，开始预测", style = MaterialTheme.typography.titleMedium, color = AppColors.DeepRose)
+                }
+                Spacer(Modifier.height(12.dp))
+            }
 
             PrimaryCta(
                 text = "✦ ${stringResource(Res.string.btn_record_period)}",
