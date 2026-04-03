@@ -1,33 +1,89 @@
-This is a Kotlin Multiplatform project targeting Android and iOS.
+# 姨妈来了 (Yimalaile)
 
-Structure
-- [/composeApp](./composeApp/src) contains shared code and platform source sets:
-  - [commonMain](./composeApp/src/commonMain/kotlin): shared Kotlin + Compose UI.
-  - [androidMain](./composeApp/src/androidMain/kotlin): Android entry point and platform APIs.
-  - [iosMain](./composeApp/src/iosMain/kotlin): iOS view controller and platform APIs.
-- [/iosApp](./iosApp/iosApp) is the native iOS wrapper that consumes the ComposeApp framework.
+A privacy-first menstrual cycle tracker built with Kotlin Multiplatform and Compose Multiplatform. All data stays on your device.
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html).
+**By [Novawerk](https://github.com/Novawerk)** — In an era where action is cheapest, remaking every app the non-profit way.
 
-Quick start (Android)
-- Prerequisites:
-  - JDK 17+ (AGP 8.7.x). Set JAVA_HOME accordingly.
-  - Android SDK installed and sdk.dir set in local.properties.
-  - Use the Gradle Wrapper: ./gradlew
-- Build Debug APK: ./gradlew :composeApp:assembleDebug
-- Install on device/emulator: ./gradlew :composeApp:installDebug
-- Full clean build: ./gradlew clean build (note: this will configure iOS targets; see note below if avoiding iOS locally).
+## Features
 
-iOS note
-- As per repository guidelines, for local verification do NOT run iOS builds. Focus on Android and shared logic. Xcode integration exists under iosApp, but is not required for local validation.
+- **Period tracking** — Record start/end dates, daily intensity, mood, symptoms, and notes
+- **Cycle prediction** — Predicts next 3 periods based on your history
+- **Backfill** — Batch-record past periods with a visual calendar
+- **Statistics** — Average cycle/period length, duration chart, prediction confidence
+- **Privacy-first** — All data stored locally via DataStore. No accounts, no cloud, no tracking.
+- **Dual language** — Full English and Chinese (简体中文) localization
+- **Theming** — 3 color palettes (Warm / Vivid / Minimal) + light/dark/system mode
 
-Project planning
-- Business requirements: [.junie/plans/requirements.md](.junie/plans/requirements.md)
-- Implementation plan: [.junie/plans/implementation_plan.md](.junie/plans/implementation_plan.md)
+## Tech Stack
 
-Phase 0 placeholders
-- Legal copy strings (EN/ZH) live in composeApp/src/commonMain/composeResources/values*/strings.xml.
-- A simple PrivacyDisclaimerPlaceholder composable exists at composeApp/src/commonMain/kotlin/com/haodong/yimalaile/ui/PrivacyDisclaimer.kt. It is not yet wired into the main UI; persistence of acceptance will be added alongside storage in a later phase.
+| Layer | Technology |
+|-------|-----------|
+| Language | Kotlin 2.2.0 |
+| UI | Compose Multiplatform 1.8.2 (Material Design 3) |
+| Navigation | Compose Navigation 2.9.2 (type-safe routes) |
+| Storage | Jetpack DataStore Preferences 1.1.7 |
+| DI | kotlin-inject 0.8.0 (KSP) |
+| Date/Time | kotlinx-datetime 0.6.1 |
+| Targets | Android (min SDK 24) / iOS |
+| Build | Gradle 8.7.3 with version catalog |
 
-Notes
-- Follow the repository guidelines in .junie/guidelines.md. For local verification, do not run iOS builds; focus on Android and shared logic.
+## Architecture
+
+```
+composeApp/src/commonMain/kotlin/com/haodong/yimalaile/
+├── App.kt                          # NavHost + startup logic
+├── Platform.kt                     # expect declarations
+├── di/
+│   └── AppComponent.kt             # kotlin-inject DI root
+├── domain/
+│   ├── menstrual/                   # Core business logic
+│   │   ├── MenstrualRecord.kt      # Data model
+│   │   ├── DailyRecord.kt          # Daily entry model
+│   │   ├── MenstrualService.kt     # Service (recording, prediction, validation)
+│   │   ├── RecordsRepository.kt    # Persistence interface
+│   │   ├── CycleState.kt           # Query state bundle
+│   │   ├── PredictedCycle.kt       # Prediction result
+│   │   └── AddRecordResult.kt      # Operation result type
+│   └── settings/
+│       └── SettingsRepository.kt   # Preferences (disclaimer, theme)
+├── infrastructure/
+│   └── persistence/
+│       └── DataStoreRecordsRepository.kt  # DataStore implementation
+└── ui/
+    ├── theme/AppTheme.kt           # 3 palettes × light/dark
+    ├── navigation/Routes.kt        # @Serializable route objects
+    ├── components/                  # Shared: PrimaryCta, RangeCalendar, etc.
+    ├── disclaimer/                  # First-launch disclaimer
+    ├── onboarding/                  # Initial data collection
+    ├── home/                        # Main screen + HomeViewModel
+    ├── statistics/                  # History list
+    ├── settings/                    # Theme, clear data, about
+    └── record/                      # Start/End/Backfill/LogDay/Detail sheets
+```
+
+## Quick Start
+
+```bash
+# Prerequisites: JDK 17+, Android SDK
+
+# Build
+./gradlew :composeApp:assembleDebug
+
+# Install on device/emulator
+./gradlew :composeApp:installDebug
+```
+
+iOS builds via Xcode (`iosApp/`). Do not build iOS locally for development — focus on Android and shared logic.
+
+## Business Rules
+
+1. Cannot start a new period while one is active (no end date)
+2. Period date ranges cannot overlap
+3. Backfill is not blocked by an active period (it records past data)
+4. Predictions require ≥ 2 complete records
+5. Ending a period auto-trims daily records outside the range
+6. All data local-only — no medical claims, disclaimer on first launch
+
+## License
+
+Non-profit open source by Novawerk.
