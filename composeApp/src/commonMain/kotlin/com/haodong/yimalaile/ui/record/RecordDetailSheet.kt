@@ -216,47 +216,85 @@ private fun ActionCard(emoji: String, label: String, onClick: () -> Unit, modifi
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun DailyRecordRow(day: DailyRecord) {
-    Box(
+    Row(
         Modifier.fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f))
-            .padding(16.dp)
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
-            // Day circle
-            Box(
-                Modifier.size(36.dp).clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)),
-                contentAlignment = Alignment.Center,
-            ) {
+        // Date + mood column
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            if (day.mood != null) {
+                Text(moodLabel(day.mood), fontSize = 24.sp)
+            }
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "${day.date.monthNumber}/${day.date.dayOfMonth}",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        Spacer(Modifier.width(16.dp))
+
+        // Divider line
+        Box(
+            Modifier
+                .width(2.dp)
+                .height(40.dp)
+                .clip(RoundedCornerShape(1.dp))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+        )
+
+        Spacer(Modifier.width(16.dp))
+
+        // Details
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            // Intensity
+            if (day.intensity != null) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    // Intensity dots
+                    val dotCount = when (day.intensity) {
+                        Intensity.LIGHT -> 1; Intensity.MEDIUM -> 2; Intensity.HEAVY -> 3
+                    }
+                    repeat(dotCount) {
+                        Box(Modifier.size(6.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)))
+                    }
+                    Text(
+                        intensityLabel(day.intensity),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            // Symptoms
+            if (day.symptoms.isNotEmpty()) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    day.symptoms.forEach { symptom ->
+                        Box(
+                            Modifier.clip(RoundedCornerShape(6.dp))
+                                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f))
+                                .padding(horizontal = 8.dp, vertical = 2.dp)
+                        ) {
+                            Text(symptom, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                        }
+                    }
+                }
+            }
+
+            // Notes
+            if (!day.notes.isNullOrBlank()) {
                 Text(
-                    "${day.date.dayOfMonth}",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    day.notes,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    maxLines = 2,
                 )
             }
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                // Tags row
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    if (day.intensity != null) InfoChip(intensityLabel(day.intensity), MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                    if (day.mood != null) InfoChip(moodLabel(day.mood), MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f))
-                    day.symptoms.forEach { InfoChip(it, MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)) }
-                }
-                if (!day.notes.isNullOrBlank()) {
-                    Spacer(Modifier.height(6.dp))
-                    Text(day.notes, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
         }
-    }
-}
-
-@Composable
-private fun InfoChip(text: String, bgColor: androidx.compose.ui.graphics.Color) {
-    Box(Modifier.clip(RoundedCornerShape(8.dp)).background(bgColor).padding(horizontal = 10.dp, vertical = 4.dp)) {
-        Text(text, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onBackground)
     }
 }
 

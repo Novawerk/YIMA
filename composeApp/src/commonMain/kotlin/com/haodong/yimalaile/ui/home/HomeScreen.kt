@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.domain.menstrual.CycleState
@@ -311,10 +313,10 @@ private fun HomeContent(
 
             // Determine hero text based on days until
             val (question, heroText) = when {
-                daysUntil == null -> "—" to stringResource(Res.string.status_no_prediction)
-                daysUntil < 0 -> "姨妈还没来吗？" to "该来了"
-                daysUntil <= 3 -> "姨妈快来了吗？" to "快了"
-                else -> "离姨妈还远吗？" to "还早"
+                daysUntil == null -> "" to stringResource(Res.string.status_no_prediction)
+                daysUntil < 0 -> "已经推迟了" to "该来了"
+                daysUntil <= 3 -> "就快到了" to "快了"
+                else -> "暂时安心" to "还早"
             }
 
             Text(
@@ -436,7 +438,7 @@ private fun DayTimeline(
     activePeriod: com.haodong.yimalaile.domain.menstrual.MenstrualRecord,
     today: LocalDate,
     onLogDay: () -> Unit,
-    onLogSpecificDay: (LocalDate) -> Unit = onLogDay.let { { _: LocalDate -> it() } },
+    onLogSpecificDay: (LocalDate) -> Unit = { onLogDay() },
 ) {
     val dailyMap = activePeriod.dailyRecords.associateBy { it.date }
     val days = buildList {
@@ -445,37 +447,54 @@ private fun DayTimeline(
     }
 
     Column(
-        Modifier.fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-            .padding(16.dp),
+        Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text("这几天", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.height(12.dp))
+        days.forEach { date ->
+            val record = dailyMap[date]
+            val isEmpty = record == null
+            val isToday = date == today
 
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            days.forEach { date ->
-                val record = dailyMap[date]
-                val isEmpty = record == null
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f, fill = false)
-                        .then(if (isEmpty) Modifier.clickable { onLogSpecificDay(date) } else Modifier),
+            Row(
+                Modifier.fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        if (isToday) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                        else Color.Transparent
+                    )
+                    .then(if (isEmpty) Modifier.clickable { onLogSpecificDay(date) } else Modifier)
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                // Day number circle
+                Box(
+                    Modifier.size(36.dp).clip(CircleShape)
+                        .background(
+                            if (record != null) MaterialTheme.colorScheme.primaryContainer
+                            else if (isToday) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                        ),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Box(
-                        Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(
-                                if (record != null) MaterialTheme.colorScheme.primaryContainer
-                                else Color.Transparent
-                            ),
-                        contentAlignment = Alignment.Center,
+                    Text(
+                        "${date.dayOfMonth}",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
+                        color = if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+
+                Spacer(Modifier.width(12.dp))
+
+                // Content area
+                if (record != null) {
+                    // Show recorded info
+                    Row(
+                        Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        if (record?.mood != null) {
+                        if (record.mood != null) {
                             Text(
                                 when (record.mood) {
                                     com.haodong.yimalaile.domain.menstrual.Mood.HAPPY -> "😊"
@@ -483,26 +502,48 @@ private fun DayTimeline(
                                     com.haodong.yimalaile.domain.menstrual.Mood.SAD -> "😔"
                                     com.haodong.yimalaile.domain.menstrual.Mood.VERY_SAD -> "😢"
                                 },
-                                fontSize = 16.sp,
+                                fontSize = 18.sp,
                             )
-                        } else if (record?.intensity != null) {
-                            val dotSize = when (record.intensity) {
-                                com.haodong.yimalaile.domain.menstrual.Intensity.LIGHT -> 6.dp
-                                com.haodong.yimalaile.domain.menstrual.Intensity.MEDIUM -> 10.dp
-                                com.haodong.yimalaile.domain.menstrual.Intensity.HEAVY -> 14.dp
+                        }
+                        if (record.intensity != null) {
+                            Box(
+                                Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                                    .padding(horizontal = 8.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    when (record.intensity) {
+                                        com.haodong.yimalaile.domain.menstrual.Intensity.LIGHT -> "少量"
+                                        com.haodong.yimalaile.domain.menstrual.Intensity.MEDIUM -> "中量"
+                                        com.haodong.yimalaile.domain.menstrual.Intensity.HEAVY -> "多量"
+                                    },
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
                             }
-                            Box(Modifier.size(dotSize).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
-                        } else {
-                            // Empty — subtle plus
-                            Text("+", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
+                        }
+                        if (record.symptoms.isNotEmpty()) {
+                            Text(
+                                record.symptoms.joinToString(" · "),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                            )
                         }
                     }
-                    Spacer(Modifier.height(2.dp))
+                } else {
+                    // Empty — invite to record
                     Text(
-                        "${date.dayOfMonth}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (date == today) MaterialTheme.colorScheme.primary
-                               else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        if (isToday) "记录今天的情况" else "点击补充",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                        modifier = Modifier.weight(1f),
+                    )
+                    Text(
+                        "+",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
                     )
                 }
             }
