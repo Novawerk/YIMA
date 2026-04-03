@@ -113,7 +113,7 @@ fun PeriodDurationChart(
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             shown.forEach { record ->
-                val days = record.startDate.until(record.endDate!!, DateTimeUnit.DAY) + 1
+                val days = record.startDate.until(record.endDate!!, DateTimeUnit.DAY).toInt() + 1
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         "${record.startDate.monthNumber}/${record.startDate.dayOfMonth}",

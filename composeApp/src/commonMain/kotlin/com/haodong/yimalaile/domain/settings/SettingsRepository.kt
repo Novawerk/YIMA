@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.first
 import me.tatarka.inject.annotations.Inject
 
 private val DISCLAIMER_ACCEPTED = booleanPreferencesKey("disclaimer_accepted")
-private val COLOR_PALETTE = stringPreferencesKey("color_palette")
 private val DARK_MODE = stringPreferencesKey("dark_mode")
+private val LANGUAGE = stringPreferencesKey("language")
 
 @Inject
 open class SettingsRepository(private val dataStore: DataStore<Preferences>) {
@@ -22,17 +22,20 @@ open class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { prefs -> prefs[DISCLAIMER_ACCEPTED] = value }
     }
 
-    suspend fun getColorPalette(): String =
-        dataStore.data.first()[COLOR_PALETTE] ?: "warm"
-
-    suspend fun setColorPalette(value: String) {
-        dataStore.edit { prefs -> prefs[COLOR_PALETTE] = value }
-    }
-
     suspend fun getDarkMode(): String =
         dataStore.data.first()[DARK_MODE] ?: "system"
 
     suspend fun setDarkMode(value: String) {
         dataStore.edit { prefs -> prefs[DARK_MODE] = value }
+    }
+
+    suspend fun getLanguage(): String? =
+        dataStore.data.first()[LANGUAGE]
+
+    suspend fun setLanguage(value: String?) {
+        dataStore.edit { prefs ->
+            if (value == null) prefs.remove(LANGUAGE)
+            else prefs[LANGUAGE] = value
+        }
     }
 }

@@ -1,4 +1,4 @@
-package com.haodong.yimalaile.ui.onboarding
+package com.haodong.yimalaile.ui.pages.onboarding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

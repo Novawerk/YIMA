@@ -12,7 +12,7 @@ import com.haodong.yimalaile.domain.menstrual.Mood
 import com.haodong.yimalaile.domain.menstrual.RecordSource
 import com.haodong.yimalaile.domain.menstrual.RecordsRepository
 import kotlinx.coroutines.flow.first
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
 import me.tatarka.inject.annotations.Inject
 

@@ -1,8 +1,10 @@
 package com.haodong.yimalaile
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -11,16 +13,19 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.haodong.yimalaile.di.AppComponent
-import com.haodong.yimalaile.ui.disclaimer.DisclaimerScreen
-import com.haodong.yimalaile.ui.home.HomeScreen
+import com.haodong.yimalaile.ui.pages.disclaimer.DisclaimerScreen
+import com.haodong.yimalaile.ui.pages.home.HomeScreen
+import com.haodong.yimalaile.ui.locale.LocalAppLocale
+import com.haodong.yimalaile.ui.pages.sheet.SheetHost
+import com.haodong.yimalaile.ui.pages.sheet.SheetManager
 import com.haodong.yimalaile.ui.navigation.DisclaimerRoute
 import com.haodong.yimalaile.ui.navigation.HomeRoute
 import com.haodong.yimalaile.ui.navigation.OnboardingRoute
 import com.haodong.yimalaile.ui.navigation.SettingsRoute
 import com.haodong.yimalaile.ui.navigation.StatisticsRoute
-import com.haodong.yimalaile.ui.onboarding.OnboardingScreen
-import com.haodong.yimalaile.ui.settings.SettingsScreen
-import com.haodong.yimalaile.ui.statistics.StatisticsScreen
+import com.haodong.yimalaile.ui.pages.onboarding.OnboardingScreen
+import com.haodong.yimalaile.ui.pages.settings.SettingsScreen
+import com.haodong.yimalaile.ui.pages.statistics.StatisticsScreen
 import com.haodong.yimalaile.ui.theme.AppTheme
 import kotlinx.coroutines.launch
 
@@ -29,17 +34,18 @@ fun App(component: AppComponent) {
     val service = component.menstrualService
     val settings = component.settingsRepository
     val scope = rememberCoroutineScope()
+    val sheetManager = remember { SheetManager(service) }
 
-    // Theme state
-    var palette by remember { mutableStateOf("warm") }
+    // Theme & language state
     var darkMode by remember { mutableStateOf("system") }
+    var language by remember { mutableStateOf<String?>(null) }
 
     // Startup: load settings + determine start route
     var startRoute by remember { mutableStateOf<Any?>(null) }
 
     LaunchedEffect(Unit) {
-        palette = settings.getColorPalette()
         darkMode = settings.getDarkMode()
+        language = settings.getLanguage()
 
         val disclaimerAccepted = settings.isDisclaimerAccepted()
         val state = service.getCycleState()
@@ -53,7 +59,9 @@ fun App(component: AppComponent) {
 
     val route = startRoute ?: return
 
-    AppTheme(palette = palette, darkMode = darkMode) {
+    CompositionLocalProvider(LocalAppLocale provides language) {
+    key(language) {
+    AppTheme(darkMode = darkMode) {
         val navController = rememberNavController()
 
         NavHost(navController = navController, startDestination = route) {
@@ -80,6 +88,7 @@ fun App(component: AppComponent) {
             composable<HomeRoute> {
                 HomeScreen(
                     service = service,
+                    sheetManager = sheetManager,
                     onNavigateStatistics = { navController.navigate(StatisticsRoute) },
                     onNavigateSettings = { navController.navigate(SettingsRoute) },
                 )
@@ -94,15 +103,15 @@ fun App(component: AppComponent) {
 
             composable<SettingsRoute> {
                 SettingsScreen(
-                    currentPalette = palette,
                     currentDarkMode = darkMode,
-                    onPaletteChange = { newPalette ->
-                        palette = newPalette
-                        scope.launch { settings.setColorPalette(newPalette) }
-                    },
+                    currentLanguage = language,
                     onDarkModeChange = { newMode ->
                         darkMode = newMode
                         scope.launch { settings.setDarkMode(newMode) }
+                    },
+                    onLanguageChange = { newLang ->
+                        language = newLang
+                        scope.launch { settings.setLanguage(newLang) }
                     },
                     onBack = { navController.popBackStack() },
                     onClearData = {
@@ -117,5 +126,10 @@ fun App(component: AppComponent) {
                 )
             }
         }
+
+        // Global sheet host — renders active sheet from SheetManager
+        SheetHost(sheetManager)
+    }
+    }
     }
 }

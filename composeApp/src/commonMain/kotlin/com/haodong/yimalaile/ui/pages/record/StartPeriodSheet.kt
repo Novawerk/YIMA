@@ -1,4 +1,4 @@
-package com.haodong.yimalaile.ui.record
+package com.haodong.yimalaile.ui.pages.record
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.ui.components.PrimaryCta
 import com.haodong.yimalaile.ui.components.RangeCalendar
-import com.haodong.yimalaile.ui.theme.AppColors
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus

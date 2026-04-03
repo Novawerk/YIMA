@@ -32,7 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
@@ -154,27 +154,17 @@ private fun MonthGrid(
     val rows = (startOffset + daysInMonth + 6) / 7
 
     Column(Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
-        // Month label
-        Row(
-            Modifier.fillMaxWidth().padding(start = 4.dp, top = 16.dp, bottom = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                stringResource(Res.string.calendar_month_label, yearMonth.month.number),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = surface,
-            )
-            Spacer(Modifier.padding(start = 4.dp))
-            Text(
-                "${yearMonth.year}",
-                style = MaterialTheme.typography.bodySmall,
-                color = surfaceVariant.copy(alpha = 0.5f),
-            )
-        }
+        // Month label — clear "Month Year" format
+        Text(
+            "${monthName(yearMonth.month)} ${yearMonth.year}",
+            modifier = Modifier.fillMaxWidth().padding(start = 8.dp, top = 20.dp, bottom = 12.dp),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = surface,
+        )
 
         for (row in 0 until rows) {
-            Row(Modifier.fillMaxWidth().height(44.dp)) {
+            Row(Modifier.fillMaxWidth().height(48.dp)) {
                 for (col in 0 until 7) {
                     val dayNum = row * 7 + col - startOffset + 1
 
@@ -243,20 +233,20 @@ private fun MonthGrid(
                                 )
                             }
 
-                            // Occupied dot indicator below number
-                            if (isOccupied && !isStart && !isEnd) {
-                                Box(
-                                    Modifier.align(Alignment.BottomCenter)
-                                        .padding(bottom = 2.dp)
-                                        .size(4.dp)
-                                        .clip(CircleShape)
-                                        .background(primary.copy(alpha = 0.4f))
-                                )
-                            }
                         }
                     }
                 }
             }
         }
     }
+}
+
+
+private fun monthName(month: Month): String = when (month) {
+    Month.JANUARY -> "January"; Month.FEBRUARY -> "February"
+    Month.MARCH -> "March"; Month.APRIL -> "April"
+    Month.MAY -> "May"; Month.JUNE -> "June"
+    Month.JULY -> "July"; Month.AUGUST -> "August"
+    Month.SEPTEMBER -> "September"; Month.OCTOBER -> "October"
+    Month.NOVEMBER -> "November"; Month.DECEMBER -> "December"
 }

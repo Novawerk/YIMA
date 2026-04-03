@@ -1,4 +1,4 @@
-package com.haodong.yimalaile.ui.disclaimer
+package com.haodong.yimalaile.ui.pages.disclaimer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

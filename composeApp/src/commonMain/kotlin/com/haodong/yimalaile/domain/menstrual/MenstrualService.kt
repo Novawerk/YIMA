@@ -1,6 +1,6 @@
 package com.haodong.yimalaile.domain.menstrual
 
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
@@ -124,14 +124,14 @@ class MenstrualService(private val repository: RecordsRepository) {
     private fun averageCycleLength(records: List<MenstrualRecord>): Int? {
         val sorted = records.filter { !it.isDeleted }.sortedBy { it.startDate }
         if (sorted.size < 2) return null
-        val gaps = sorted.zipWithNext().map { (a, b) -> a.startDate.until(b.startDate, DateTimeUnit.DAY) }
+        val gaps = sorted.zipWithNext().map { (a, b) -> a.startDate.until(b.startDate, DateTimeUnit.DAY).toInt() }
         return gaps.sum() / gaps.size
     }
 
     private fun averagePeriodLength(records: List<MenstrualRecord>): Int? {
         val lengths = records
             .filter { !it.isDeleted && it.endDate != null }
-            .map { it.startDate.until(it.endDate!!, DateTimeUnit.DAY) + 1 }
+            .map { it.startDate.until(it.endDate!!, DateTimeUnit.DAY).toInt() + 1 }
         return if (lengths.isEmpty()) null else lengths.sum() / lengths.size
     }
 

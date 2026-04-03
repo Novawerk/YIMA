@@ -1,4 +1,4 @@
-package com.haodong.yimalaile.ui.record
+package com.haodong.yimalaile.ui.pages.record
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -56,7 +56,7 @@ fun RecordDetailSheet(
     onLogDay: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    val days = record.endDate?.let { record.startDate.until(it, DateTimeUnit.DAY) + 1 }
+    val days = record.endDate?.let { record.startDate.until(it, DateTimeUnit.DAY).toInt() + 1 }
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
     ModalBottomSheet(

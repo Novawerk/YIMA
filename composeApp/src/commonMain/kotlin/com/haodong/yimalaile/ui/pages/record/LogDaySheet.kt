@@ -1,4 +1,4 @@
-package com.haodong.yimalaile.ui.record
+package com.haodong.yimalaile.ui.pages.record
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -35,13 +35,14 @@ import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.Intensity
 import com.haodong.yimalaile.domain.menstrual.Mood
 import com.haodong.yimalaile.ui.components.PrimaryCta
+import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun LogDaySheet(
-    targetDate: kotlinx.datetime.LocalDate? = null,
+    targetDate: LocalDate? = null,
     onDismiss: () -> Unit,
     onSave: (Intensity?, Mood?, List<String>, String?) -> Unit,
 ) {

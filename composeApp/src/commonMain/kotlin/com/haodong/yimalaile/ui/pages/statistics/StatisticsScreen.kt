@@ -1,4 +1,4 @@
-package com.haodong.yimalaile.ui.statistics
+package com.haodong.yimalaile.ui.pages.statistics
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -42,16 +42,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.domain.menstrual.AddRecordResult
 import com.haodong.yimalaile.domain.menstrual.CycleState
+import com.haodong.yimalaile.domain.menstrual.DailyRecord
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
-import com.haodong.yimalaile.ui.record.BackfillSheet
-import com.haodong.yimalaile.ui.record.DayPickerSheet
-import com.haodong.yimalaile.ui.record.LogDaySheet
-import com.haodong.yimalaile.ui.record.RecordDetailSheet
-import com.haodong.yimalaile.ui.record.StartPeriodSheet
+import com.haodong.yimalaile.ui.pages.record.BackfillSheet
+import com.haodong.yimalaile.ui.pages.record.DayPickerSheet
+import com.haodong.yimalaile.ui.pages.record.EndPeriodSheet
+import com.haodong.yimalaile.ui.pages.record.LogDaySheet
+import com.haodong.yimalaile.ui.pages.record.RecordDetailSheet
+import com.haodong.yimalaile.ui.pages.record.StartPeriodSheet
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.plus
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.until
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
@@ -67,7 +69,7 @@ fun StatisticsScreen(
     var editStartFor by remember { mutableStateOf<MenstrualRecord?>(null) }
     var editEndFor by remember { mutableStateOf<MenstrualRecord?>(null) }
     var logDayFor by remember { mutableStateOf<MenstrualRecord?>(null) }
-    var logDayDate by remember { mutableStateOf<kotlinx.datetime.LocalDate?>(null) }
+    var logDayDate by remember { mutableStateOf<LocalDate?>(null) }
     var logDayRecordId by remember { mutableStateOf<String?>(null) }
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -190,7 +192,7 @@ fun StatisticsScreen(
     // Edit end date — reuse StartPeriodSheet in single mode with minDate
     if (editEndFor != null) {
         val rec = editEndFor!!
-        com.haodong.yimalaile.ui.record.EndPeriodSheet(
+        EndPeriodSheet(
             startDate = rec.startDate,
             dailyRecords = rec.dailyRecords,
             existingRecords = state?.recentPeriods?.filter { it.id != rec.id } ?: emptyList(),
@@ -229,7 +231,7 @@ fun StatisticsScreen(
             onDismiss = { logDayDate = null; logDayRecordId = null },
             onSave = { intensity, mood, symptoms, notes ->
                 scope.launch {
-                    val day = com.haodong.yimalaile.domain.menstrual.DailyRecord(
+                    val day = DailyRecord(
                         date = targetDate, intensity = intensity, mood = mood,
                         symptoms = symptoms, notes = notes,
                     )
@@ -245,7 +247,7 @@ fun StatisticsScreen(
 
 @Composable
 private fun RecordCard(record: MenstrualRecord, daysStr: String, onClick: () -> Unit) {
-    val days = record.endDate?.let { record.startDate.until(it, DateTimeUnit.DAY) + 1 }
+    val days = record.endDate?.let { record.startDate.until(it, DateTimeUnit.DAY).toInt() + 1 }
     val isActive = record.endDate == null
 
     Box(
