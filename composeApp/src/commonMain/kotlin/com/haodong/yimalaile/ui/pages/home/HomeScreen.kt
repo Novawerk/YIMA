@@ -1,29 +1,12 @@
 package com.haodong.yimalaile.ui.pages.home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -35,11 +18,13 @@ import com.haodong.yimalaile.ui.components.SmallSpacer
 import com.haodong.yimalaile.ui.pages.sheet.SheetManager
 import com.haodong.yimalaile.ui.theme.expressiveShapes
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.stringResource
-import yimalaile.composeapp.generated.resources.*
+import yimalaile.composeapp.generated.resources.Res
+import yimalaile.composeapp.generated.resources.app_name
+import yimalaile.composeapp.generated.resources.record_save_success
+import kotlin.time.Clock
 
 @Composable
 fun HomeScreen(
@@ -112,35 +97,6 @@ fun HomeScreen(
                             scope.launch {
                                 val result = sheetManager.backfillPeriod() ?: return@launch
                                 if (result is AddRecordResult.Success) { viewModel.refresh(); snackbar.showSnackbar(successMsg) }
-                            }
-                        },
-                        onRecordClick = { record, isActive ->
-                            scope.launch {
-                                val action = sheetManager.showRecordDetail(record, isActive) ?: return@launch
-                                when (action) {
-                                    is com.haodong.yimalaile.ui.pages.sheet.DetailAction.EditStart -> {
-                                        sheetManager.startPeriod()
-                                        viewModel.refresh()
-                                    }
-                                    is com.haodong.yimalaile.ui.pages.sheet.DetailAction.EditEnd -> {
-                                        val ok = sheetManager.endPeriod() ?: return@launch
-                                        if (ok) { viewModel.refresh(); snackbar.showSnackbar(successMsg) }
-                                    }
-                                    is com.haodong.yimalaile.ui.pages.sheet.DetailAction.LogDay -> {
-                                        val ok = sheetManager.logDay() ?: return@launch
-                                        if (ok) { viewModel.refresh(); snackbar.showSnackbar(successMsg) }
-                                    }
-                                    is com.haodong.yimalaile.ui.pages.sheet.DetailAction.Delete -> {
-                                        service.deleteRecord(record.id)
-                                        viewModel.refresh()
-                                        snackbar.showSnackbar(successMsg)
-                                    }
-                                }
-                            }
-                        },
-                        onPredictionClick = { prediction ->
-                            scope.launch {
-                                sheetManager.showPredictionDetail(prediction, s.phaseInfo?.periodLength ?: 5)
                             }
                         },
                     )

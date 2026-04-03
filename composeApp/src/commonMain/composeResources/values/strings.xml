@@ -45,6 +45,10 @@
     <string name="home_section_past">Past</string>
     <string name="home_section_current">Current</string>
     <string name="home_section_predicted">Predicted</string>
+    <string name="home_cycle_calendar">Cycle Calendar</string>
+    <string name="legend_period">Period</string>
+    <string name="legend_ovulation">Ovulation</string>
+    <string name="legend_predicted">Predicted</string>
     <string name="home_log_today">✦ Log today</string>
     <string name="home_end_period">Period ended</string>
 
@@ -172,6 +176,8 @@
     <string name="onboarding_backfill">Backfill</string>
     <string name="onboarding_skip">Skip</string>
     <string name="onboarding_done">Done</string>
+    <string name="onboarding_progress_feedback">%1$d backfilled. %2$d more for accurate predictions!</string>
+    <string name="onboarding_enough_feedback">Great! Predictions are now enabled. You can add more history later from the History screen.</string>
     <string name="onboarding_select_range">Select period date range</string>
     <string name="onboarding_back">Back</string>
     <string name="onboarding_save">Save</string>

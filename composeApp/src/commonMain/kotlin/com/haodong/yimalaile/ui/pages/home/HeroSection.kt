@@ -93,6 +93,7 @@ internal fun ColumnScope.HeroSection(
     dayCount: Int?,
     phaseInfo: CyclePhaseInfo?,
     onPhaseClick: () -> Unit,
+    onCalendarClick: () -> Unit,
 ) {
     val display = resolveHeroDisplay(inPeriod, dayCount, heroNumber, phaseInfo)
 
@@ -190,7 +191,7 @@ internal fun ColumnScope.HeroSection(
                 Surface(
                     tonalElevation = 1.dp,
                     shape = MaterialTheme.shapes.extraLarge,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().clickable { onCalendarClick() },
                 ) {
                     Row(
                         modifier = Modifier.padding(24.dp),

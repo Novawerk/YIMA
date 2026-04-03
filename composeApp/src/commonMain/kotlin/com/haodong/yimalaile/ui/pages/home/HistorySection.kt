@@ -20,9 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.CyclePhaseInfo
 import com.haodong.yimalaile.domain.menstrual.CycleState
-import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
-import com.haodong.yimalaile.domain.menstrual.PredictedCycle
-import com.haodong.yimalaile.ui.pages.sheet.SheetManager
 import com.haodong.yimalaile.ui.components.PrimaryCta
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
@@ -44,8 +41,7 @@ internal fun HistorySection(
     onEndPeriod: () -> Unit,
     onLogDay: () -> Unit,
     onBackfill: () -> Unit,
-    onRecordClick: (MenstrualRecord, Boolean) -> Unit,
-    onPredictionClick: (PredictedCycle) -> Unit,
+    onCalendarClick: () -> Unit,
 ) {
     // Layout: past 3 (old→new) | current cycle | predictions
     val pastRecords = state.recentPeriods.filter { it.endDate != null }
@@ -80,7 +76,7 @@ internal fun HistorySection(
                         label = "${record.startDate.month.number}/${record.startDate.day}",
                         days = days, tag = pastTag,
                         style = HistoryCardStyle.COMPLETED,
-                        onClick = { onRecordClick(record, false) },
+                        onClick = onCalendarClick,
                     )
                 }
                 if (activePeriod != null) {
@@ -90,7 +86,7 @@ internal fun HistorySection(
                             label = "${activePeriod.startDate.month.number}/${activePeriod.startDate.day}",
                             days = days, tag = currentTag,
                             style = HistoryCardStyle.ACTIVE,
-                            onClick = { onRecordClick(activePeriod, true) },
+                            onClick = onCalendarClick,
                         )
                     }
                 } else if (predictions.isNotEmpty()) {
@@ -100,7 +96,7 @@ internal fun HistorySection(
                             label = "${pred.predictedStart.month.number}/${pred.predictedStart.day}",
                             days = phaseInfo?.periodLength ?: 5, tag = currentTag,
                             style = HistoryCardStyle.ACTIVE,
-                            onClick = { onPredictionClick(pred) },
+                            onClick = onCalendarClick,
                         )
                     }
                 }
@@ -112,7 +108,7 @@ internal fun HistorySection(
                         label = "${pred.predictedStart.month.number}/${pred.predictedStart.day}",
                         days = phaseInfo?.periodLength ?: 5, tag = predictedTag,
                         style = HistoryCardStyle.PREDICTED,
-                        onClick = { onPredictionClick(pred) },
+                        onClick = onCalendarClick,
                     )
                 }
             }

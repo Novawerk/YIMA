@@ -111,18 +111,33 @@ fun OnboardingScreen(
                     color = MaterialTheme.colorScheme.onBackground,
                 )
                 Spacer(Modifier.height(8.dp))
-                Text(
-                    stringResource(Res.string.onboarding_past_hint),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                val remaining = (2 - backfillCount).coerceAtLeast(0) // need 2 backfills for 3 total
+                if (backfillCount > 0) {
+                    Text(
+                        if (remaining > 0) stringResource(Res.string.onboarding_progress_feedback, backfillCount, remaining)
+                        else stringResource(Res.string.onboarding_enough_feedback, backfillCount),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = if (remaining == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else {
+                    Text(
+                        stringResource(Res.string.onboarding_past_hint),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
                 Spacer(Modifier.height(32.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    PrimaryCta(stringResource(Res.string.onboarding_backfill), onClick = {
-                        rangeStart = null; rangeEnd = null; step = 3
-                    }, modifier = Modifier.weight(1f))
-                    OutlinedButton(onClick = onComplete, modifier = Modifier.weight(1f).height(56.dp)) {
-                        Text(if (backfillCount == 0) stringResource(Res.string.onboarding_skip) else stringResource(Res.string.onboarding_done))
+                if (remaining <= 0) {
+                    // Enough data — only show Done
+                    PrimaryCta(stringResource(Res.string.onboarding_done), onClick = onComplete)
+                } else {
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        PrimaryCta(stringResource(Res.string.onboarding_backfill), onClick = {
+                            rangeStart = null; rangeEnd = null; step = 3
+                        }, modifier = Modifier.weight(1f))
+                        OutlinedButton(onClick = onComplete, modifier = Modifier.weight(1f).height(56.dp)) {
+                            Text(if (backfillCount == 0) stringResource(Res.string.onboarding_skip) else stringResource(Res.string.onboarding_done))
+                        }
                     }
                 }
                 Spacer(Modifier.weight(1f))

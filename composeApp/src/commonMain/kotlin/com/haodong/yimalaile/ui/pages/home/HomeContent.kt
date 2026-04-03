@@ -8,14 +8,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.haodong.yimalaile.domain.menstrual.CyclePhaseInfo
 import com.haodong.yimalaile.domain.menstrual.CycleState
-import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
-import com.haodong.yimalaile.domain.menstrual.PredictedCycle
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.until
 
 /**
- * Thin orchestrator — dispatches to HeroSection, HistorySection, and PhaseSheet.
+ * Thin orchestrator — dispatches to HeroSection, HistorySection, PhaseSheet, and CycleCalendarSheet.
  */
 @Composable
 internal fun ColumnScope.HomeContent(
@@ -26,10 +24,9 @@ internal fun ColumnScope.HomeContent(
     onEndPeriod: () -> Unit,
     onLogDay: () -> Unit,
     onBackfill: () -> Unit,
-    onRecordClick: (MenstrualRecord, Boolean) -> Unit,
-    onPredictionClick: (PredictedCycle) -> Unit,
 ) {
     var showPhaseSheet by remember { mutableStateOf(false) }
+    var showCalendarSheet by remember { mutableStateOf(false) }
     val inPeriod = state.activePeriod != null
     val dayCount = if (inPeriod) {
         state.activePeriod!!.startDate.until(today, DateTimeUnit.DAY).toInt() + 1
@@ -42,6 +39,7 @@ internal fun ColumnScope.HomeContent(
         dayCount = dayCount,
         phaseInfo = phaseInfo,
         onPhaseClick = { showPhaseSheet = true },
+        onCalendarClick = { showCalendarSheet = true },
     )
 
     HistorySection(
@@ -53,14 +51,21 @@ internal fun ColumnScope.HomeContent(
         onEndPeriod = onEndPeriod,
         onLogDay = onLogDay,
         onBackfill = onBackfill,
-        onRecordClick = onRecordClick,
-        onPredictionClick = onPredictionClick,
+        onCalendarClick = { showCalendarSheet = true },
     )
 
     if (showPhaseSheet && phaseInfo != null) {
         PhaseExplanationSheet(
             phaseInfo = phaseInfo,
             onDismiss = { showPhaseSheet = false },
+        )
+    }
+
+    if (showCalendarSheet) {
+        CycleCalendarSheet(
+            state = state,
+            phaseInfo = phaseInfo,
+            onDismiss = { showCalendarSheet = false },
         )
     }
 }

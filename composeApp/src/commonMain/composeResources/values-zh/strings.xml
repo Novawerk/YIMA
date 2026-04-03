@@ -45,6 +45,10 @@
     <string name="home_section_past">过去</string>
     <string name="home_section_current">当前</string>
     <string name="home_section_predicted">预测</string>
+    <string name="home_cycle_calendar">周期日历</string>
+    <string name="legend_period">经期</string>
+    <string name="legend_ovulation">排卵期</string>
+    <string name="legend_predicted">预测</string>
     <string name="home_log_today">✦ 记录今天</string>
     <string name="home_end_period">经期结束</string>
 
@@ -172,6 +176,8 @@
     <string name="onboarding_backfill">补录</string>
     <string name="onboarding_skip">跳过</string>
     <string name="onboarding_done">完成</string>
+    <string name="onboarding_progress_feedback">已补录%1$d组，再补录%2$d组即可获得精准预测！</string>
+    <string name="onboarding_enough_feedback">太棒了！预测已开启。如需补录更多历史数据，可在历史记录中操作。</string>
     <string name="onboarding_select_range">选择经期日期范围</string>
     <string name="onboarding_back">返回</string>
     <string name="onboarding_save">保存</string>

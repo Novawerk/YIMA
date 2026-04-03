@@ -26,7 +26,7 @@ internal fun phaseDescription(phase: CyclePhase): String = when (phase) {
 
 @Composable
 internal fun phaseShape(phase: CyclePhase): Shape = when (phase) {
-    CyclePhase.MENSTRUAL -> MaterialTheme.expressiveShapes.heart
+    CyclePhase.MENSTRUAL -> MaterialTheme.expressiveShapes.arrow
     CyclePhase.FOLLICULAR -> MaterialTheme.expressiveShapes.flower
     CyclePhase.OVULATION -> MaterialTheme.expressiveShapes.sunny
     CyclePhase.LUTEAL -> MaterialTheme.expressiveShapes.bun
