@@ -97,6 +97,7 @@ fun App(component: AppComponent) {
             composable<StatisticsRoute> {
                 StatisticsScreen(
                     service = service,
+                    sheetManager = sheetManager,
                     onBack = { navController.popBackStack() },
                 )
             }

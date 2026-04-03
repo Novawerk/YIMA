@@ -108,7 +108,6 @@ fun SettingsScreen(
         Box(
             Modifier.fillMaxWidth()
                 .clip(RoundedCornerShape(20.dp))
-                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
                 .padding(24.dp),
         ) {
             Column {

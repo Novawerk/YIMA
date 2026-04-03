@@ -37,6 +37,14 @@
     <string name="home_day_n">Day %1$d</string>
     <string name="home_remaining_days">~%1$d days remaining</string>
     <string name="home_exceeded_avg">Exceeded average period length</string>
+    <string name="home_period_overdue_title">Period longer than usual, day %1$d</string>
+    <string name="home_period_overdue_sub">Consider ending it?</string>
+    <string name="home_period_day_title">Period day %1$d, remaining</string>
+    <string name="home_hero_due_today">Period is due today</string>
+    <string name="home_hero_due_today_sub">Has it started?</string>
+    <string name="home_section_past">Past</string>
+    <string name="home_section_current">Current</string>
+    <string name="home_section_predicted">Predicted</string>
     <string name="home_log_today">✦ Log today</string>
     <string name="home_end_period">Period ended</string>
 

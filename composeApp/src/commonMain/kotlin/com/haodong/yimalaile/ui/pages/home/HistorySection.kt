@@ -54,14 +54,6 @@ internal fun HistorySection(
     val activePeriod = state.activePeriod
     val predictions = state.predictions.take(3)
 
-    // Compute real maxDays across all visible cards
-    val allDays = buildList {
-        pastRecords.forEach { add(it.startDate.until(it.endDate!!, DateTimeUnit.DAY).toInt() + 1) }
-        if (activePeriod != null) add(activePeriod.startDate.until(today, DateTimeUnit.DAY).toInt() + 1)
-        if (phaseInfo != null) add(phaseInfo.periodLength)
-    }
-    val maxDays = (allDays.maxOrNull() ?: 5).coerceAtLeast(3)
-
     Surface(
         tonalElevation = 1.dp,
         shape = MaterialTheme.shapes.extraLarge,
@@ -77,12 +69,16 @@ internal fun HistorySection(
                 fontWeight = FontWeight.Light,
             )
 
+            val pastTag = stringResource(Res.string.home_section_past)
+            val currentTag = stringResource(Res.string.home_section_current)
+            val predictedTag = stringResource(Res.string.home_section_predicted)
+
             LazyRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 items(pastRecords, key = { it.id }) { record ->
                     val days = record.startDate.until(record.endDate!!, DateTimeUnit.DAY).toInt() + 1
                     HistoryCard(
                         label = "${record.startDate.month.number}/${record.startDate.day}",
-                        days = days, maxDays = maxDays,
+                        days = days, tag = pastTag,
                         style = HistoryCardStyle.COMPLETED,
                         onClick = { onRecordClick(record, false) },
                     )
@@ -92,7 +88,7 @@ internal fun HistorySection(
                         val days = activePeriod.startDate.until(today, DateTimeUnit.DAY).toInt() + 1
                         HistoryCard(
                             label = "${activePeriod.startDate.month.number}/${activePeriod.startDate.day}",
-                            days = days, maxDays = maxDays,
+                            days = days, tag = currentTag,
                             style = HistoryCardStyle.ACTIVE,
                             onClick = { onRecordClick(activePeriod, true) },
                         )
@@ -102,7 +98,7 @@ internal fun HistorySection(
                         val pred = predictions.first()
                         HistoryCard(
                             label = "${pred.predictedStart.month.number}/${pred.predictedStart.day}",
-                            days = phaseInfo?.periodLength ?: 5, maxDays = maxDays,
+                            days = phaseInfo?.periodLength ?: 5, tag = currentTag,
                             style = HistoryCardStyle.ACTIVE,
                             onClick = { onPredictionClick(pred) },
                         )
@@ -114,7 +110,7 @@ internal fun HistorySection(
                     val pred = futurePreds[i]
                     HistoryCard(
                         label = "${pred.predictedStart.month.number}/${pred.predictedStart.day}",
-                        days = phaseInfo?.periodLength ?: 5, maxDays = maxDays,
+                        days = phaseInfo?.periodLength ?: 5, tag = predictedTag,
                         style = HistoryCardStyle.PREDICTED,
                         onClick = { onPredictionClick(pred) },
                     )
@@ -133,9 +129,9 @@ internal fun HistorySection(
 
                 if (todayRecord != null) {
                     TodaySummaryCard(todayRecord, onClick = onLogDay)
+                } else {
+                    PrimaryCta(text = logText, onClick = onLogDay)
                 }
-
-                PrimaryCta(text = logText, onClick = onLogDay)
                 OutlinedButton(
                     onClick = onEndPeriod,
                     modifier = Modifier.fillMaxWidth().height(56.dp),
@@ -182,12 +178,11 @@ internal enum class HistoryCardStyle { COMPLETED, ACTIVE, PREDICTED }
 internal fun HistoryCard(
     label: String,
     days: Int,
-    maxDays: Int,
+    tag: String,
     style: HistoryCardStyle,
     onClick: () -> Unit = {},
 ) {
-    val barHeight = (days.toFloat() / maxDays * 60).coerceIn(12f, 60f).dp
-
+    val daysStr = stringResource(Res.string.unit_days)
     val elevation = when (style) {
         HistoryCardStyle.COMPLETED -> 3.dp
         HistoryCardStyle.ACTIVE -> 1.dp
@@ -195,12 +190,7 @@ internal fun HistoryCard(
     }
     val border = when (style) {
         HistoryCardStyle.ACTIVE -> BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-        else -> null // PREDICTED uses dashed border drawn manually
-    }
-    val barColor = when (style) {
-        HistoryCardStyle.COMPLETED -> MaterialTheme.colorScheme.tertiaryContainer
-        HistoryCardStyle.ACTIVE -> MaterialTheme.colorScheme.primaryContainer
-        HistoryCardStyle.PREDICTED -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+        else -> null
     }
     val textColor = when (style) {
         HistoryCardStyle.COMPLETED -> MaterialTheme.colorScheme.onSurface
@@ -232,17 +222,26 @@ internal fun HistoryCard(
                 )
             }
         } else Modifier
-            Box(modifier = Modifier.width(78.dp).height(110.dp).then(dashedModifier)) {
-            Surface(
-                color = barColor,
-                modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter).height(barHeight),
-            ) { }
+        Column(
+            modifier = Modifier.width(78.dp).height(90.dp).then(dashedModifier).padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                tag,
+                style = MaterialTheme.typography.labelSmall,
+                color = textColor.copy(alpha = 0.4f),
+            )
             Text(
                 label,
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = if (style == HistoryCardStyle.PREDICTED) FontWeight.Normal else FontWeight.Bold,
-                modifier = Modifier.align(Alignment.Center),
                 color = textColor,
+            )
+            Text(
+                "$days$daysStr",
+                style = MaterialTheme.typography.labelSmall,
+                color = textColor.copy(alpha = 0.6f),
             )
         }
     }

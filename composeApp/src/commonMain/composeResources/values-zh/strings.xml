@@ -37,6 +37,14 @@
     <string name="home_day_n">第 %1$d 天</string>
     <string name="home_remaining_days">预计还有 %1$d 天结束</string>
     <string name="home_exceeded_avg">已超过平均经期时长</string>
+    <string name="home_period_overdue_title">经期比平时长了，第%1$d天</string>
+    <string name="home_period_overdue_sub">考虑结束了吗？</string>
+    <string name="home_period_day_title">经期造访中，这是第%1$d天，还剩</string>
+    <string name="home_hero_due_today">今天姨妈该来了</string>
+    <string name="home_hero_due_today_sub">来了吗？</string>
+    <string name="home_section_past">过去</string>
+    <string name="home_section_current">当前</string>
+    <string name="home_section_predicted">预测</string>
     <string name="home_log_today">✦ 记录今天</string>
     <string name="home_end_period">经期结束</string>
 
