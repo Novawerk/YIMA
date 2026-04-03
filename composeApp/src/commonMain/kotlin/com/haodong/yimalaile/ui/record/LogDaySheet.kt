@@ -36,25 +36,7 @@ import com.haodong.yimalaile.domain.menstrual.Intensity
 import com.haodong.yimalaile.domain.menstrual.Mood
 import com.haodong.yimalaile.ui.components.PrimaryCta
 import org.jetbrains.compose.resources.stringResource
-import yimalaile.composeapp.generated.resources.Res
-import yimalaile.composeapp.generated.resources.intensity_heavy
-import yimalaile.composeapp.generated.resources.intensity_light
-import yimalaile.composeapp.generated.resources.intensity_medium
-import yimalaile.composeapp.generated.resources.mood_happy
-import yimalaile.composeapp.generated.resources.mood_neutral
-import yimalaile.composeapp.generated.resources.mood_sad
-import yimalaile.composeapp.generated.resources.mood_very_sad
-import yimalaile.composeapp.generated.resources.record_dialog_title
-import yimalaile.composeapp.generated.resources.record_flow_intensity
-import yimalaile.composeapp.generated.resources.record_mood
-import yimalaile.composeapp.generated.resources.record_notes_hint
-import yimalaile.composeapp.generated.resources.record_save_btn
-import yimalaile.composeapp.generated.resources.record_symptoms
-import yimalaile.composeapp.generated.resources.symptom_back_pain
-import yimalaile.composeapp.generated.resources.symptom_breast_pain
-import yimalaile.composeapp.generated.resources.symptom_cramps
-import yimalaile.composeapp.generated.resources.symptom_fatigue
-import yimalaile.composeapp.generated.resources.symptom_headache
+import yimalaile.composeapp.generated.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -76,7 +58,7 @@ fun LogDaySheet(
     ) {
         Column(Modifier.padding(24.dp)) {
             val title = if (targetDate != null) {
-                "记录 ${targetDate.monthNumber}月${targetDate.dayOfMonth}日"
+                stringResource(Res.string.record_date_title, targetDate.monthNumber, targetDate.dayOfMonth)
             } else {
                 stringResource(Res.string.record_dialog_title)
             }

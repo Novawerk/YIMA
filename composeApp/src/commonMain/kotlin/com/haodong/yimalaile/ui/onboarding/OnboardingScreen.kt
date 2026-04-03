@@ -30,6 +30,8 @@ import com.haodong.yimalaile.ui.components.PrimaryCta
 import com.haodong.yimalaile.ui.components.RangeCalendar
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
+import org.jetbrains.compose.resources.stringResource
+import yimalaile.composeapp.generated.resources.*
 
 @Composable
 fun OnboardingScreen(
@@ -62,12 +64,12 @@ fun OnboardingScreen(
             // Ask current period status
             0 -> {
                 Spacer(Modifier.weight(0.3f))
-                Text("你现在在经期中吗？", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
+                Text(stringResource(Res.string.onboarding_ask_period), style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
                 Spacer(Modifier.height(32.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    PrimaryCta("是的", onClick = { step = 1 }, modifier = Modifier.weight(1f))
+                    PrimaryCta(stringResource(Res.string.onboarding_yes), onClick = { step = 1 }, modifier = Modifier.weight(1f))
                     OutlinedButton(onClick = { step = 2 }, modifier = Modifier.weight(1f).height(56.dp)) {
-                        Text("不在")
+                        Text(stringResource(Res.string.onboarding_no))
                     }
                 }
                 Spacer(Modifier.weight(1f))
@@ -75,7 +77,7 @@ fun OnboardingScreen(
 
             // Pick current period start date
             1 -> {
-                Text("哪天开始的？", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
+                Text(stringResource(Res.string.onboarding_when_start), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
                 Spacer(Modifier.height(8.dp))
                 RangeCalendar(
                     existingRecords = createdRecords,
@@ -86,7 +88,7 @@ fun OnboardingScreen(
                     modifier = Modifier.weight(1f),
                 )
                 PrimaryCta(
-                    text = "确认",
+                    text = stringResource(Res.string.onboarding_confirm),
                     onClick = {
                         scope.launch {
                             val result = service.startPeriod(selectedSingle!!)
@@ -104,23 +106,23 @@ fun OnboardingScreen(
             2 -> {
                 Spacer(Modifier.weight(0.3f))
                 Text(
-                    if (backfillCount == 0) "你还记得上次经期吗？" else "继续补录？",
+                    if (backfillCount == 0) stringResource(Res.string.onboarding_ask_past) else stringResource(Res.string.onboarding_ask_past_more),
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "补录过去的记录可以帮助预测更准确",
+                    stringResource(Res.string.onboarding_past_hint),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.height(32.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    PrimaryCta("补录", onClick = {
+                    PrimaryCta(stringResource(Res.string.onboarding_backfill), onClick = {
                         rangeStart = null; rangeEnd = null; step = 3
                     }, modifier = Modifier.weight(1f))
                     OutlinedButton(onClick = onComplete, modifier = Modifier.weight(1f).height(56.dp)) {
-                        Text(if (backfillCount == 0) "跳过" else "完成")
+                        Text(if (backfillCount == 0) stringResource(Res.string.onboarding_skip) else stringResource(Res.string.onboarding_done))
                     }
                 }
                 Spacer(Modifier.weight(1f))
@@ -128,7 +130,7 @@ fun OnboardingScreen(
 
             // RangeCalendar for past period
             3 -> {
-                Text("选择经期日期范围", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
+                Text(stringResource(Res.string.onboarding_select_range), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
                 Spacer(Modifier.height(8.dp))
                 RangeCalendar(
                     existingRecords = createdRecords,
@@ -148,9 +150,9 @@ fun OnboardingScreen(
                     modifier = Modifier.weight(1f),
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = { step = 2 }, Modifier.weight(1f)) { Text("返回") }
+                    TextButton(onClick = { step = 2 }, Modifier.weight(1f)) { Text(stringResource(Res.string.onboarding_back)) }
                     PrimaryCta(
-                        text = "保存",
+                        text = stringResource(Res.string.onboarding_save),
                         onClick = {
                             scope.launch {
                                 val result = service.backfillPeriod(rangeStart!!, rangeEnd!!)

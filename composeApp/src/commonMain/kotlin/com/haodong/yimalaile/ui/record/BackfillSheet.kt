@@ -28,9 +28,7 @@ import com.haodong.yimalaile.ui.components.RangeCalendar
 import com.haodong.yimalaile.ui.theme.AppColors
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.stringResource
-import yimalaile.composeapp.generated.resources.Res
-import yimalaile.composeapp.generated.resources.dialog_cancel
-import yimalaile.composeapp.generated.resources.record_save_btn
+import yimalaile.composeapp.generated.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,7 +44,7 @@ fun BackfillSheet(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("补录经期") },
+                title = { Text(stringResource(Res.string.backfill_title)) },
                 navigationIcon = {
                     IconButton(onClick = onDismiss) {
                         Icon(Icons.Default.Close, stringResource(Res.string.dialog_cancel))
@@ -60,21 +58,21 @@ fun BackfillSheet(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                "选择开始和结束日期",
+                stringResource(Res.string.backfill_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             if (selectedStart != null && selectedEnd == null) {
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "已选开始：${selectedStart!!.monthNumber}月${selectedStart!!.dayOfMonth}日，再选结束日期",
+                    stringResource(Res.string.backfill_selected_start, selectedStart!!.monthNumber, selectedStart!!.dayOfMonth),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
             } else if (selectedStart != null && selectedEnd != null) {
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "${selectedStart!!.monthNumber}月${selectedStart!!.dayOfMonth}日 — ${selectedEnd!!.monthNumber}月${selectedEnd!!.dayOfMonth}日",
+                    stringResource(Res.string.backfill_selected_range, selectedStart!!.monthNumber, selectedStart!!.dayOfMonth, selectedEnd!!.monthNumber, selectedEnd!!.dayOfMonth),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )

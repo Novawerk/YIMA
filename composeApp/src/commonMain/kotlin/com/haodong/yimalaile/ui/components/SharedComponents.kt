@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.until
+import org.jetbrains.compose.resources.stringResource
+import yimalaile.composeapp.generated.resources.*
 
 /** Full-width pill CTA button matching design (Deep Rose bg, white text). */
 @Composable
@@ -139,7 +141,7 @@ fun PeriodDurationChart(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        "查看全部 ${records.size} 条记录 →",
+                        stringResource(Res.string.history_view_all, records.size),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                     )

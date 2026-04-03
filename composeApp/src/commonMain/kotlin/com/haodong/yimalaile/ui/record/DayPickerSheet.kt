@@ -28,6 +28,8 @@ import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
+import org.jetbrains.compose.resources.stringResource
+import yimalaile.composeapp.generated.resources.*
 
 /**
  * Shows all days within a period as tappable circles.
@@ -60,10 +62,10 @@ fun DayPickerSheet(
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
         Column(Modifier.padding(24.dp)) {
-            Text("选择日期", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
+            Text(stringResource(Res.string.day_picker_title), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
             Spacer(Modifier.height(4.dp))
             Text(
-                "选择要补充记录的日期",
+                stringResource(Res.string.day_picker_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -118,7 +120,7 @@ private fun DayChip(day: Int, month: Int, hasRecord: Boolean, onClick: () -> Uni
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
         )
         if (hasRecord) {
-            Text("已记录", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+            Text(stringResource(Res.string.day_picker_recorded), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
         }
     }
 }

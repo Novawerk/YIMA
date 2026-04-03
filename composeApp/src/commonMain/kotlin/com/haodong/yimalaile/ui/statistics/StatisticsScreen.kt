@@ -54,10 +54,7 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.plus
 import kotlinx.datetime.until
 import org.jetbrains.compose.resources.stringResource
-import yimalaile.composeapp.generated.resources.Res
-import yimalaile.composeapp.generated.resources.record_save_success
-import yimalaile.composeapp.generated.resources.stats_empty_message
-import yimalaile.composeapp.generated.resources.unit_days
+import yimalaile.composeapp.generated.resources.*
 
 @Composable
 fun StatisticsScreen(
@@ -76,6 +73,7 @@ fun StatisticsScreen(
     val scope = rememberCoroutineScope()
     val successMsg = stringResource(Res.string.record_save_success)
     val daysStr = stringResource(Res.string.unit_days)
+    val deletedMsg = stringResource(Res.string.record_deleted)
 
     fun refresh() { scope.launch { state = service.getCycleState() } }
     LaunchedEffect(Unit) { state = service.getCycleState() }
@@ -98,7 +96,7 @@ fun StatisticsScreen(
                                 .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)),
                         ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = MaterialTheme.colorScheme.primary) }
                         Spacer(Modifier.weight(1f))
-                        Text("历史记录", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
+                        Text(stringResource(Res.string.history_title), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
                         Spacer(Modifier.weight(1f))
                         Box(Modifier.size(40.dp))
                     }
@@ -133,7 +131,7 @@ fun StatisticsScreen(
             modifier = Modifier.align(Alignment.BottomEnd).padding(24.dp),
             containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.background,
             shape = RoundedCornerShape(28.dp),
-            icon = { Icon(Icons.Default.Add, null) }, text = { Text("补录") },
+            icon = { Icon(Icons.Default.Add, null) }, text = { Text(stringResource(Res.string.history_backfill)) },
         )
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
     }
@@ -166,7 +164,7 @@ fun StatisticsScreen(
                     service.deleteRecord(detailRecord!!.id)
                     detailRecord = null
                     refresh()
-                    snackbar.showSnackbar("已删除")
+                    snackbar.showSnackbar(deletedMsg)
                 }
             },
         )
@@ -261,14 +259,14 @@ private fun RecordCard(record: MenstrualRecord, daysStr: String, onClick: () -> 
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "${record.startDate.monthNumber}月${record.startDate.dayOfMonth}日",
+                        stringResource(Res.string.history_date_start, record.startDate.monthNumber, record.startDate.dayOfMonth),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onBackground,
                     )
                     if (record.endDate != null) {
                         Text(
-                            " — ${record.endDate.monthNumber}月${record.endDate.dayOfMonth}日",
+                            " ${stringResource(Res.string.history_date_range, record.endDate.monthNumber, record.endDate.dayOfMonth)}",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -283,7 +281,7 @@ private fun RecordCard(record: MenstrualRecord, daysStr: String, onClick: () -> 
                     }
                     if (record.dailyRecords.isNotEmpty()) {
                         Spacer(Modifier.width(6.dp))
-                        Text("${record.dailyRecords.size}条记录", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
+                        Text(stringResource(Res.string.history_n_daily_records, record.dailyRecords.size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
                     }
                 }
             }
@@ -294,7 +292,7 @@ private fun RecordCard(record: MenstrualRecord, daysStr: String, onClick: () -> 
                         .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
-                    Text("进行中", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
+                    Text(stringResource(Res.string.history_in_progress), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
                 }
             } else if (days != null) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {

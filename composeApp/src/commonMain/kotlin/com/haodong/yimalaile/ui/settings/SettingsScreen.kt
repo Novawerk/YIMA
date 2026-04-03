@@ -40,11 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.ui.theme.AppColors
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import yimalaile.composeapp.generated.resources.Res
-import yimalaile.composeapp.generated.resources.app_version
-import yimalaile.composeapp.generated.resources.dialog_cancel
-import yimalaile.composeapp.generated.resources.dialog_confirm
-import yimalaile.composeapp.generated.resources.settings_title
+import yimalaile.composeapp.generated.resources.*
 
 @Composable
 fun SettingsScreen(
@@ -83,25 +79,25 @@ fun SettingsScreen(
         Spacer(Modifier.height(32.dp))
 
         // ---------- Color palette ----------
-        SectionLabel("配色方案")
+        SectionLabel(stringResource(Res.string.settings_color_palette))
         Spacer(Modifier.height(12.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             PaletteCard(
-                name = "温暖",
+                name = stringResource(Res.string.settings_palette_warm),
                 colors = listOf(Color(0xFFa66d6d), Color(0xFFF7CDC3), Color(0xFFFFF9F8)),
                 selected = currentPalette == "warm",
                 onClick = { onPaletteChange("warm") },
                 modifier = Modifier.weight(1f),
             )
             PaletteCard(
-                name = "鲜明",
+                name = stringResource(Res.string.settings_palette_vivid),
                 colors = listOf(Color(0xFFE91E63), Color(0xFFFFEB3B), Color(0xFFFFFDE7)),
                 selected = currentPalette == "vivid",
                 onClick = { onPaletteChange("vivid") },
                 modifier = Modifier.weight(1f),
             )
             PaletteCard(
-                name = "简约",
+                name = stringResource(Res.string.settings_palette_mono),
                 colors = listOf(Color(0xFF333333), Color(0xFF9E9E9E), Color(0xFFFFFFFF)),
                 selected = currentPalette == "mono",
                 onClick = { onPaletteChange("mono") },
@@ -112,18 +108,18 @@ fun SettingsScreen(
         Spacer(Modifier.height(24.dp))
 
         // ---------- Dark mode ----------
-        SectionLabel("显示模式")
+        SectionLabel(stringResource(Res.string.settings_display_mode))
         Spacer(Modifier.height(12.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            ModeChip("跟随系统", selected = currentDarkMode == "system", onClick = { onDarkModeChange("system") }, modifier = Modifier.weight(1f))
-            ModeChip("浅色", selected = currentDarkMode == "light", onClick = { onDarkModeChange("light") }, modifier = Modifier.weight(1f))
-            ModeChip("深色", selected = currentDarkMode == "dark", onClick = { onDarkModeChange("dark") }, modifier = Modifier.weight(1f))
+            ModeChip(stringResource(Res.string.settings_mode_system), selected = currentDarkMode == "system", onClick = { onDarkModeChange("system") }, modifier = Modifier.weight(1f))
+            ModeChip(stringResource(Res.string.settings_mode_light), selected = currentDarkMode == "light", onClick = { onDarkModeChange("light") }, modifier = Modifier.weight(1f))
+            ModeChip(stringResource(Res.string.settings_mode_dark), selected = currentDarkMode == "dark", onClick = { onDarkModeChange("dark") }, modifier = Modifier.weight(1f))
         }
 
         Spacer(Modifier.height(24.dp))
 
         // ---------- Other settings ----------
-        SettingsItem(label = "清除所有数据", value = "重新开始", onClick = { showClearConfirm = true }, destructive = true)
+        SettingsItem(label = stringResource(Res.string.settings_clear_data), value = stringResource(Res.string.settings_clear_data_value), onClick = { showClearConfirm = true }, destructive = true)
         Spacer(Modifier.height(12.dp))
         SettingsItem(label = stringResource(Res.string.app_version), value = "1.0.0")
     }
@@ -131,8 +127,8 @@ fun SettingsScreen(
     if (showClearConfirm) {
         AlertDialog(
             onDismissRequest = { showClearConfirm = false },
-            title = { Text("确认清除") },
-            text = { Text("这将删除所有经期记录并重新开始引导。此操作无法撤销。") },
+            title = { Text(stringResource(Res.string.settings_clear_title)) },
+            text = { Text(stringResource(Res.string.settings_clear_body)) },
             confirmButton = {
                 TextButton(onClick = { showClearConfirm = false; onClearData() }) {
                     Text(stringResource(Res.string.dialog_confirm), color = MaterialTheme.colorScheme.error)

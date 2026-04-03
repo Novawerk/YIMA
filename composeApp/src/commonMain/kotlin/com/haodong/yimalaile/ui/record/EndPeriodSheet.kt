@@ -32,10 +32,7 @@ import com.haodong.yimalaile.ui.components.RangeCalendar
 import com.haodong.yimalaile.ui.theme.AppColors
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.stringResource
-import yimalaile.composeapp.generated.resources.Res
-import yimalaile.composeapp.generated.resources.dialog_cancel
-import yimalaile.composeapp.generated.resources.dialog_confirm
-import yimalaile.composeapp.generated.resources.record_end_date
+import yimalaile.composeapp.generated.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,10 +64,10 @@ fun EndPeriodSheet(
                 Text("✓", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
             }
             Spacer(Modifier.height(12.dp))
-            Text("什么时候结束的？", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
+            Text(stringResource(Res.string.end_period_question), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
             Spacer(Modifier.height(4.dp))
             Text(
-                "从 ${startDate.monthNumber}月${startDate.dayOfMonth}日 开始",
+                stringResource(Res.string.end_period_from, startDate.monthNumber, startDate.dayOfMonth),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -107,8 +104,8 @@ fun EndPeriodSheet(
         val overflow = dailyRecords.count { it.date > pending }
         AlertDialog(
             onDismissRequest = { pendingEndDate = null },
-            title = { Text("移除多余记录？") },
-            text = { Text("结束日期之后有 ${overflow} 条每日记录，确认后将被移除。") },
+            title = { Text(stringResource(Res.string.end_period_trim_title)) },
+            text = { Text(stringResource(Res.string.end_period_trim_body, overflow)) },
             confirmButton = {
                 TextButton(onClick = {
                     pendingEndDate = null

@@ -41,8 +41,8 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.number
 import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
-
-private val WEEKDAY_LABELS = listOf("一", "二", "三", "四", "五", "六", "日")
+import org.jetbrains.compose.resources.stringResource
+import yimalaile.composeapp.generated.resources.*
 
 @Composable
 fun RangeCalendar(
@@ -79,6 +79,16 @@ fun RangeCalendar(
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = months.size - 1)
     LaunchedEffect(Unit) { listState.scrollToItem(months.size - 1) }
 
+    val weekdayLabels = listOf(
+        stringResource(Res.string.weekday_mon),
+        stringResource(Res.string.weekday_tue),
+        stringResource(Res.string.weekday_wed),
+        stringResource(Res.string.weekday_thu),
+        stringResource(Res.string.weekday_fri),
+        stringResource(Res.string.weekday_sat),
+        stringResource(Res.string.weekday_sun),
+    )
+
     Column(modifier) {
         // Weekday header
         Row(
@@ -87,7 +97,7 @@ fun RangeCalendar(
                 .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                 .padding(vertical = 8.dp),
         ) {
-            WEEKDAY_LABELS.forEachIndexed { i, label ->
+            weekdayLabels.forEachIndexed { i, label ->
                 Text(
                     label,
                     modifier = Modifier.weight(1f),
@@ -150,7 +160,7 @@ private fun MonthGrid(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                "${yearMonth.month.number}月",
+                stringResource(Res.string.calendar_month_label, yearMonth.month.number),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = surface,

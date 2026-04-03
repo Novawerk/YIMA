@@ -43,6 +43,8 @@ import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.domain.menstrual.Mood
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.until
+import org.jetbrains.compose.resources.stringResource
+import yimalaile.composeapp.generated.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -85,7 +87,7 @@ fun RecordDetailSheet(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
                     )
-                    Text("天", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(Res.string.detail_unit_days), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
@@ -93,9 +95,8 @@ fun RecordDetailSheet(
 
             // Date range
             Text(
-                "${record.startDate.monthNumber}月${record.startDate.dayOfMonth}日" +
-                    if (record.endDate != null) " — ${record.endDate.monthNumber}月${record.endDate.dayOfMonth}日"
-                    else " — 进行中",
+                if (record.endDate != null) stringResource(Res.string.detail_date_range, record.startDate.monthNumber, record.startDate.dayOfMonth, record.endDate.monthNumber, record.endDate.dayOfMonth)
+                else stringResource(Res.string.detail_date_start_only, record.startDate.monthNumber, record.startDate.dayOfMonth, stringResource(Res.string.detail_in_progress)),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
@@ -131,16 +132,16 @@ fun RecordDetailSheet(
 
             // Action buttons — two rows, rounded cards
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                ActionCard("📅", "修改开始", onClick = onEditStart, modifier = Modifier.weight(1f))
-                ActionCard("🏁", "修改结束", onClick = onEditEnd, modifier = Modifier.weight(1f))
-                ActionCard("📝", "补充记录", onClick = onLogDay, modifier = Modifier.weight(1f))
+                ActionCard("📅", stringResource(Res.string.detail_edit_start), onClick = onEditStart, modifier = Modifier.weight(1f))
+                ActionCard("🏁", stringResource(Res.string.detail_edit_end), onClick = onEditEnd, modifier = Modifier.weight(1f))
+                ActionCard("📝", stringResource(Res.string.detail_add_record), onClick = onLogDay, modifier = Modifier.weight(1f))
             }
 
             // Daily records
             if (record.dailyRecords.isNotEmpty()) {
                 Spacer(Modifier.height(24.dp))
                 Text(
-                    "每日记录",
+                    stringResource(Res.string.detail_daily_records),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.fillMaxWidth(),
@@ -160,7 +161,7 @@ fun RecordDetailSheet(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        "还没有每日记录\n点击上方「补充记录」添加",
+                        stringResource(Res.string.detail_no_records),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         textAlign = TextAlign.Center,
@@ -171,7 +172,7 @@ fun RecordDetailSheet(
             // Delete
             Spacer(Modifier.height(32.dp))
             Text(
-                "删除此记录",
+                stringResource(Res.string.detail_delete),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error.copy(alpha = 0.6f),
                 modifier = Modifier.clickable { showDeleteConfirm = true }.padding(8.dp),
@@ -183,15 +184,15 @@ fun RecordDetailSheet(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("确认删除") },
-            text = { Text("删除后无法恢复，确定要删除这条经期记录吗？") },
+            title = { Text(stringResource(Res.string.detail_delete_title)) },
+            text = { Text(stringResource(Res.string.detail_delete_body)) },
             confirmButton = {
                 TextButton(onClick = { showDeleteConfirm = false; onDelete() }) {
-                    Text("删除", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(Res.string.detail_delete_confirm), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) { Text("取消") }
+                TextButton(onClick = { showDeleteConfirm = false }) { Text(stringResource(Res.string.dialog_cancel)) }
             },
         )
     }
@@ -263,7 +264,11 @@ private fun DailyRecordRow(day: DailyRecord) {
                         Box(Modifier.size(6.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)))
                     }
                     Text(
-                        intensityLabel(day.intensity),
+                        when (day.intensity) {
+                            Intensity.LIGHT -> stringResource(Res.string.intensity_light)
+                            Intensity.MEDIUM -> stringResource(Res.string.intensity_medium)
+                            Intensity.HEAVY -> stringResource(Res.string.intensity_heavy)
+                        },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -298,5 +303,4 @@ private fun DailyRecordRow(day: DailyRecord) {
     }
 }
 
-private fun intensityLabel(i: Intensity) = when (i) { Intensity.LIGHT -> "少量"; Intensity.MEDIUM -> "中量"; Intensity.HEAVY -> "多量" }
 private fun moodLabel(m: Mood) = when (m) { Mood.HAPPY -> "😊"; Mood.NEUTRAL -> "😐"; Mood.SAD -> "😔"; Mood.VERY_SAD -> "😢" }

@@ -63,14 +63,7 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import kotlinx.datetime.until
 import org.jetbrains.compose.resources.stringResource
-import yimalaile.composeapp.generated.resources.Res
-import yimalaile.composeapp.generated.resources.btn_record_period
-import yimalaile.composeapp.generated.resources.record_save_success
-import yimalaile.composeapp.generated.resources.stat_cycle_length
-import yimalaile.composeapp.generated.resources.stat_period_length
-import yimalaile.composeapp.generated.resources.status_here_desc
-import yimalaile.composeapp.generated.resources.status_no_prediction
-import yimalaile.composeapp.generated.resources.unit_days
+import yimalaile.composeapp.generated.resources.*
 
 @Composable
 fun HomeScreen(
@@ -243,7 +236,7 @@ private fun HomeContent(
             val remainingDays = avgPeriodLen?.let { (it - dayCount).coerceAtLeast(0) }
 
             Text(
-                "照顾好自己",
+                stringResource(Res.string.home_take_care),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -251,7 +244,7 @@ private fun HomeContent(
 
             Row(verticalAlignment = Alignment.Top) {
                 Text(
-                    "经期中",
+                    stringResource(Res.string.home_in_period),
                     style = MaterialTheme.typography.headlineLarge,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
@@ -260,20 +253,20 @@ private fun HomeContent(
 
             Spacer(Modifier.height(16.dp))
 
-            StatusPill("第 ${dayCount} 天")
+            StatusPill(stringResource(Res.string.home_day_n, dayCount))
 
             // Estimated remaining
             if (remainingDays != null) {
                 Spacer(Modifier.height(8.dp))
                 if (remainingDays > 0) {
                     Text(
-                        "预计还有 ${remainingDays} 天结束",
+                        stringResource(Res.string.home_remaining_days, remainingDays),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 } else {
                     Text(
-                        "已超过平均经期时长",
+                        stringResource(Res.string.home_exceeded_avg),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                     )
@@ -292,7 +285,7 @@ private fun HomeContent(
             Spacer(Modifier.weight(1f))
 
             // Primary action: log today
-            PrimaryCta(text = "✦ 记录今天", onClick = onLogDay)
+            PrimaryCta(text = stringResource(Res.string.home_log_today), onClick = onLogDay)
             Spacer(Modifier.height(12.dp))
             // Secondary action: end period — outlined style
             OutlinedButton(
@@ -301,7 +294,7 @@ private fun HomeContent(
                 shape = RoundedCornerShape(28.dp),
                 border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)),
             ) {
-                Text("经期结束", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                Text(stringResource(Res.string.home_end_period), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
             }
 
         } else {
@@ -314,9 +307,9 @@ private fun HomeContent(
             // Determine hero text based on days until
             val (question, heroText) = when {
                 daysUntil == null -> "" to stringResource(Res.string.status_no_prediction)
-                daysUntil < 0 -> "已经推迟了" to "该来了"
-                daysUntil <= 3 -> "就快到了" to "快了"
-                else -> "暂时安心" to "还早"
+                daysUntil < 0 -> stringResource(Res.string.home_hero_overdue_sub) to stringResource(Res.string.home_hero_overdue)
+                daysUntil <= 3 -> stringResource(Res.string.home_hero_soon_sub) to stringResource(Res.string.home_hero_soon)
+                else -> stringResource(Res.string.home_hero_early_sub) to stringResource(Res.string.home_hero_early)
             }
 
             Text(
@@ -340,9 +333,9 @@ private fun HomeContent(
             if (prediction != null) {
                 val startDate = prediction.predictedStart
                 val label = if (daysUntil != null && daysUntil < 0) {
-                    "预计 ${startDate.monthNumber}月${startDate.dayOfMonth}日 (已推迟${-daysUntil}天)"
+                    stringResource(Res.string.home_predicted_delayed, startDate.monthNumber, startDate.dayOfMonth, -daysUntil)
                 } else if (daysUntil != null) {
-                    "预计 ${startDate.monthNumber}月${startDate.dayOfMonth}日 (${daysUntil}天后)"
+                    stringResource(Res.string.home_predicted_in_days, startDate.monthNumber, startDate.dayOfMonth, daysUntil)
                 } else ""
                 StatusPill(label)
             }
@@ -391,9 +384,9 @@ private fun HomeContent(
                 val gaps = sorted.zipWithNext().map { (a, b) -> a.startDate.until(b.startDate, DateTimeUnit.DAY) }
                 val variance = gaps.map { (it - avgCycle) * (it - avgCycle) }.average()
                 val confidence = when {
-                    sorted.size >= 6 && variance < 9 -> "高"
-                    sorted.size >= 3 -> "中"
-                    else -> "低"
+                    sorted.size >= 6 && variance < 9 -> stringResource(Res.string.stats_confidence_high)
+                    sorted.size >= 3 -> stringResource(Res.string.stats_confidence_medium)
+                    else -> stringResource(Res.string.stats_confidence_low)
                 }
                 Row(
                     Modifier.fillMaxWidth()
@@ -403,7 +396,7 @@ private fun HomeContent(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text("预测置信度", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(Res.string.home_prediction_confidence), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     StatusPill(confidence)
                 }
             }
@@ -418,7 +411,7 @@ private fun HomeContent(
                     shape = RoundedCornerShape(28.dp),
                     border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)),
                 ) {
-                    Text("补录更多，开始预测", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Text(stringResource(Res.string.home_backfill_to_predict), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
                 }
                 Spacer(Modifier.height(12.dp))
             }
@@ -514,9 +507,9 @@ private fun DayTimeline(
                             ) {
                                 Text(
                                     when (record.intensity) {
-                                        com.haodong.yimalaile.domain.menstrual.Intensity.LIGHT -> "少量"
-                                        com.haodong.yimalaile.domain.menstrual.Intensity.MEDIUM -> "中量"
-                                        com.haodong.yimalaile.domain.menstrual.Intensity.HEAVY -> "多量"
+                                        com.haodong.yimalaile.domain.menstrual.Intensity.LIGHT -> stringResource(Res.string.intensity_light)
+                                        com.haodong.yimalaile.domain.menstrual.Intensity.MEDIUM -> stringResource(Res.string.intensity_medium)
+                                        com.haodong.yimalaile.domain.menstrual.Intensity.HEAVY -> stringResource(Res.string.intensity_heavy)
                                     },
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.primary,
@@ -535,7 +528,7 @@ private fun DayTimeline(
                 } else {
                     // Empty — invite to record
                     Text(
-                        if (isToday) "记录今天的情况" else "点击补充",
+                        if (isToday) stringResource(Res.string.home_log_today_hint) else stringResource(Res.string.home_tap_to_add),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
                         modifier = Modifier.weight(1f),
