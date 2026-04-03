@@ -65,13 +65,8 @@ internal fun ColumnScope.HeroSection(
                 }
                 SmallSpacer(48)
                 Text(
-                    text = if (inPeriod && phaseInfo != null) {
-                        stringResource(Res.string.home_estimated_remaining, (phaseInfo.periodLength - (dayCount ?: 0)).coerceAtLeast(0))
-                    } else if (inPeriod) {
-                        stringResource(Res.string.home_day_n, dayCount ?: 0)
-                    } else {
-                        stringResource(Res.string.unit_days)
-                    },
+                    text = if (inPeriod) stringResource(Res.string.home_estimated_remaining, (phaseInfo?.let { it.periodLength - (dayCount ?: 0) } ?: 0).coerceAtLeast(0))
+                           else stringResource(Res.string.unit_days),
                     style = MaterialTheme.typography.labelSmall,
                 )
                 SmallSpacer(24)
@@ -110,36 +105,38 @@ internal fun ColumnScope.HeroSection(
                     ) { }
                 }
             }
-            SmallSpacer(16)
-            Surface(
-                tonalElevation = 1.dp,
-                shape = MaterialTheme.shapes.extraLarge,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Row(
-                    modifier = Modifier.padding(24.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+            // Next period card — only show when NOT in period
+            if (!inPeriod) {
+                SmallSpacer(16)
+                Surface(
+                    tonalElevation = 1.dp,
+                    shape = MaterialTheme.shapes.extraLarge,
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text(
-                        if (inPeriod) stringResource(Res.string.home_estimated_remaining, (phaseInfo.periodLength - (dayCount ?: 0)).coerceAtLeast(0))
-                        else stringResource(Res.string.home_next_period_starts),
-                        style = MaterialTheme.typography.labelSmallEmphasized,
-                        color = MaterialTheme.colorScheme.secondary,
-                        fontWeight = FontWeight.Black,
-                    )
-                    GrowSpacer()
-                    if (!inPeriod && phaseInfo.nextPeriodStart != null) {
-                        val d = phaseInfo.nextPeriodStart
+                    Row(
+                        modifier = Modifier.padding(24.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         Text(
-                            "${d.monthNumber}/${d.dayOfMonth}",
-                            style = MaterialTheme.typography.bodyLargeEmphasized,
+                            stringResource(Res.string.home_next_period_starts),
+                            style = MaterialTheme.typography.labelSmallEmphasized,
+                            color = MaterialTheme.colorScheme.secondary,
+                            fontWeight = FontWeight.Black,
                         )
-                        SmallSpacer(8)
-                        Surface(
-                            modifier = Modifier.size(24.dp),
-                            color = MaterialTheme.colorScheme.primary,
-                            shape = MaterialTheme.expressiveShapes.puffy,
-                        ) { }
+                        GrowSpacer()
+                        if (phaseInfo.nextPeriodStart != null) {
+                            val d = phaseInfo.nextPeriodStart
+                            Text(
+                                "${d.monthNumber}/${d.dayOfMonth}",
+                                style = MaterialTheme.typography.bodyLargeEmphasized,
+                            )
+                            SmallSpacer(8)
+                            Surface(
+                                modifier = Modifier.size(24.dp),
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = MaterialTheme.expressiveShapes.puffy,
+                            ) { }
+                        }
                     }
                 }
             }
