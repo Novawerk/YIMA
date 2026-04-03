@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.ui.theme.AppColors
 import kotlinx.coroutines.launch
@@ -122,6 +123,37 @@ fun SettingsScreen(
         SettingsItem(label = stringResource(Res.string.settings_clear_data), value = stringResource(Res.string.settings_clear_data_value), onClick = { showClearConfirm = true }, destructive = true)
         Spacer(Modifier.height(12.dp))
         SettingsItem(label = stringResource(Res.string.app_version), value = "1.0.0")
+
+        Spacer(Modifier.height(32.dp))
+
+        // About
+        Box(
+            Modifier.fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
+                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
+                .padding(24.dp),
+        ) {
+            Column {
+                Text(
+                    stringResource(Res.string.settings_about),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    stringResource(Res.string.settings_about_org),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    stringResource(Res.string.settings_about_motto),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
     }
 
     if (showClearConfirm) {

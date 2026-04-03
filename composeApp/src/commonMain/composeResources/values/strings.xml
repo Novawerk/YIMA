@@ -206,6 +206,9 @@
     <string name="settings_clear_data_value">Start over</string>
     <string name="settings_clear_title">Confirm Clear</string>
     <string name="settings_clear_body">This will delete all period records and restart onboarding. This action cannot be undone.</string>
+    <string name="settings_about">About Us</string>
+    <string name="settings_about_org">Novawerk</string>
+    <string name="settings_about_motto">In an era where action is cheapest, remaking every app the non-profit way.</string>
 
     <!-- Weekday labels -->
     <string name="calendar_month_label">%1$d</string>

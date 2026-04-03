@@ -103,7 +103,7 @@ fun EndPeriodSheet(
     if (pending != null) {
         val overflow = dailyRecords.count { it.date > pending }
         AlertDialog(
-            onDismissRequest = { pendingEndDate = null },
+            onDismissRequest = { },
             title = { Text(stringResource(Res.string.end_period_trim_title)) },
             text = { Text(stringResource(Res.string.end_period_trim_body, overflow)) },
             confirmButton = {

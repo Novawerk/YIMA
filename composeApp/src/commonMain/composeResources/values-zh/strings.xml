@@ -206,6 +206,9 @@
     <string name="settings_clear_data_value">重新开始</string>
     <string name="settings_clear_title">确认清除</string>
     <string name="settings_clear_body">这将删除所有经期记录并重新开始引导。此操作无法撤销。</string>
+    <string name="settings_about">关于我们</string>
+    <string name="settings_about_org">Novawerk</string>
+    <string name="settings_about_motto">在行动最便宜的时代，用非盈利的方式重新制作每一个App</string>
 
     <string name="calendar_month_label">%1$d月</string>
     <string name="history_date_start">%1$d月%2$d日</string>
