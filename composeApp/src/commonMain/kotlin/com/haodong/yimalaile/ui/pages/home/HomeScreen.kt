@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -58,9 +57,7 @@ fun HomeScreen(
             is HomeUiState.Ready -> {
                 val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
-                Column(
-                    Modifier.fillMaxSize(),
-                ) {
+                Column(Modifier.fillMaxSize()) {
                     // ── App Bar ──
                     Row(
                         Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
@@ -83,42 +80,36 @@ fun HomeScreen(
                     }
                     SmallSpacer(24)
 
-                    // ── Content: Hero (fills space) + Bottom actions ──
-                    if (s.cycleState.activePeriod != null) {
-                        InPeriodContent(
-                            state = s.cycleState,
-                            today = today,
-                            onEndPeriod = {
-                                scope.launch {
-                                    val ok = sheetManager.endPeriod() ?: return@launch
-                                    if (ok) { viewModel.refresh(); snackbar.showSnackbar(successMsg) }
-                                }
-                            },
-                            onLogDay = {
-                                scope.launch {
-                                    val ok = sheetManager.logDay() ?: return@launch
-                                    if (ok) { viewModel.refresh(); snackbar.showSnackbar(successMsg) }
-                                }
-                            },
-                        )
-                    } else {
-                        NotInPeriodContent(
-                            state = s.cycleState,
-                            today = today,
-                            onStartPeriod = {
-                                scope.launch {
-                                    val result = sheetManager.startPeriod() ?: return@launch
-                                    if (result is AddRecordResult.Success) { viewModel.refresh(); snackbar.showSnackbar(successMsg) }
-                                }
-                            },
-                            onBackfill = {
-                                scope.launch {
-                                    val result = sheetManager.backfillPeriod() ?: return@launch
-                                    if (result is AddRecordResult.Success) { viewModel.refresh(); snackbar.showSnackbar(successMsg) }
-                                }
-                            },
-                        )
-                    }
+                    // ── Unified Content ──
+                    HomeContent(
+                        state = s.cycleState,
+                        phaseInfo = s.phaseInfo,
+                        today = today,
+                        onStartPeriod = {
+                            scope.launch {
+                                val result = sheetManager.startPeriod() ?: return@launch
+                                if (result is AddRecordResult.Success) { viewModel.refresh(); snackbar.showSnackbar(successMsg) }
+                            }
+                        },
+                        onEndPeriod = {
+                            scope.launch {
+                                val ok = sheetManager.endPeriod() ?: return@launch
+                                if (ok) { viewModel.refresh(); snackbar.showSnackbar(successMsg) }
+                            }
+                        },
+                        onLogDay = {
+                            scope.launch {
+                                val ok = sheetManager.logDay() ?: return@launch
+                                if (ok) { viewModel.refresh(); snackbar.showSnackbar(successMsg) }
+                            }
+                        },
+                        onBackfill = {
+                            scope.launch {
+                                val result = sheetManager.backfillPeriod() ?: return@launch
+                                if (result is AddRecordResult.Success) { viewModel.refresh(); snackbar.showSnackbar(successMsg) }
+                            }
+                        },
+                    )
                 }
             }
         }

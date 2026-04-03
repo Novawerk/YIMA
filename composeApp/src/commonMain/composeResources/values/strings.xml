@@ -223,4 +223,16 @@
     <string name="weekday_fri">Fri</string>
     <string name="weekday_sat">Sat</string>
     <string name="weekday_sun">Sun</string>
+
+    <!-- Cycle phases -->
+    <string name="phase_menstrual">Menstrual</string>
+    <string name="phase_follicular">Follicular</string>
+    <string name="phase_ovulation">Ovulation</string>
+    <string name="phase_luteal">Luteal</string>
+    <string name="home_next_visit">Next visit</string>
+    <string name="home_current_phase">Current phase</string>
+    <string name="home_next_period_starts">Next period starts</string>
+    <string name="home_past_records">Past records</string>
+    <string name="home_day_in_cycle">Day %1$d of %2$d</string>
+    <string name="home_estimated_remaining">~%1$d days remaining</string>
 </resources>

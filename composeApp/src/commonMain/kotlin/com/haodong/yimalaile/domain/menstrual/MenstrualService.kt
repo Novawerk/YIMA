@@ -135,5 +135,45 @@ class MenstrualService(private val repository: RecordsRepository) {
         return if (lengths.isEmpty()) null else lengths.sum() / lengths.size
     }
 
+    /**
+     * Determine the current cycle phase based on historical data.
+     * Returns null if not enough data (< 2 completed records).
+     */
+    fun getCurrentPhase(state: CycleState, today: LocalDate): CyclePhaseInfo? {
+        val allRecords = state.recentPeriods + listOfNotNull(state.activePeriod)
+        val avgCycle = averageCycleLength(allRecords) ?: return null
+        val avgPeriod = averagePeriodLength(allRecords) ?: return null
+
+        // Find the anchor: most recent period start
+        val lastPeriodStart = allRecords
+            .filter { !it.isDeleted }
+            .maxByOrNull { it.startDate }
+            ?.startDate ?: return null
+
+        val dayInCycle = lastPeriodStart.until(today, DateTimeUnit.DAY).toInt() + 1 // 1-based
+        val progress = (dayInCycle.toFloat() / avgCycle).coerceIn(0f, 1f)
+        val daysUntilNext = (avgCycle - dayInCycle).coerceAtLeast(0)
+        val nextStart = state.predictions.firstOrNull()?.predictedStart
+
+        // Determine phase based on proportions of cycle
+        val phase = when {
+            state.activePeriod != null -> CyclePhase.MENSTRUAL
+            dayInCycle <= avgPeriod -> CyclePhase.MENSTRUAL
+            dayInCycle <= (avgCycle * 0.46).toInt() -> CyclePhase.FOLLICULAR
+            dayInCycle <= (avgCycle * 0.57).toInt() -> CyclePhase.OVULATION
+            else -> CyclePhase.LUTEAL
+        }
+
+        return CyclePhaseInfo(
+            phase = phase,
+            dayInCycle = dayInCycle,
+            cycleLength = avgCycle,
+            periodLength = avgPeriod,
+            progress = progress,
+            daysUntilNextPeriod = daysUntilNext,
+            nextPeriodStart = nextStart,
+        )
+    }
+
     private fun newId() = "record_${Clock.System.now().toEpochMilliseconds()}_${(0..9999).random()}"
 }
