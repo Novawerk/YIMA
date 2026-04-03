@@ -6,6 +6,8 @@ import androidx.compose.runtime.getValue
 import com.haodong.yimalaile.ui.pages.record.BackfillSheet
 import com.haodong.yimalaile.ui.pages.record.EndPeriodSheet
 import com.haodong.yimalaile.ui.pages.record.LogDaySheet
+import com.haodong.yimalaile.ui.pages.record.PredictionDetailSheet
+import com.haodong.yimalaile.ui.pages.record.RecordDetailSheet
 import com.haodong.yimalaile.ui.pages.record.StartPeriodSheet
 
 /**
@@ -45,6 +47,21 @@ fun SheetHost(manager: SheetManager) {
             onSave = { start, end -> r.result.complete(start to end) },
         )
 
-        null -> {} // nothing to show
+        is SheetRequest.RecordDetail -> RecordDetailSheet(
+            record = r.record,
+            onDismiss = { manager.dismiss() },
+            onEditStart = { r.result.complete(DetailAction.EditStart) },
+            onEditEnd = { r.result.complete(DetailAction.EditEnd) },
+            onLogDay = { r.result.complete(DetailAction.LogDay) },
+            onDelete = { r.result.complete(DetailAction.Delete) },
+        )
+
+        is SheetRequest.PredictionDetail -> PredictionDetailSheet(
+            prediction = r.prediction,
+            avgPeriodLength = r.avgPeriodLength,
+            onDismiss = { manager.dismiss() },
+        )
+
+        null -> {}
     }
 }

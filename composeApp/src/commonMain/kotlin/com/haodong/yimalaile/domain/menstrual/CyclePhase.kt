@@ -28,4 +28,24 @@ data class CyclePhaseInfo(
     val progress: Float,            // 0f..1f progress through cycle
     val daysUntilNextPeriod: Int,   // days remaining until next predicted period
     val nextPeriodStart: LocalDate?,
-)
+) {
+    /** Start day (1-based) of each phase within this cycle. */
+    fun phaseStartDay(p: CyclePhase): Int = when (p) {
+        CyclePhase.MENSTRUAL -> 1
+        CyclePhase.FOLLICULAR -> periodLength + 1
+        CyclePhase.OVULATION -> (cycleLength * 0.46).toInt() + 1
+        CyclePhase.LUTEAL -> (cycleLength * 0.57).toInt() + 1
+    }
+
+    /** Days until a given phase starts. Negative = already past, 0 = current phase. */
+    fun daysUntilPhase(p: CyclePhase): Int {
+        if (p == phase) return 0
+        val startDay = phaseStartDay(p)
+        return if (startDay > dayInCycle) {
+            startDay - dayInCycle
+        } else {
+            // Phase already passed this cycle — show days until next cycle's occurrence
+            (cycleLength - dayInCycle) + startDay
+        }
+    }
+}

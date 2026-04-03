@@ -19,7 +19,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +35,21 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.until
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
+
+// ============================================================
+// Decorative shape
+// ============================================================
+
+/** Small colored shape icon — used for phase indicators, badges, etc. */
+@Composable
+fun DecorShape(
+    size: Int,
+    shape: Shape,
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.surface,
+) {
+    Surface(modifier = modifier.size(size.dp), color = color, shape = shape) { }
+}
 
 // ============================================================
 // Spacer utilities

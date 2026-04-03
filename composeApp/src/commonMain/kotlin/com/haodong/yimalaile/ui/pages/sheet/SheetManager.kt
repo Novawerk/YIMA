@@ -6,6 +6,7 @@ import com.haodong.yimalaile.domain.menstrual.Intensity
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.domain.menstrual.Mood
+import com.haodong.yimalaile.domain.menstrual.PredictedCycle
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +26,13 @@ data class LogDayResult(
     val notes: String?,
 )
 
+sealed class DetailAction {
+    object EditStart : DetailAction()
+    object EditEnd : DetailAction()
+    object LogDay : DetailAction()
+    object Delete : DetailAction()
+}
+
 // ============================================================
 // Sheet requests — what the SheetHost renders
 // ============================================================
@@ -35,32 +43,36 @@ sealed class SheetRequest {
     data class StartPeriod(
         val records: List<MenstrualRecord>,
         val result: CompletableDeferred<LocalDate?>,
-    ) : SheetRequest() {
-        override val deferred get() = result
-    }
+    ) : SheetRequest() { override val deferred get() = result }
 
     data class EndPeriod(
         val startDate: LocalDate,
         val dailyRecords: List<DailyRecord>,
         val records: List<MenstrualRecord>,
         val result: CompletableDeferred<LocalDate?>,
-    ) : SheetRequest() {
-        override val deferred get() = result
-    }
+    ) : SheetRequest() { override val deferred get() = result }
 
     data class LogDay(
         val targetDate: LocalDate?,
         val result: CompletableDeferred<LogDayResult?>,
-    ) : SheetRequest() {
-        override val deferred get() = result
-    }
+    ) : SheetRequest() { override val deferred get() = result }
 
     data class Backfill(
         val records: List<MenstrualRecord>,
         val result: CompletableDeferred<Pair<LocalDate, LocalDate>?>,
-    ) : SheetRequest() {
-        override val deferred get() = result
-    }
+    ) : SheetRequest() { override val deferred get() = result }
+
+    data class RecordDetail(
+        val record: MenstrualRecord,
+        val isActive: Boolean,
+        val result: CompletableDeferred<DetailAction?>,
+    ) : SheetRequest() { override val deferred get() = result }
+
+    data class PredictionDetail(
+        val prediction: PredictedCycle,
+        val avgPeriodLength: Int,
+        val result: CompletableDeferred<Unit?>,
+    ) : SheetRequest() { override val deferred get() = result }
 }
 
 // ============================================================
@@ -136,6 +148,21 @@ class SheetManager(private val service: MenstrualService) {
     suspend fun backfillPeriod(): AddRecordResult? {
         val (start, end) = showBackfillSheet() ?: return null
         return service.backfillPeriod(start, end)
+    }
+
+    /** Show record detail. Returns the action the user chose, or null if dismissed. */
+    suspend fun showRecordDetail(record: MenstrualRecord, isActive: Boolean = false): DetailAction? {
+        val deferred = CompletableDeferred<DetailAction?>()
+        _activeSheet.value = SheetRequest.RecordDetail(record, isActive, deferred)
+        return deferred.await().also { _activeSheet.value = null }
+    }
+
+    /** Show prediction detail (read-only). Suspends until dismissed. */
+    suspend fun showPredictionDetail(prediction: PredictedCycle, avgPeriodLength: Int) {
+        val deferred = CompletableDeferred<Unit?>()
+        _activeSheet.value = SheetRequest.PredictionDetail(prediction, avgPeriodLength, deferred)
+        deferred.await()
+        _activeSheet.value = null
     }
 
     // ---- Dismiss (from swipe/back) ----

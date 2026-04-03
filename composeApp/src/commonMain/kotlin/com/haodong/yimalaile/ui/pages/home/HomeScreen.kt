@@ -29,8 +29,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.domain.menstrual.AddRecordResult
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
+import com.haodong.yimalaile.ui.components.DecorShape
+import com.haodong.yimalaile.ui.components.GrowSpacer
 import com.haodong.yimalaile.ui.components.SmallSpacer
 import com.haodong.yimalaile.ui.pages.sheet.SheetManager
+import com.haodong.yimalaile.ui.theme.expressiveShapes
 import kotlinx.coroutines.launch
 import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
@@ -61,14 +64,16 @@ fun HomeScreen(
                     // ── App Bar ──
                     Row(
                         Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
+                        DecorShape(24, shape = MaterialTheme.expressiveShapes.cookie7, color = MaterialTheme.colorScheme.primary)
+                        SmallSpacer(8)
                         Text(
                             stringResource(Res.string.app_name),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                        GrowSpacer()
                         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             IconButton(onClick = onNavigateStatistics, modifier = Modifier.size(40.dp)) {
                                 Icon(Icons.Outlined.History, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -107,6 +112,35 @@ fun HomeScreen(
                             scope.launch {
                                 val result = sheetManager.backfillPeriod() ?: return@launch
                                 if (result is AddRecordResult.Success) { viewModel.refresh(); snackbar.showSnackbar(successMsg) }
+                            }
+                        },
+                        onRecordClick = { record, isActive ->
+                            scope.launch {
+                                val action = sheetManager.showRecordDetail(record, isActive) ?: return@launch
+                                when (action) {
+                                    is com.haodong.yimalaile.ui.pages.sheet.DetailAction.EditStart -> {
+                                        sheetManager.startPeriod()
+                                        viewModel.refresh()
+                                    }
+                                    is com.haodong.yimalaile.ui.pages.sheet.DetailAction.EditEnd -> {
+                                        val ok = sheetManager.endPeriod() ?: return@launch
+                                        if (ok) { viewModel.refresh(); snackbar.showSnackbar(successMsg) }
+                                    }
+                                    is com.haodong.yimalaile.ui.pages.sheet.DetailAction.LogDay -> {
+                                        val ok = sheetManager.logDay() ?: return@launch
+                                        if (ok) { viewModel.refresh(); snackbar.showSnackbar(successMsg) }
+                                    }
+                                    is com.haodong.yimalaile.ui.pages.sheet.DetailAction.Delete -> {
+                                        service.deleteRecord(record.id)
+                                        viewModel.refresh()
+                                        snackbar.showSnackbar(successMsg)
+                                    }
+                                }
+                            }
+                        },
+                        onPredictionClick = { prediction ->
+                            scope.launch {
+                                sheetManager.showPredictionDetail(prediction, s.phaseInfo?.periodLength ?: 5)
                             }
                         },
                     )
