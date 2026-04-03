@@ -5,7 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,6 +33,32 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.until
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
+
+// ============================================================
+// Spacer utilities
+// ============================================================
+
+/** Fixed-size vertical spacer. */
+@Composable
+fun SmallSpacer(size: Int) {
+    Spacer(Modifier.size(size.dp))
+}
+
+/** Flexible spacer that grows to fill remaining space in a Column. */
+@Composable
+fun ColumnScope.GrowSpacer() {
+    Spacer(Modifier.weight(1f))
+}
+
+/** Flexible spacer that grows to fill remaining space in a Row. */
+@Composable
+fun RowScope.GrowSpacer() {
+    Spacer(Modifier.weight(1f))
+}
+
+// ============================================================
+// Components
+// ============================================================
 
 /** Full-width pill CTA button matching design (Deep Rose bg, white text). */
 @Composable
@@ -174,6 +202,32 @@ fun IllustrationPlaceholder(modifier: Modifier = Modifier) {
             ).forEach { color ->
                 Box(Modifier.size(40.dp).clip(CircleShape).background(color))
             }
+        }
+    }
+}
+
+/** Compact inline stat row with dot separator. */
+@Composable
+fun CompactStatRow(items: List<String>, modifier: Modifier = Modifier) {
+    if (items.isEmpty()) return
+    Row(
+        modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        items.forEachIndexed { index, item ->
+            if (index > 0) {
+                Text(
+                    "  ·  ",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                )
+            }
+            Text(
+                item,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
