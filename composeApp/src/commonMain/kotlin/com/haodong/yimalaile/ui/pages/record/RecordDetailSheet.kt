@@ -1,6 +1,7 @@
 package com.haodong.yimalaile.ui.pages.record
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -211,11 +212,24 @@ private fun DailyRecordCard(day: DailyRecord) {
 
 @Composable
 private fun EmptyDayCard(date: LocalDate, onClick: () -> Unit) {
+    val borderColor = MaterialTheme.colorScheme.outlineVariant
+    val cornerRadius = 16.dp
     Surface(
         onClick = onClick,
         shape = MaterialTheme.shapes.medium,
-        border = ButtonDefaults.outlinedButtonBorder(enabled = true),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().drawBehind {
+            val stroke = 1.5.dp.toPx()
+            val dash = 6.dp.toPx()
+            val gap = 4.dp.toPx()
+            drawRoundRect(
+                color = borderColor,
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(cornerRadius.toPx()),
+                style = androidx.compose.ui.graphics.drawscope.Stroke(
+                    width = stroke,
+                    pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(dash, gap)),
+                ),
+            )
+        },
     ) {
         Row(
             Modifier.padding(horizontal = 16.dp, vertical = 12.dp),

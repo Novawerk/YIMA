@@ -144,7 +144,7 @@ internal fun ColumnScope.HeroSection(
                             waveSpeed = 4.dp,
                         )
                     }
-                    SmallSpacer(48)
+                    SmallSpacer(32)
                     Text(
                         text = stringResource(Res.string.unit_days),
                         style = MaterialTheme.typography.titleLarge,

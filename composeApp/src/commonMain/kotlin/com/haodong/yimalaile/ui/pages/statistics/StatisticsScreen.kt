@@ -180,14 +180,7 @@ private fun RecordCard(record: MenstrualRecord, daysStr: String, onClick: () -> 
                         )
                     }
                 }
-                if (record.dailyRecords.isNotEmpty()) {
-                    SmallSpacer(4)
-                    Text(
-                        stringResource(Res.string.history_n_daily_records, record.dailyRecords.size),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+
             }
 
             if (isActive) {
@@ -205,6 +198,15 @@ private fun RecordCard(record: MenstrualRecord, daysStr: String, onClick: () -> 
                 }
             } else if (days != null) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (record.dailyRecords.isNotEmpty()) {
+                        SmallSpacer(4)
+                        Text(
+                            stringResource(Res.string.history_n_daily_records, record.dailyRecords.size),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        SmallSpacer(8)
+                    }
                     Text("$days", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
                     SmallSpacer(4)
                     Text(daysStr, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)

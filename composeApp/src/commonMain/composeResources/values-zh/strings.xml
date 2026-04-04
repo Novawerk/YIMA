@@ -166,20 +166,19 @@
     <string name="detail_delete_confirm">删除</string>
 
     <!-- Onboarding -->
-    <string name="onboarding_ask_period">你现在在经期中吗？</string>
-    <string name="onboarding_yes">是的</string>
-    <string name="onboarding_no">不在</string>
-    <string name="onboarding_when_start">哪天开始的？</string>
+    <string name="onboarding_when_last_start">上次月经是什么时候开始的？</string>
+    <string name="onboarding_when_end">什么时候结束的？</string>
+    <string name="onboarding_still_in_period">还没结束</string>
+    <string name="onboarding_confirm_cycles">我们推算了你过去的周期</string>
+    <string name="onboarding_confirm_hint">如有偏差，点击"调整"修改</string>
+    <string name="onboarding_looks_right">没问题</string>
+    <string name="onboarding_all_set">准备就绪！</string>
+    <string name="onboarding_all_set_hint">已记录3个周期，预测功能已开启。</string>
+    <string name="onboarding_get_started">开始使用</string>
+    <string name="onboarding_next">下一步</string>
+    <string name="onboarding_period_n">第%1$d次月经</string>
+    <string name="onboarding_adjust">调整</string>
     <string name="onboarding_confirm">确认</string>
-    <string name="onboarding_ask_past">你还记得上次经期吗？</string>
-    <string name="onboarding_ask_past_more">继续补录？</string>
-    <string name="onboarding_past_hint">补录过去的记录可以帮助预测更准确</string>
-    <string name="onboarding_backfill">补录</string>
-    <string name="onboarding_skip">跳过</string>
-    <string name="onboarding_done">完成</string>
-    <string name="onboarding_progress_feedback">已补录%1$d组，再补录%2$d组即可获得精准预测！</string>
-    <string name="onboarding_enough_feedback">太棒了！预测已开启。如需补录更多历史数据，可在历史记录中操作。</string>
-    <string name="onboarding_select_range">选择经期日期范围</string>
     <string name="onboarding_back">返回</string>
     <string name="onboarding_save">保存</string>
 

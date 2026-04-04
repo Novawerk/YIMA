@@ -166,20 +166,19 @@
     <string name="detail_delete_confirm">Delete</string>
 
     <!-- Onboarding -->
-    <string name="onboarding_ask_period">Are you on your period?</string>
-    <string name="onboarding_yes">Yes</string>
-    <string name="onboarding_no">No</string>
-    <string name="onboarding_when_start">When did it start?</string>
+    <string name="onboarding_when_last_start">When did your last period start?</string>
+    <string name="onboarding_when_end">When did it end?</string>
+    <string name="onboarding_still_in_period">Still in period</string>
+    <string name="onboarding_confirm_cycles">We estimated your past cycles</string>
+    <string name="onboarding_confirm_hint">Tap "Adjust" to correct if needed</string>
+    <string name="onboarding_looks_right">Looks right</string>
+    <string name="onboarding_all_set">All set!</string>
+    <string name="onboarding_all_set_hint">3 cycles recorded. Predictions are now enabled.</string>
+    <string name="onboarding_get_started">Get started</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_period_n">Period %1$d</string>
+    <string name="onboarding_adjust">Adjust</string>
     <string name="onboarding_confirm">Confirm</string>
-    <string name="onboarding_ask_past">Do you remember your last period?</string>
-    <string name="onboarding_ask_past_more">Backfill more?</string>
-    <string name="onboarding_past_hint">Backfilling past records helps improve predictions</string>
-    <string name="onboarding_backfill">Backfill</string>
-    <string name="onboarding_skip">Skip</string>
-    <string name="onboarding_done">Done</string>
-    <string name="onboarding_progress_feedback">%1$d backfilled. %2$d more for accurate predictions!</string>
-    <string name="onboarding_enough_feedback">Great! Predictions are now enabled. You can add more history later from the History screen.</string>
-    <string name="onboarding_select_range">Select period date range</string>
     <string name="onboarding_back">Back</string>
     <string name="onboarding_save">Save</string>
 
