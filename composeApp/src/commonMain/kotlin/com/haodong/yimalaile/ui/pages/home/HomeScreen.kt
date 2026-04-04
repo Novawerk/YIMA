@@ -89,8 +89,8 @@ fun HomeScreen(
                         onCalendarClick = { showCalendarSheet = true },
                     )
 
-                    // ── History + CTA ──
-                    HistorySection(
+                    // ── Bottom: Calendar/Stats toggle + CTA ──
+                    BottomSection(
                         state = s.cycleState,
                         phaseInfo = s.phaseInfo,
                         today = today,
@@ -119,7 +119,6 @@ fun HomeScreen(
                                 if (result is AddRecordResult.Success) { viewModel.refresh(); snackbar.showSnackbar(successMsg) }
                             }
                         },
-                        onCalendarClick = { showCalendarSheet = true },
                     )
                 }
 
