@@ -1,36 +1,27 @@
 package com.haodong.yimalaile.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.haodong.yimalaile.domain.menstrual.CyclePhase
 import com.haodong.yimalaile.domain.menstrual.CyclePhaseInfo
 import com.haodong.yimalaile.domain.menstrual.CycleState
-import com.haodong.yimalaile.ui.pages.home.phaseShape
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
-import com.haodong.yimalaile.ui.theme.expressiveShapes
 import kotlinx.datetime.*
 import kotlin.time.Clock
 
@@ -39,7 +30,7 @@ import kotlin.time.Clock
 // ============================================================
 
 enum class DayType {
-    NONE, PERIOD, ACTIVE_PERIOD, PREDICTED_PERIOD, OVULATION, PREDICTED_OVULATION,
+    NONE, PERIOD, PREDICTED_PERIOD, OVULATION, PREDICTED_OVULATION,
 }
 
 // ============================================================
@@ -55,51 +46,30 @@ fun buildDateMap(
     val avgCycle = phaseInfo?.cycleLength ?: 28
     val avgPeriod = phaseInfo?.periodLength ?: 5
 
-    state.recentPeriods.forEach { record ->
-        val end = record.endDate ?: return@forEach
+    state.records.forEach { record ->
+        val end = record.endDate ?: today
         var d = record.startDate
         while (d <= end) { map[d] = DayType.PERIOD; d = d.plus(1, DateTimeUnit.DAY) }
-        val ovStart = record.startDate.plus((avgCycle * 0.46).toInt(), DateTimeUnit.DAY)
-        val ovEnd = record.startDate.plus((avgCycle * 0.57).toInt(), DateTimeUnit.DAY)
-        var od = ovStart
-        while (od <= ovEnd) { if (od !in map) map[od] = DayType.OVULATION; od = od.plus(1, DateTimeUnit.DAY) }
-    }
-    state.activePeriod?.let { active ->
-        var d = active.startDate
-        while (d <= today) { map[d] = DayType.ACTIVE_PERIOD; d = d.plus(1, DateTimeUnit.DAY) }
     }
     state.predictions.forEach { pred ->
         val pEnd = pred.predictedEnd ?: pred.predictedStart.plus(avgPeriod - 1, DateTimeUnit.DAY)
         var d = pred.predictedStart
         while (d <= pEnd) { if (d !in map) map[d] = DayType.PREDICTED_PERIOD; d = d.plus(1, DateTimeUnit.DAY) }
-        val ovStart = pred.predictedStart.plus((avgCycle * 0.46).toInt(), DateTimeUnit.DAY)
-        val ovEnd = pred.predictedStart.plus((avgCycle * 0.57).toInt(), DateTimeUnit.DAY)
-        var od = ovStart
-        while (od <= ovEnd) { if (od !in map) map[od] = DayType.PREDICTED_OVULATION; od = od.plus(1, DateTimeUnit.DAY) }
     }
     return map
 }
 
 // ============================================================
-// Reusable Cycle Calendar Grid
+// Reusable Cycle Calendar Grid — simple square cells
 // ============================================================
 
 private data class YearMonth(val year: Int, val month: Month)
 
-private val TODAY_COLOR = Color(0xFF4CAF50)
+private val TODAY_COLOR = Color(0xFF7C4DFF) // purple
 
 /**
- * Reusable cycle-aware calendar grid.
- * Shows cycle context (periods, ovulation, predictions) and optionally supports date picking.
- *
- * @param state Cycle data for coloring
- * @param phaseInfo Phase info for calculating ovulation windows
- * @param selectedDate Currently selected date (for picker mode)
- * @param selectedStart Start of selected range (for range picker mode)
- * @param selectedEnd End of selected range (for range picker mode)
- * @param onDateClick Called when a date is tapped (null = read-only)
- * @param isDateEnabled Controls which dates are tappable (default: all non-future)
- * @param monthRange How many months to show (-3..2 = 3 past + current + 2 future)
+ * Reusable cycle-aware calendar grid with simple square cells.
+ * No ovulation display, no complex shapes — just rounded-rect cells like HomeCalendar.
  */
 @Composable
 fun CycleCalendarGrid(
@@ -124,84 +94,52 @@ fun CycleCalendarGrid(
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = initialIndex)
     LaunchedEffect(Unit) { listState.scrollToItem(initialIndex) }
 
-    Column(modifier) {
-        // Weekday header
-        Row(Modifier.fillMaxWidth()) {
-            listOf("M", "T", "W", "T", "F", "S", "S").forEach { day ->
-                Text(
-                    day,
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                )
-            }
-        }
-        SmallSpacer(8)
-
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.fillMaxWidth().weight(1f),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            items(months, key = { "${it.year}-${it.month}" }) { ym ->
-                CalendarMonth(
-                    yearMonth = ym,
-                    today = today,
-                    dateMap = dateMap,
-                    selectedDate = selectedDate,
-                    selectedStart = selectedStart,
-                    selectedEnd = selectedEnd,
-                    onDateClick = onDateClick,
-                    isDateEnabled = isDateEnabled,
-                )
-            }
+    LazyColumn(
+        state = listState,
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        items(months, key = { "${it.year}-${it.month}" }) { ym ->
+            CalendarMonth(
+                yearMonth = ym,
+                today = today,
+                dateMap = dateMap,
+                selectedDate = selectedDate,
+                selectedStart = selectedStart,
+                selectedEnd = selectedEnd,
+                onDateClick = onDateClick,
+                isDateEnabled = isDateEnabled,
+            )
         }
     }
 }
 
 // ============================================================
-// Legend row
+// Legend row — simplified (no ovulation)
 // ============================================================
 
 @Composable
 fun CycleCalendarLegend(modifier: Modifier = Modifier) {
     val periodColor = MaterialTheme.colorScheme.error
-    val ovulationColor = MaterialTheme.colorScheme.tertiary
-    val todayShape = MaterialTheme.expressiveShapes.diamond
+    val cellShape = MaterialTheme.shapes.extraSmall
 
     Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        LegendItem(color = periodColor, shape = phaseShape(CyclePhase.MENSTRUAL), text = stringResource(Res.string.legend_period))
-        LegendItem(color = ovulationColor, shape = phaseShape(CyclePhase.OVULATION), text = stringResource(Res.string.legend_ovulation))
-        LegendItem(color = periodColor, dashed = true, text = stringResource(Res.string.legend_predicted))
-        LegendItem(color = TODAY_COLOR, shape = todayShape, text = stringResource(Res.string.legend_today))
+        LegendItem(color = periodColor, text = stringResource(Res.string.legend_period))
+        LegendItem(color = periodColor.copy(alpha = 0.4f), text = stringResource(Res.string.legend_predicted))
+        LegendItem(color = TODAY_COLOR, text = stringResource(Res.string.legend_today))
     }
 }
 
 @Composable
-private fun LegendItem(
-    color: Color,
-    shape: Shape = CircleShape,
-    dashed: Boolean = false,
-    text: String,
-) {
+private fun LegendItem(color: Color, text: String) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        if (dashed) {
-            Box(
-                Modifier.size(10.dp).drawBehind {
-                    drawCircle(color = color, style = Stroke(width = 1.5.dp.toPx(),
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(3.dp.toPx(), 2.dp.toPx()))))
-                }
-            )
-        } else {
-            Box(Modifier.size(10.dp).clip(shape).background(color))
-        }
+        Box(Modifier.size(10.dp).background(color, MaterialTheme.shapes.extraSmall))
         Text(text, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 // ============================================================
-// Month grid — resolves all colors from MaterialTheme internally
+// Month grid — simple square cells
 // ============================================================
 
 @Composable
@@ -215,16 +153,10 @@ private fun CalendarMonth(
     onDateClick: ((LocalDate) -> Unit)?,
     isDateEnabled: (LocalDate) -> Boolean,
 ) {
-    // Resolve all colors from theme — no params needed
     val periodColor = MaterialTheme.colorScheme.error
-    val ovulationColor = MaterialTheme.colorScheme.tertiary
-    val todayColor = TODAY_COLOR
     val onSurface = MaterialTheme.colorScheme.onSurface
     val primary = MaterialTheme.colorScheme.primary
-    val periodShape = phaseShape(CyclePhase.MENSTRUAL)
-    val ovulationShape = phaseShape(CyclePhase.OVULATION)
-    val todayShape = MaterialTheme.expressiveShapes.diamond
-    val selectedColor = primary
+    val cellShape = MaterialTheme.shapes.extraSmall
 
     val firstDay = LocalDate(yearMonth.year, yearMonth.month, 1)
     val startOffset = firstDay.dayOfWeek.ordinal
@@ -239,91 +171,70 @@ private fun CalendarMonth(
     Column(Modifier.fillMaxWidth()) {
         Text(
             "${monthName(yearMonth.month)} ${yearMonth.year}",
-            modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 4.dp),
+            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.SemiBold,
             color = onSurface.copy(alpha = 0.5f),
         )
 
         for (row in 0 until rows) {
-            Row(Modifier.fillMaxWidth().height(32.dp)) {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
+            ) {
                 for (col in 0 until 7) {
                     val dayNum = row * 7 + col - startOffset + 1
                     if (dayNum < 1 || dayNum > daysInMonth) {
-                        Box(Modifier.weight(1f))
+                        Spacer(Modifier.weight(1f).height(32.dp))
                     } else {
                         val date = LocalDate(yearMonth.year, yearMonth.month, dayNum)
                         val type = dateMap[date] ?: DayType.NONE
                         val isToday = date == today
                         val isFuture = date > today
-                        val enabled = !isFuture && isDateEnabled(date)
+                        val enabled = isDateEnabled(date)
                         val isSelected = date == selectedDate ||
                                 date == selectedStart || date == selectedEnd
                         val isInRange = selectedStart != null && selectedEnd != null &&
                                 date > selectedStart && date < selectedEnd
 
-                        val hasOverlap = isToday && type != DayType.NONE
-                        val dayShape = when {
-                            isSelected -> CircleShape
-                            isToday -> todayShape // today always uses diamond
-                            type == DayType.PERIOD || type == DayType.ACTIVE_PERIOD -> periodShape
-                            type == DayType.OVULATION -> ovulationShape
-                            else -> CircleShape
-                        }
+                        val isPeriod = type == DayType.PERIOD
+                        val isPredictedPeriod = type == DayType.PREDICTED_PERIOD
+
                         val bgColor = when {
-                            isSelected -> selectedColor
-                            hasOverlap -> todayColor // today overlapping = solid green
-                            type == DayType.PERIOD || type == DayType.ACTIVE_PERIOD -> periodColor
-                            type == DayType.OVULATION -> ovulationColor
+                            isSelected -> primary
                             isInRange -> primary.copy(alpha = 0.15f)
-                            else -> Color.Transparent
+                            isPeriod -> periodColor
+                            isToday -> TODAY_COLOR
+                            isPredictedPeriod -> periodColor.copy(alpha = 0.4f)
+                            else -> MaterialTheme.colorScheme.surfaceVariant
                         }
                         val textColor = when {
-                            isSelected -> MaterialTheme.colorScheme.onPrimary
-                            hasOverlap -> Color.White // white on green
-                            type == DayType.PERIOD || type == DayType.ACTIVE_PERIOD -> Color.White
-                            type == DayType.OVULATION -> Color.White
-                            type == DayType.PREDICTED_PERIOD -> periodColor.copy(alpha = if (isFuture) 0.5f else 1f)
-                            type == DayType.PREDICTED_OVULATION -> ovulationColor.copy(alpha = 0.5f)
-                            isFuture -> onSurface.copy(alpha = 0.2f)
-                            isToday -> todayColor
-                            else -> onSurface
+                            isSelected -> Color.White
+                            isInRange -> primary
+                            isPeriod -> Color.White
+                            isToday -> Color.White
+                            isPredictedPeriod -> Color.White
+                            isFuture -> onSurface.copy(alpha = 0.15f)
+                            !enabled -> onSurface.copy(alpha = 0.15f)
+                            else -> onSurface.copy(alpha = 0.45f)
                         }
-                        val isPredicted = type == DayType.PREDICTED_PERIOD || type == DayType.PREDICTED_OVULATION
-                        val dashedBorderColor = when {
-                            isSelected -> null
-                            type == DayType.PREDICTED_PERIOD -> periodColor
-                            type == DayType.PREDICTED_OVULATION -> ovulationColor
-                            else -> null
-                        }
+                        val showNumber = isToday || isPeriod || isPredictedPeriod || isSelected || isInRange
 
-                        Box(
-                            Modifier.weight(1f).fillMaxHeight(),
-                            contentAlignment = Alignment.Center,
+                        Surface(
+                            modifier = Modifier.weight(1f).height(32.dp)
+                                .then(if (enabled && onDateClick != null) Modifier.clickable { onDateClick(date) } else Modifier),
+                            shape = cellShape,
+                            color = bgColor,
                         ) {
-                            Box(
-                                Modifier.size(26.dp).clip(dayShape)
-                                    .background(bgColor)
-                                    .then(
-                                        if (dashedBorderColor != null) {
-                                            val dc = dashedBorderColor
-                                            Modifier.drawBehind {
-                                                drawCircle(color = dc, style = Stroke(width = 1.5.dp.toPx(),
-                                                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx()))))
-                                            }
-                                        } else if (isToday && !isSelected && !hasOverlap) {
-                                            Modifier.border(2.5.dp, todayColor, todayShape)
-                                        } else Modifier
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                if (showNumber) {
+                                    Text(
+                                        "$dayNum",
+                                        fontSize = 12.sp,
+                                        fontWeight = if (isToday || isSelected) FontWeight.Bold else FontWeight.Normal,
+                                        color = textColor,
                                     )
-                                    .then(if (enabled && onDateClick != null) Modifier.clickable { onDateClick(date) } else Modifier),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Text(
-                                    "$dayNum",
-                                    fontSize = 12.sp,
-                                    fontWeight = if (isToday || isSelected) FontWeight.Bold else FontWeight.Normal,
-                                    color = textColor,
-                                )
+                                }
                             }
                         }
                     }

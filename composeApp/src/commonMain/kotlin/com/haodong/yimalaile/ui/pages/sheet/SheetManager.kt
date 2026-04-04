@@ -11,9 +11,11 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlin.time.Clock
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
+import kotlinx.datetime.until
 
 // ============================================================
 // Result types
@@ -43,12 +45,11 @@ sealed class SheetRequest {
 
     data class StartPeriod(
         val records: List<MenstrualRecord>,
-        val result: CompletableDeferred<LocalDate?>,
+        val avgPeriodLength: Int,
+        val result: CompletableDeferred<Pair<LocalDate, LocalDate?>?>,
     ) : SheetRequest() { override val deferred get() = result }
 
     data class EndPeriod(
-        val startDate: LocalDate,
-        val dailyRecords: List<DailyRecord>,
         val records: List<MenstrualRecord>,
         val result: CompletableDeferred<LocalDate?>,
     ) : SheetRequest() { override val deferred get() = result }
@@ -65,7 +66,6 @@ sealed class SheetRequest {
 
     data class RecordDetail(
         val record: MenstrualRecord,
-        val isActive: Boolean,
         val result: CompletableDeferred<DetailAction?>,
     ) : SheetRequest() { override val deferred get() = result }
 
@@ -87,20 +87,22 @@ class SheetManager(private val service: MenstrualService) {
 
     // ---- Low-level: show sheet and suspend until result ----
 
-    private suspend fun showStartPeriodSheet(): LocalDate? {
+    private suspend fun showStartPeriodSheet(): Pair<LocalDate, LocalDate?>? {
         val state = service.getCycleState()
-        val allRecords = state.recentPeriods + listOfNotNull(state.activePeriod)
-        val deferred = CompletableDeferred<LocalDate?>()
-        _activeSheet.value = SheetRequest.StartPeriod(allRecords, deferred)
+        val avgPeriod = state.records
+            .filter { it.endDate != null }
+            .map { it.startDate.until(it.endDate!!, DateTimeUnit.DAY).toInt() + 1 }
+            .takeIf { it.isNotEmpty() }
+            ?.let { it.sum() / it.size } ?: 5
+        val deferred = CompletableDeferred<Pair<LocalDate, LocalDate?>?>()
+        _activeSheet.value = SheetRequest.StartPeriod(state.records, avgPeriod, deferred)
         return deferred.await().also { _activeSheet.value = null }
     }
 
     private suspend fun showEndPeriodSheet(): LocalDate? {
         val state = service.getCycleState()
-        val active = state.activePeriod ?: return null
-        val others = state.recentPeriods.filter { it.id != active.id }
         val deferred = CompletableDeferred<LocalDate?>()
-        _activeSheet.value = SheetRequest.EndPeriod(active.startDate, active.dailyRecords, others, deferred)
+        _activeSheet.value = SheetRequest.EndPeriod(state.records, deferred)
         return deferred.await().also { _activeSheet.value = null }
     }
 
@@ -112,41 +114,44 @@ class SheetManager(private val service: MenstrualService) {
 
     private suspend fun showBackfillSheet(): Pair<LocalDate, LocalDate>? {
         val state = service.getCycleState()
-        val allRecords = state.recentPeriods + listOfNotNull(state.activePeriod)
         val deferred = CompletableDeferred<Pair<LocalDate, LocalDate>?>()
-        _activeSheet.value = SheetRequest.Backfill(allRecords, deferred)
+        _activeSheet.value = SheetRequest.Backfill(state.records, deferred)
         return deferred.await().also { _activeSheet.value = null }
     }
 
     // ---- High-level: show sheet + execute service call ----
 
-    suspend fun startPeriod(): AddRecordResult? {
-        val date = showStartPeriodSheet() ?: return null
-        return service.startPeriod(date)
+    /** "姨妈来了" — record period arrival */
+    suspend fun recordPeriodStart(): AddRecordResult? {
+        val (start, end) = showStartPeriodSheet() ?: return null
+        return service.recordPeriodStart(start, end)
     }
 
-    suspend fun endPeriod(): Boolean? {
+    /** "姨妈走了" — record period departure */
+    suspend fun recordPeriodEnd(): Boolean? {
         val date = showEndPeriodSheet() ?: return null
-        val state = service.getCycleState()
-        val active = state.activePeriod ?: return false
-        return service.endPeriod(active.id, date)
+        return service.recordPeriodEnd(date)
     }
 
     suspend fun logDay(targetDate: LocalDate? = null): Boolean? {
         val result = showLogDaySheet(targetDate) ?: return null
         val state = service.getCycleState()
-        val active = state.activePeriod ?: return false
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        // Find the record covering today (or the most recent one)
+        val record = state.currentPeriod
+            ?: state.records.maxByOrNull { it.startDate }
+            ?: return false
         val day = DailyRecord(
-            date = targetDate ?: Clock.System.todayIn(TimeZone.currentSystemDefault()),
+            date = targetDate ?: today,
             intensity = result.intensity,
             mood = result.mood,
             symptoms = result.symptoms,
             notes = result.notes,
         )
-        return service.logDay(active.id, day)
+        return service.logDay(record.id, day)
     }
 
-    /** Log a day for a specific record (not just the active period). */
+    /** Log a day for a specific record. */
     suspend fun logDayForRecord(recordId: String, targetDate: LocalDate): Boolean? {
         val result = showLogDaySheet(targetDate) ?: return null
         val day = DailyRecord(
@@ -165,9 +170,9 @@ class SheetManager(private val service: MenstrualService) {
     }
 
     /** Show record detail. Returns the action the user chose, or null if dismissed. */
-    suspend fun showRecordDetail(record: MenstrualRecord, isActive: Boolean = false): DetailAction? {
+    suspend fun showRecordDetail(record: MenstrualRecord): DetailAction? {
         val deferred = CompletableDeferred<DetailAction?>()
-        _activeSheet.value = SheetRequest.RecordDetail(record, isActive, deferred)
+        _activeSheet.value = SheetRequest.RecordDetail(record, deferred)
         return deferred.await().also { _activeSheet.value = null }
     }
 

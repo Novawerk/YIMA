@@ -44,13 +44,10 @@ fun RecordDetailSheet(
     onDelete: () -> Unit,
     onLogSpecificDay: ((LocalDate) -> Unit)? = null,
 ) {
-    val days = record.endDate?.let { record.startDate.until(it, DateTimeUnit.DAY).toInt() + 1 }
-    val isActive = record.endDate == null
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+    val endDate = record.endDate ?: today // legacy records without endDate
+    val days = record.startDate.until(endDate, DateTimeUnit.DAY).toInt() + 1
     var showDeleteConfirm by remember { mutableStateOf(false) }
-
-    // Build list of all days in the period
-    val endDate = record.endDate ?: today
     val allDays = buildList {
         var d = record.startDate
         while (d <= endDate) { add(d); d = d.plus(1, DateTimeUnit.DAY) }
@@ -66,11 +63,7 @@ fun RecordDetailSheet(
             // ── App Bar ──
             val dateRange = "${record.startDate.monthNumber}/${record.startDate.dayOfMonth}" +
                     if (record.endDate != null) " — ${record.endDate.monthNumber}/${record.endDate.dayOfMonth}" else ""
-            val subtitle = buildString {
-                append(record.startDate.year)
-                if (days != null) append(" · $days${stringResource(Res.string.unit_days)}")
-                if (isActive) append(" · ${stringResource(Res.string.history_in_progress)}")
-            }
+            val subtitle = "${record.startDate.year} · $days${stringResource(Res.string.unit_days)}"
 
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),

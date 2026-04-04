@@ -37,7 +37,7 @@ fun App(component: AppComponent) {
 
         val disclaimerAccepted = settings.isDisclaimerAccepted()
         val state = service.getCycleState()
-        val hasData = state.recentPeriods.isNotEmpty() || state.activePeriod != null
+        val hasData = state.records.isNotEmpty()
         startRoute = when {
             !disclaimerAccepted -> DisclaimerRoute
             !hasData -> OnboardingRoute

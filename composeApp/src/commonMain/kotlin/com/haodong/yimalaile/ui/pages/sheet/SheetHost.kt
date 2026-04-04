@@ -21,13 +21,12 @@ fun SheetHost(manager: SheetManager) {
     when (val r = request) {
         is SheetRequest.StartPeriod -> StartPeriodSheet(
             existingRecords = r.records,
+            avgPeriodLength = r.avgPeriodLength,
             onDismiss = { manager.dismiss() },
-            onConfirm = { date -> r.result.complete(date) },
+            onConfirm = { start, end -> r.result.complete(start to end) },
         )
 
         is SheetRequest.EndPeriod -> EndPeriodSheet(
-            startDate = r.startDate,
-            dailyRecords = r.dailyRecords,
             existingRecords = r.records,
             onDismiss = { manager.dismiss() },
             onConfirm = { date -> r.result.complete(date) },

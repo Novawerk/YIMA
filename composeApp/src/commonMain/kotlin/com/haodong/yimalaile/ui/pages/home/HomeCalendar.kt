@@ -31,16 +31,22 @@ internal fun HomeCalendar(
 ) {
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
     val dateMap = buildDateMap(state, phaseInfo, today)
-    val inPeriod = state.activePeriod != null
-    val dayCount = if (inPeriod) {
-        state.activePeriod.startDate.until(today, DateTimeUnit.DAY).toInt() + 1
-    } else null
+    val inPeriod = state.inPeriod
+    val periodStart = state.currentPeriod?.startDate
+        ?: if (state.inPredictedPeriod) state.predictions.firstOrNull { pred ->
+            val avgP = phaseInfo?.periodLength ?: 5
+            val pEnd = pred.predictedEnd ?: pred.predictedStart.plus(avgP - 1, DateTimeUnit.DAY)
+            today in pred.predictedStart..pEnd
+        }?.predictedStart else null
+    val dayCount = periodStart?.let {
+        it.until(today, DateTimeUnit.DAY).toInt() + 1
+    }
 
     val periodColor = MaterialTheme.colorScheme.error
     val periodLight = MaterialTheme.colorScheme.error.copy(alpha = 0.45f)
 
-    // Build set of next predicted period dates (highlight when no active period)
-    val nextPredictedDates = if (!inPeriod && state.predictions.isNotEmpty()) {
+    // Build set of next predicted period dates
+    val nextPredictedDates = if (state.predictions.isNotEmpty()) {
         val pred = state.predictions.first()
         val avgPeriod = phaseInfo?.periodLength ?: 5
         val pEnd = pred.predictedEnd ?: pred.predictedStart.plus(avgPeriod - 1, DateTimeUnit.DAY)
@@ -103,7 +109,7 @@ internal fun HomeCalendar(
 
             // Info between months — plain text
             SmallSpacer(32)
-            val lastPeriod = state.recentPeriods.maxByOrNull { it.startDate }
+            val lastPeriod = state.records.maxByOrNull { it.startDate }
             if (lastPeriod != null) {
                 Text(
                     stringResource(Res.string.home_last_period),
@@ -192,7 +198,7 @@ private fun MonthBlock(
                         val isToday = date == today
                         val isFuture = date > today
 
-                        val isPeriod = type == DayType.PERIOD || type == DayType.ACTIVE_PERIOD
+                        val isPeriod = type == DayType.PERIOD
                         val isPredictedPeriod = type == DayType.PREDICTED_PERIOD
                         val isNextPredicted = date in nextPredictedDates
                         val bgColor = when {

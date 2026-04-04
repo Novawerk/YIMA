@@ -90,13 +90,13 @@ fun MiniCycleCalendar(
 
                 val bgColor = when {
                     isToday && type != DayType.NONE -> TODAY_GREEN
-                    type == DayType.PERIOD || type == DayType.ACTIVE_PERIOD -> periodColor
+                    type == DayType.PERIOD -> periodColor
                     type == DayType.OVULATION -> ovulationColor
                     else -> Color.Transparent
                 }
                 val textColor = when {
                     isToday -> if (type != DayType.NONE) Color.White else TODAY_GREEN
-                    type == DayType.PERIOD || type == DayType.ACTIVE_PERIOD || type == DayType.OVULATION -> Color.White
+                    type == DayType.PERIOD || type == DayType.OVULATION -> Color.White
                     type == DayType.PREDICTED_PERIOD -> periodColor.copy(alpha = 0.4f)
                     type == DayType.PREDICTED_OVULATION -> ovulationColor.copy(alpha = 0.4f)
                     date > today -> onSurface.copy(alpha = 0.25f)

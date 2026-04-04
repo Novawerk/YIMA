@@ -30,7 +30,7 @@ fun BackfillSheet(
     var selectedEnd by remember { mutableStateOf<LocalDate?>(null) }
 
     val calendarState = remember(existingRecords) {
-        CycleState(activePeriod = null, recentPeriods = existingRecords.filter { it.endDate != null }, predictions = emptyList())
+        CycleState(records = existingRecords, predictions = emptyList(), currentPeriod = null, inPredictedPeriod = false)
     }
 
     // Occupied dates from existing records

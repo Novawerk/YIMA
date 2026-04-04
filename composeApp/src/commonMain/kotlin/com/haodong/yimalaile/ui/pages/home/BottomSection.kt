@@ -27,8 +27,8 @@ fun BottomSection(
     inPeriod: Boolean,
     calendarMode: Boolean,
     onToggleMode: (Boolean) -> Unit,
-    onStartPeriod: () -> Unit,
-    onEndPeriod: () -> Unit,
+    onPeriodArrived: () -> Unit,
+    onPeriodGone: () -> Unit,
 ) {
     // Docked toolbar
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
@@ -63,7 +63,7 @@ fun BottomSection(
                 SmallSpacer(8)
                 if (inPeriod) {
                     FloatingActionButton(
-                        onClick = onEndPeriod,
+                        onClick = onPeriodGone,
                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                         shape = RoundedCornerShape(50),
@@ -77,7 +77,7 @@ fun BottomSection(
                     }
                 } else {
                     FloatingActionButton(
-                        onClick = onStartPeriod,
+                        onClick = onPeriodArrived,
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary,
                         shape = RoundedCornerShape(50),

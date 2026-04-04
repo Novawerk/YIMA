@@ -29,7 +29,7 @@
     <string name="stat_period_length">经期时长</string>
     <string name="unit_days">天</string>
     <string name="home_motivational_quote">\"照顾好自己，多喝温水.\"</string>
-    <string name="btn_record_period">记录月经</string>
+    <string name="btn_record_period">姨妈来了</string>
 
     <!-- Home — in period state -->
     <string name="home_take_care">照顾好自己</string>
@@ -51,7 +51,7 @@
     <string name="legend_predicted">预测</string>
     <string name="legend_today">今天</string>
     <string name="home_log_today">✦ 记录今天</string>
-    <string name="home_end_period">经期结束</string>
+    <string name="home_end_period">姨妈走了</string>
 
     <!-- Home — not in period states -->
     <string name="home_hero_overdue_sub">已经推迟了</string>

@@ -46,11 +46,7 @@ fun StatisticsScreen(
     LaunchedEffect(Unit) { state = service.getCycleState() }
 
     val s = state
-    val allRecords = s?.let {
-        (listOfNotNull(it.activePeriod) + it.recentPeriods)
-            .distinctBy { r -> r.id }
-            .sortedByDescending { r -> r.startDate }
-    } ?: emptyList()
+    val allRecords = s?.records ?: emptyList()
 
     Column(
         Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
@@ -92,17 +88,16 @@ fun StatisticsScreen(
                 contentPadding = PaddingValues(vertical = 8.dp),
             ) {
                 items(allRecords, key = { it.id }) { record ->
-                    val isActive = record.endDate == null
                     RecordCard(
                         record = record,
                         daysStr = daysStr,
                         onClick = {
                             scope.launch {
-                                val action = sheetManager.showRecordDetail(record, isActive) ?: return@launch
+                                val action = sheetManager.showRecordDetail(record) ?: return@launch
                                 when (action) {
-                                    is DetailAction.EditStart -> { sheetManager.startPeriod(); refresh() }
+                                    is DetailAction.EditStart -> { sheetManager.recordPeriodStart(); refresh() }
                                     is DetailAction.EditEnd -> {
-                                        val ok = sheetManager.endPeriod() ?: return@launch
+                                        val ok = sheetManager.recordPeriodEnd() ?: return@launch
                                         if (ok) { refresh(); snackbar.showSnackbar(successMsg) }
                                     }
                                     is DetailAction.LogDay -> {
@@ -146,7 +141,6 @@ fun StatisticsScreen(
 @Composable
 private fun RecordCard(record: MenstrualRecord, daysStr: String, onClick: () -> Unit) {
     val days = record.endDate?.let { record.startDate.until(it, DateTimeUnit.DAY).toInt() + 1 }
-    val isActive = record.endDate == null
 
     Surface(
         onClick = onClick,
@@ -160,10 +154,8 @@ private fun RecordCard(record: MenstrualRecord, daysStr: String, onClick: () -> 
         ) {
             DecorShape(
                 size = 20,
-                shape = if (isActive) MaterialTheme.expressiveShapes.heart
-                        else MaterialTheme.expressiveShapes.bun,
-                color = if (isActive) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.tertiary,
+                shape = MaterialTheme.expressiveShapes.bun,
+                color = MaterialTheme.colorScheme.tertiary,
             )
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -180,23 +172,9 @@ private fun RecordCard(record: MenstrualRecord, daysStr: String, onClick: () -> 
                         )
                     }
                 }
-
             }
 
-            if (isActive) {
-                Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    shape = MaterialTheme.shapes.small,
-                ) {
-                    Text(
-                        stringResource(Res.string.history_in_progress),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                    )
-                }
-            } else if (days != null) {
+            if (days != null) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (record.dailyRecords.isNotEmpty()) {
                         SmallSpacer(4)

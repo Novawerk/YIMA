@@ -21,6 +21,7 @@ import com.haodong.yimalaile.ui.theme.expressiveShapes
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import kotlinx.datetime.until
 import org.jetbrains.compose.resources.stringResource
@@ -50,10 +51,16 @@ fun HomeScreen(
                 val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
                 var showPhaseSheet by remember { mutableStateOf(false) }
                 var showCalendarSheet by remember { mutableStateOf(false) }
-                val inPeriod = s.cycleState.activePeriod != null
-                val dayCount = if (inPeriod) {
-                    s.cycleState.activePeriod.startDate.until(today, DateTimeUnit.DAY).toInt() + 1
-                } else null
+                val inPeriod = s.cycleState.inPeriod
+                val periodStart = s.cycleState.currentPeriod?.startDate
+                    ?: if (s.cycleState.inPredictedPeriod) s.cycleState.predictions.firstOrNull { pred ->
+                        val avgP = s.phaseInfo?.periodLength ?: 5
+                        val pEnd = pred.predictedEnd ?: pred.predictedStart.plus(avgP - 1, DateTimeUnit.DAY)
+                        today in pred.predictedStart..pEnd
+                    }?.predictedStart else null
+                val dayCount = periodStart?.let {
+                    it.until(today, DateTimeUnit.DAY).toInt() + 1
+                }
                 val heroNumber = if (inPeriod) dayCount ?: 0 else s.phaseInfo?.daysUntilNextPeriod ?: 0
 
                 var calendarMode by remember { mutableStateOf(true) }
@@ -118,17 +125,17 @@ fun HomeScreen(
                             calendarMode = mode
                             scope.launch { settings.setHomeMode(if (mode) "calendar" else "stats") }
                         },
-                        onStartPeriod = {
+                        onPeriodArrived = {
                             scope.launch {
-                                val result = sheetManager.startPeriod() ?: return@launch
+                                val result = sheetManager.recordPeriodStart() ?: return@launch
                                 if (result is AddRecordResult.Success) {
                                     viewModel.refresh(); snackbar.showSnackbar(successMsg)
                                 }
                             }
                         },
-                        onEndPeriod = {
+                        onPeriodGone = {
                             scope.launch {
-                                val ok = sheetManager.endPeriod() ?: return@launch
+                                val ok = sheetManager.recordPeriodEnd() ?: return@launch
                                 if (ok) {
                                     viewModel.refresh(); snackbar.showSnackbar(successMsg)
                                 }

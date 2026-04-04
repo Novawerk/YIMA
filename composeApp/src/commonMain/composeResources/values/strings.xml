@@ -29,7 +29,7 @@
     <string name="stat_period_length">Period Length</string>
     <string name="unit_days">days</string>
     <string name="home_motivational_quote">\"Take care of yourself, stay hydrated.\"</string>
-    <string name="btn_record_period">Record Period</string>
+    <string name="btn_record_period">Period Arrived</string>
 
     <!-- Home — in period state -->
     <string name="home_take_care">Take care of yourself</string>
@@ -51,7 +51,7 @@
     <string name="legend_predicted">Predicted</string>
     <string name="legend_today">Today</string>
     <string name="home_log_today">✦ Log today</string>
-    <string name="home_end_period">Period ended</string>
+    <string name="home_end_period">Period Gone</string>
 
     <!-- Home — not in period states -->
     <string name="home_hero_overdue_sub">Already delayed</string>

@@ -48,7 +48,7 @@ fun OnboardingScreen(
     var adjustEnd by remember { mutableStateOf<LocalDate?>(null) }
 
     // Calendar state for display
-    val calendarState = remember { CycleState(activePeriod = null, recentPeriods = emptyList(), predictions = emptyList()) }
+    val calendarState = remember { CycleState(records = emptyList(), predictions = emptyList(), currentPeriod = null, inPredictedPeriod = false) }
 
     Column(
         Modifier.fillMaxSize()
@@ -356,7 +356,7 @@ fun OnboardingScreen(
                                 // Save the first period
                                 val start = periodStart!!
                                 if (stillInPeriod) {
-                                    service.startPeriod(start)
+                                    service.recordPeriodStart(start)
                                 } else {
                                     service.backfillPeriod(start, periodEnd!!)
                                 }
