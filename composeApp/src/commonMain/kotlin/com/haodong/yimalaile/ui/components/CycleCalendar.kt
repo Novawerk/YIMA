@@ -49,7 +49,12 @@ fun buildDateMap(
     state.records.forEach { record ->
         val end = record.endDate ?: today
         var d = record.startDate
-        while (d <= end) { map[d] = DayType.PERIOD; d = d.plus(1, DateTimeUnit.DAY) }
+        while (d <= end) {
+            // For unconfirmed records, future days are predicted
+            val type = if (!record.endConfirmed && d > today) DayType.PREDICTED_PERIOD else DayType.PERIOD
+            map[d] = type
+            d = d.plus(1, DateTimeUnit.DAY)
+        }
     }
     state.predictions.forEach { pred ->
         val pEnd = pred.predictedEnd ?: pred.predictedStart.plus(avgPeriod - 1, DateTimeUnit.DAY)
