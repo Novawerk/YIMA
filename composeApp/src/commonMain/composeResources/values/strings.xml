@@ -49,6 +49,7 @@
     <string name="legend_period">Period</string>
     <string name="legend_ovulation">Ovulation</string>
     <string name="legend_predicted">Predicted</string>
+    <string name="legend_today">Today</string>
     <string name="home_log_today">✦ Log today</string>
     <string name="home_end_period">Period ended</string>
 
@@ -227,6 +228,7 @@
     <string name="about_team_members">Made with ♥ by the Novawerk team</string>
     <string name="about_links_title">Links</string>
     <string name="about_github">github.com/Novawerk/yimalaile</string>
+    <string name="settings_review">Leave a review</string>
 
     <!-- Weekday labels -->
     <string name="calendar_month_label">%1$d</string>

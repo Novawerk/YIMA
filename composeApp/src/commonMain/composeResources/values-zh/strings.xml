@@ -49,6 +49,7 @@
     <string name="legend_period">经期</string>
     <string name="legend_ovulation">排卵期</string>
     <string name="legend_predicted">预测</string>
+    <string name="legend_today">今天</string>
     <string name="home_log_today">✦ 记录今天</string>
     <string name="home_end_period">经期结束</string>
 
@@ -227,6 +228,7 @@
     <string name="about_team_members">由 Novawerk 团队用 ♥ 制作</string>
     <string name="about_links_title">链接</string>
     <string name="about_github">github.com/Novawerk/yimalaile</string>
+    <string name="settings_review">去App Store评分</string>
 
     <string name="calendar_month_label">%1$d月</string>
     <string name="history_date_start">%1$d月%2$d日</string>

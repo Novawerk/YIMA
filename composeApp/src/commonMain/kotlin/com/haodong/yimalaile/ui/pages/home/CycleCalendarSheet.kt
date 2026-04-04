@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.CyclePhaseInfo
 import com.haodong.yimalaile.domain.menstrual.CycleState
 import com.haodong.yimalaile.ui.components.SmallSpacer
+import com.haodong.yimalaile.ui.theme.expressiveShapes
 import kotlinx.datetime.*
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
@@ -116,11 +117,13 @@ internal fun CycleCalendarSheet(
 
     val periodColor = MaterialTheme.colorScheme.error
     val ovulationColor = MaterialTheme.colorScheme.tertiary
+    val todayColor = Color(0xFF4CAF50) // green
     val onSurface = MaterialTheme.colorScheme.onSurface
     val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
     val primary = MaterialTheme.colorScheme.primary
     val periodShape = phaseShape(com.haodong.yimalaile.domain.menstrual.CyclePhase.MENSTRUAL)
     val ovulationShape = phaseShape(com.haodong.yimalaile.domain.menstrual.CyclePhase.OVULATION)
+    val todayShape = MaterialTheme.expressiveShapes.diamond
 
     // 6-month range: 3 past + current + 2 future
     val months = (-3..2).map { offset ->
@@ -151,6 +154,7 @@ internal fun CycleCalendarSheet(
                 LegendItem(color = periodColor, shape = phaseShape(com.haodong.yimalaile.domain.menstrual.CyclePhase.MENSTRUAL), label = stringResource(Res.string.legend_period))
                 LegendItem(color = ovulationColor, shape = phaseShape(com.haodong.yimalaile.domain.menstrual.CyclePhase.OVULATION), label = stringResource(Res.string.legend_ovulation))
                 LegendItem(color = periodColor, shape = phaseShape(com.haodong.yimalaile.domain.menstrual.CyclePhase.MENSTRUAL), label = stringResource(Res.string.legend_predicted), dashed = true)
+                LegendItem(color = todayColor, shape = todayShape, label = stringResource(Res.string.legend_today))
             }
             SmallSpacer(16)
 
@@ -181,10 +185,11 @@ internal fun CycleCalendarSheet(
                         dateMap = dateMap,
                         periodColor = periodColor,
                         ovulationColor = ovulationColor,
+                        todayColor = todayColor,
                         onSurface = onSurface,
-                        primary = primary,
                         periodShape = periodShape,
                         ovulationShape = ovulationShape,
+                        todayShape = todayShape,
                     )
                 }
             }
@@ -238,10 +243,11 @@ private fun CalendarMonth(
     dateMap: Map<LocalDate, DayType>,
     periodColor: Color,
     ovulationColor: Color,
+    todayColor: Color,
     onSurface: Color,
-    primary: Color,
     periodShape: androidx.compose.ui.graphics.Shape,
     ovulationShape: androidx.compose.ui.graphics.Shape,
+    todayShape: androidx.compose.ui.graphics.Shape,
 ) {
     val firstDay = LocalDate(yearMonth.year, yearMonth.month, 1)
     val startOffset = firstDay.dayOfWeek.ordinal
@@ -279,7 +285,7 @@ private fun CalendarMonth(
                             DayType.PERIOD, DayType.ACTIVE_PERIOD -> periodShape
                             DayType.OVULATION -> ovulationShape
                             DayType.PREDICTED_PERIOD, DayType.PREDICTED_OVULATION -> CircleShape
-                            DayType.NONE -> CircleShape
+                            DayType.NONE -> if (isToday) todayShape else CircleShape
                         }
                         val bgColor = when (type) {
                             DayType.PERIOD -> periodColor
@@ -293,7 +299,7 @@ private fun CalendarMonth(
                             DayType.OVULATION -> Color.White
                             DayType.PREDICTED_PERIOD -> periodColor
                             DayType.PREDICTED_OVULATION -> ovulationColor
-                            DayType.NONE -> if (isToday) primary else onSurface
+                            DayType.NONE -> if (isToday) todayColor else onSurface
                         }
                         val dashedBorderColor = when (type) {
                             DayType.PREDICTED_PERIOD -> periodColor
@@ -320,7 +326,7 @@ private fun CalendarMonth(
                                                 )
                                             }
                                         } else if (isToday) {
-                                            Modifier.border(2.dp, primary, dayShape)
+                                            Modifier.border(2.5.dp, todayColor, todayShape)
                                         } else if (type == DayType.ACTIVE_PERIOD) {
                                             Modifier.border(2.dp, periodColor, periodShape)
                                         } else Modifier

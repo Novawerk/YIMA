@@ -140,9 +140,13 @@ fun SettingsScreen(
             }
         }
 
-        // ---------- Clear data — at very bottom ----------
-        Spacer(Modifier.weight(1f))
+        // ---------- Clear data ----------
+        Spacer(Modifier.height(12.dp))
         SettingsItem(label = stringResource(Res.string.settings_clear_data), value = stringResource(Res.string.settings_clear_data_value), onClick = { showClearConfirm = true }, destructive = true)
+
+        // ---------- Review — at very bottom ----------
+        Spacer(Modifier.weight(1f))
+        SettingsItem(label = stringResource(Res.string.settings_review), value = "→", onClick = { /* TODO: open app store review */ })
         Spacer(Modifier.height(16.dp))
     }
 
