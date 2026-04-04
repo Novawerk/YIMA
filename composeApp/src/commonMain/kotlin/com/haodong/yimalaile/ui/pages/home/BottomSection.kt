@@ -42,7 +42,6 @@ fun BottomSection(
                 Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // Mode toggle icons
                 IconButton(
                     onClick = { onToggleMode(true) },
                     colors = IconButtonDefaults.iconButtonColors(
@@ -51,16 +50,8 @@ fun BottomSection(
                 ) {
                     Icon(Icons.Outlined.CalendarMonth, contentDescription = null)
                 }
-                IconButton(
-                    onClick = { onToggleMode(false) },
-                    colors = IconButtonDefaults.iconButtonColors(
-                        contentColor = if (!calendarMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                    ),
-                ) {
-                    Icon(Icons.Outlined.BarChart, contentDescription = null)
-                }
-                // Mutually exclusive: end period OR record period
-                SmallSpacer(8)
+                SmallSpacer(4)
+                // Primary action in the center
                 if (inPeriod) {
                     FloatingActionButton(
                         onClick = onPeriodGone,
@@ -95,6 +86,15 @@ fun BottomSection(
                             )
                         }
                     }
+                }
+                SmallSpacer(4)
+                IconButton(
+                    onClick = { onToggleMode(false) },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        contentColor = if (!calendarMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    ),
+                ) {
+                    Icon(Icons.Outlined.BarChart, contentDescription = null)
                 }
             }
         }
