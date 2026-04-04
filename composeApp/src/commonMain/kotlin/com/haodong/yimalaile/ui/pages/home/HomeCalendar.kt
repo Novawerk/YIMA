@@ -93,7 +93,7 @@ internal fun HomeCalendar(
             )
             Text(
                 when {
-                    inPeriod -> stringResource(Res.string.home_period_day_title, dayCount ?: 0)
+                    inPeriod -> stringResource(Res.string.home_in_period)
                     phaseInfo.daysUntilNextPeriod <= 0 -> stringResource(Res.string.home_hero_due_today)
                     else -> stringResource(Res.string.home_next_period_starts)
                 },
@@ -203,14 +203,13 @@ private fun MonthBlock(
                         val isNextPredicted = date in nextPredictedDates
                         val bgColor = when {
                             isPeriod -> periodColor
-                            isNextPredicted -> periodColor // highlight next predicted same as actual
-                            isPredictedPeriod -> periodLight
+                            isPredictedPeriod || isNextPredicted -> periodLight
                             isToday -> MaterialTheme.colorScheme.primary
                             else -> MaterialTheme.colorScheme.surfaceVariant
                         }
                         val textColor = when {
-                            isPeriod || isNextPredicted -> Color.White
-                            isPredictedPeriod -> Color.White
+                            isPeriod -> Color.White
+                            isPredictedPeriod || isNextPredicted -> Color.White
                             isToday -> Color.White
                             isFuture -> onSurface.copy(alpha = 0.15f)
                             else -> onSurface.copy(alpha = 0.45f)

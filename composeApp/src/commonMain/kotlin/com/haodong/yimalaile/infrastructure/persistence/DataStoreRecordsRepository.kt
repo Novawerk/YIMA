@@ -76,7 +76,7 @@ class DataStoreRecordsRepository(
 private fun List<MenstrualRecord>.toJson(): String {
     return "[" + joinToString(",") { r ->
         val dailyJson = r.dailyRecords.dailyToJson()
-        """{"id":"${r.id}","startDate":"${r.startDate}","endDate":"${r.endDate ?: ""}","dailyRecords":$dailyJson,"createdAt":${r.createdAtEpochMillis},"updatedAt":${r.updatedAtEpochMillis},"source":"${r.source.name}","isDeleted":${r.isDeleted}}"""
+        """{"id":"${r.id}","startDate":"${r.startDate}","endDate":"${r.endDate ?: ""}","endConfirmed":${r.endConfirmed},"dailyRecords":$dailyJson,"createdAt":${r.createdAtEpochMillis},"updatedAt":${r.updatedAtEpochMillis},"source":"${r.source.name}","isDeleted":${r.isDeleted}}"""
     } + "]"
 }
 
@@ -133,6 +133,7 @@ private fun String.parseRecord(): MenstrualRecord {
         id = map["id"] ?: "",
         startDate = LocalDate.parse(map["startDate"] ?: ""),
         endDate = map["endDate"]?.takeIf { it.isNotBlank() }?.let { LocalDate.parse(it) },
+        endConfirmed = map["endConfirmed"] == "true",
         dailyRecords = dailyRecords,
         createdAtEpochMillis = map["createdAt"]?.toLongOrNull() ?: 0L,
         updatedAtEpochMillis = map["updatedAt"]?.toLongOrNull() ?: 0L,

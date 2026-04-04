@@ -57,7 +57,7 @@ private fun resolveHeroDisplay(
         )
         // In period, normal
         inPeriod -> HeroDisplay(
-            title = stringResource(Res.string.home_period_day_title, dayCount ?: 0),
+            title = stringResource(Res.string.home_in_period),
             number = remainingDays,
             subtitle = null,
         )

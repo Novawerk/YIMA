@@ -8,6 +8,7 @@ data class MenstrualRecord(
     val id: String,
     val startDate: LocalDate,
     val endDate: LocalDate? = null,
+    val endConfirmed: Boolean = false,
     val dailyRecords: List<DailyRecord> = emptyList(),
     val createdAtEpochMillis: Long,
     val updatedAtEpochMillis: Long,

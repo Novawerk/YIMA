@@ -35,6 +35,7 @@ class MenstrualService(private val repository: RecordsRepository) {
         return repository.insertRecord(
             MenstrualRecord(
                 id = newId(), startDate = startDate, endDate = estimatedEnd,
+                endConfirmed = endDate != null,
                 createdAtEpochMillis = now, updatedAtEpochMillis = now,
                 source = RecordSource.MANUAL,
             )
@@ -60,6 +61,7 @@ class MenstrualService(private val repository: RecordsRepository) {
         return repository.updateRecord(
             record.copy(
                 endDate = endDate,
+                endConfirmed = true,
                 dailyRecords = trimmedDailyRecords,
                 updatedAtEpochMillis = Clock.System.now().toEpochMilliseconds(),
             )
@@ -92,7 +94,7 @@ class MenstrualService(private val repository: RecordsRepository) {
         val now = Clock.System.now().toEpochMilliseconds()
         return repository.insertRecord(
             MenstrualRecord(id = newId(), startDate = startDate, endDate = endDate,
-                createdAtEpochMillis = now, updatedAtEpochMillis = now)
+                endConfirmed = true, createdAtEpochMillis = now, updatedAtEpochMillis = now)
         )
     }
 
@@ -113,10 +115,10 @@ class MenstrualService(private val repository: RecordsRepository) {
 
         val updatedPredictions = predictNextCycles(repository.getAllRecords())
 
-        // Current period: a real record covering today
+        // Current period: a record covering today whose end hasn't been confirmed yet
         val currentPeriod = records.find { r ->
-            val rEnd = r.endDate ?: today
-            today in r.startDate..rEnd
+            !r.endConfirmed && r.endDate != null &&
+            today in r.startDate..r.endDate
         }
 
         // In predicted period: today falls within a prediction (and no real record covers it)
@@ -160,6 +162,7 @@ class MenstrualService(private val repository: RecordsRepository) {
                     id = newId(),
                     startDate = pred.predictedStart,
                     endDate = pEnd,
+                    endConfirmed = true,
                     createdAtEpochMillis = now,
                     updatedAtEpochMillis = now,
                     source = RecordSource.AUTO_CONFIRMED,
