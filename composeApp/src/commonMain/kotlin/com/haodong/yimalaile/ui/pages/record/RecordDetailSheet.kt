@@ -1,53 +1,38 @@
 package com.haodong.yimalaile.ui.pages.record
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.DailyRecord
 import com.haodong.yimalaile.domain.menstrual.Intensity
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.domain.menstrual.Mood
+import com.haodong.yimalaile.ui.components.SmallSpacer
 import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.plus
 import kotlinx.datetime.until
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
+import kotlin.time.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+/**
+ * Full-screen record detail — shows all days in the period with existing/missing records.
+ * Missing days have a "+" button to add a daily record for that date.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecordDetailSheet(
     record: MenstrualRecord,
@@ -56,129 +41,121 @@ fun RecordDetailSheet(
     onEditEnd: () -> Unit,
     onLogDay: () -> Unit,
     onDelete: () -> Unit,
+    onLogSpecificDay: ((LocalDate) -> Unit)? = null,
 ) {
     val days = record.endDate?.let { record.startDate.until(it, DateTimeUnit.DAY).toInt() + 1 }
+    val isActive = record.endDate == null
+    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
     var showDeleteConfirm by remember { mutableStateOf(false) }
+
+    // Build list of all days in the period
+    val endDate = record.endDate ?: today
+    val allDays = buildList {
+        var d = record.startDate
+        while (d <= endDate) { add(d); d = d.plus(1, DateTimeUnit.DAY) }
+    }
+    val dailyMap = record.dailyRecords.associateBy { it.date }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        shape = MaterialTheme.shapes.extraLarge,
     ) {
-        Column(
-            Modifier
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            // Hero duration circle
-            Box(
-                Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)),
-                contentAlignment = Alignment.Center,
+        Column(Modifier.fillMaxWidth()) {
+            // ── Header ──
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(Modifier.weight(1f)) {
+                    if (isActive) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = MaterialTheme.shapes.small,
+                        ) {
+                            Text(
+                                stringResource(Res.string.history_in_progress),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
+                            )
+                        }
+                        SmallSpacer(4)
+                    }
                     Text(
-                        if (days != null) "$days" else "~",
-                        fontSize = 44.sp,
+                        "${record.startDate.monthNumber}/${record.startDate.dayOfMonth}" +
+                                if (record.endDate != null) " — ${record.endDate.monthNumber}/${record.endDate.dayOfMonth}" else "",
+                        style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground,
                     )
-                    Text(stringResource(Res.string.detail_unit_days), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        "${record.startDate.year}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                if (days != null) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("$days", fontSize = 40.sp, fontWeight = FontWeight.Bold)
+                        Text(stringResource(Res.string.unit_days), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+            SmallSpacer(12)
 
-            // Date range
-            Text(
-                if (record.endDate != null) stringResource(Res.string.detail_date_range, record.startDate.monthNumber, record.startDate.dayOfMonth, record.endDate.monthNumber, record.endDate.dayOfMonth)
-                else stringResource(Res.string.detail_date_start_only, record.startDate.monthNumber, record.startDate.dayOfMonth, stringResource(Res.string.detail_in_progress)),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-            Text(
-                "${record.startDate.year}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-            )
+            // ── Action chips ──
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                ActionChip(stringResource(Res.string.detail_edit_start), onClick = onEditStart, modifier = Modifier.weight(1f))
+                ActionChip(stringResource(Res.string.detail_edit_end), onClick = onEditEnd, modifier = Modifier.weight(1f))
+            }
 
-            // Period dots — decorative arc
-            if (days != null && days > 0) {
-                Spacer(Modifier.height(16.dp))
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    repeat(days.coerceAtMost(14)) { i ->
-                        val progress = i.toFloat() / days.coerceAtMost(14)
-                        val alpha = 0.7f - (0.5f * progress)
-                        val size = (14 - 4 * progress).dp
-                        Box(
-                            Modifier
-                                .padding(horizontal = 2.dp)
-                                .size(size)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = alpha))
+            SmallSpacer(16)
+
+            // ── Day-by-day list ──
+            Text(
+                stringResource(Res.string.detail_daily_records),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            )
+            SmallSpacer(8)
+
+            LazyColumn(
+                Modifier.fillMaxWidth().weight(1f),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                items(allDays, key = { it.toString() }) { date ->
+                    val existing = dailyMap[date]
+                    if (existing != null) {
+                        DailyRecordCard(existing)
+                    } else {
+                        EmptyDayCard(
+                            date = date,
+                            onClick = { onLogSpecificDay?.invoke(date) ?: onLogDay() },
                         )
                     }
                 }
             }
 
-            Spacer(Modifier.height(24.dp))
-
-            // Action buttons — two rows, rounded cards
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                ActionCard(stringResource(Res.string.detail_edit_start), onClick = onEditStart, modifier = Modifier.weight(1f))
-                ActionCard(stringResource(Res.string.detail_edit_end), onClick = onEditEnd, modifier = Modifier.weight(1f))
-                ActionCard(stringResource(Res.string.detail_add_record), onClick = onLogDay, modifier = Modifier.weight(1f))
-            }
-
-            // Daily records
-            if (record.dailyRecords.isNotEmpty()) {
-                Spacer(Modifier.height(24.dp))
+            // ── Delete ──
+            SmallSpacer(8)
+            TextButton(
+                onClick = { showDeleteConfirm = true },
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+            ) {
                 Text(
-                    stringResource(Res.string.detail_daily_records),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.fillMaxWidth(),
+                    stringResource(Res.string.detail_delete),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.error,
                 )
-                Spacer(Modifier.height(12.dp))
-                record.dailyRecords.sortedBy { it.date }.forEach { day ->
-                    DailyRecordRow(day)
-                    Spacer(Modifier.height(8.dp))
-                }
-            } else {
-                Spacer(Modifier.height(20.dp))
-                Box(
-                    Modifier.fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f))
-                        .padding(20.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        stringResource(Res.string.detail_no_records),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                        textAlign = TextAlign.Center,
-                    )
-                }
             }
-
-            // Delete
-            Spacer(Modifier.height(32.dp))
-            Text(
-                stringResource(Res.string.detail_delete),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error.copy(alpha = 0.6f),
-                modifier = Modifier.clickable { showDeleteConfirm = true }.padding(8.dp),
-            )
-            Spacer(Modifier.height(8.dp))
+            SmallSpacer(16)
         }
     }
 
@@ -200,71 +177,45 @@ fun RecordDetailSheet(
 }
 
 @Composable
-private fun ActionCard(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun ActionChip(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
         onClick = onClick,
         modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.medium,
         tonalElevation = 2.dp,
     ) {
-        Box(
-            Modifier.padding(vertical = 14.dp, horizontal = 8.dp),
-            contentAlignment = Alignment.Center,
-        ) {
+        Box(Modifier.padding(vertical = 12.dp), contentAlignment = Alignment.Center) {
             Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
         }
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun DailyRecordRow(day: DailyRecord) {
-    Row(
-        Modifier.fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
+private fun DailyRecordCard(day: DailyRecord) {
+    Surface(
+        tonalElevation = 1.dp,
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        // Date + mood column
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            if (day.mood != null) {
-                Text(moodLabel(day.mood), fontSize = 24.sp)
-            }
-            Spacer(Modifier.height(4.dp))
+        Row(
+            Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
             Text(
                 "${day.date.monthNumber}/${day.date.dayOfMonth}",
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.width(40.dp),
             )
-        }
-
-        Spacer(Modifier.width(16.dp))
-
-        // Divider line
-        Box(
-            Modifier
-                .width(2.dp)
-                .height(40.dp)
-                .clip(RoundedCornerShape(1.dp))
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-        )
-
-        Spacer(Modifier.width(16.dp))
-
-        // Details
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            // Intensity
+            if (day.mood != null) {
+                Text(moodLabel(day.mood), fontSize = 16.sp)
+            }
             if (day.intensity != null) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    // Intensity dots
-                    val dotCount = when (day.intensity) {
-                        Intensity.LIGHT -> 1; Intensity.MEDIUM -> 2; Intensity.HEAVY -> 3
-                    }
-                    repeat(dotCount) {
-                        Box(Modifier.size(6.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)))
-                    }
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = MaterialTheme.shapes.small,
+                ) {
                     Text(
                         when (day.intensity) {
                             Intensity.LIGHT -> stringResource(Res.string.intensity_light)
@@ -272,37 +223,54 @@ private fun DailyRecordRow(day: DailyRecord) {
                             Intensity.HEAVY -> stringResource(Res.string.intensity_heavy)
                         },
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                     )
                 }
             }
-
-            // Symptoms
             if (day.symptoms.isNotEmpty()) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    day.symptoms.forEach { symptom ->
-                        Box(
-                            Modifier.clip(RoundedCornerShape(6.dp))
-                                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f))
-                                .padding(horizontal = 8.dp, vertical = 2.dp)
-                        ) {
-                            Text(symptom, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                        }
-                    }
-                }
-            }
-
-            // Notes
-            if (!day.notes.isNullOrBlank()) {
                 Text(
-                    day.notes,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                    maxLines = 2,
+                    day.symptoms.joinToString(" · "),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f),
                 )
             }
         }
     }
 }
 
-private fun moodLabel(m: Mood) = when (m) { Mood.HAPPY -> "😊"; Mood.NEUTRAL -> "😐"; Mood.SAD -> "😔"; Mood.VERY_SAD -> "😢" }
+@Composable
+private fun EmptyDayCard(date: LocalDate, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = MaterialTheme.shapes.medium,
+        border = ButtonDefaults.outlinedButtonBorder(enabled = true),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                "${date.monthNumber}/${date.dayOfMonth}",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.width(40.dp),
+            )
+            Spacer(Modifier.weight(1f))
+            Icon(
+                Icons.Default.Add,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = MaterialTheme.colorScheme.primary,
+            )
+        }
+    }
+}
+
+private fun moodLabel(m: Mood) = when (m) {
+    Mood.HAPPY -> "😊"; Mood.NEUTRAL -> "😐"
+    Mood.SAD -> "😔"; Mood.VERY_SAD -> "😢"
+}

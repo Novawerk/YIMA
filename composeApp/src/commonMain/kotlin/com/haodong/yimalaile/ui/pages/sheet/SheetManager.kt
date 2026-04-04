@@ -30,6 +30,7 @@ sealed class DetailAction {
     object EditStart : DetailAction()
     object EditEnd : DetailAction()
     object LogDay : DetailAction()
+    data class LogSpecificDay(val date: kotlinx.datetime.LocalDate) : DetailAction()
     object Delete : DetailAction()
 }
 

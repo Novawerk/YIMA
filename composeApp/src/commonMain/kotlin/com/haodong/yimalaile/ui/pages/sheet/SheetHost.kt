@@ -53,6 +53,7 @@ fun SheetHost(manager: SheetManager) {
             onEditStart = { r.result.complete(DetailAction.EditStart) },
             onEditEnd = { r.result.complete(DetailAction.EditEnd) },
             onLogDay = { r.result.complete(DetailAction.LogDay) },
+            onLogSpecificDay = { date -> r.result.complete(DetailAction.LogSpecificDay(date)) },
             onDelete = { r.result.complete(DetailAction.Delete) },
         )
 

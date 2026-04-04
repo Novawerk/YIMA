@@ -28,6 +28,8 @@ import com.haodong.yimalaile.domain.menstrual.CyclePhase
 import com.haodong.yimalaile.domain.menstrual.CyclePhaseInfo
 import com.haodong.yimalaile.domain.menstrual.CycleState
 import com.haodong.yimalaile.ui.pages.home.phaseShape
+import org.jetbrains.compose.resources.stringResource
+import yimalaile.composeapp.generated.resources.*
 import com.haodong.yimalaile.ui.theme.expressiveShapes
 import kotlinx.datetime.*
 import kotlin.time.Clock
@@ -168,30 +170,33 @@ fun CycleCalendarLegend(modifier: Modifier = Modifier) {
     val ovulationColor = MaterialTheme.colorScheme.tertiary
     val todayShape = MaterialTheme.expressiveShapes.diamond
 
-    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        LegendDot(color = periodColor, shape = phaseShape(CyclePhase.MENSTRUAL), label = "●")
-        LegendDot(color = ovulationColor, shape = phaseShape(CyclePhase.OVULATION), label = "●")
-        LegendDot(color = periodColor, dashed = true, label = "◌")
-        LegendDot(color = TODAY_COLOR, shape = todayShape, label = "◆")
+    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        LegendItem(color = periodColor, shape = phaseShape(CyclePhase.MENSTRUAL), text = stringResource(Res.string.legend_period))
+        LegendItem(color = ovulationColor, shape = phaseShape(CyclePhase.OVULATION), text = stringResource(Res.string.legend_ovulation))
+        LegendItem(color = periodColor, dashed = true, text = stringResource(Res.string.legend_predicted))
+        LegendItem(color = TODAY_COLOR, shape = todayShape, text = stringResource(Res.string.legend_today))
     }
 }
 
 @Composable
-private fun LegendDot(
+private fun LegendItem(
     color: Color,
     shape: Shape = CircleShape,
     dashed: Boolean = false,
-    label: String,
+    text: String,
 ) {
-    if (dashed) {
-        Box(
-            Modifier.size(10.dp).drawBehind {
-                drawCircle(color = color, style = Stroke(width = 1.5.dp.toPx(),
-                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(3.dp.toPx(), 2.dp.toPx()))))
-            }
-        )
-    } else {
-        Box(Modifier.size(10.dp).clip(shape).background(color))
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        if (dashed) {
+            Box(
+                Modifier.size(10.dp).drawBehind {
+                    drawCircle(color = color, style = Stroke(width = 1.5.dp.toPx(),
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(3.dp.toPx(), 2.dp.toPx()))))
+                }
+            )
+        } else {
+            Box(Modifier.size(10.dp).clip(shape).background(color))
+        }
+        Text(text, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -257,15 +262,17 @@ private fun CalendarMonth(
                         val isInRange = selectedStart != null && selectedEnd != null &&
                                 date > selectedStart && date < selectedEnd
 
+                        val hasOverlap = isToday && type != DayType.NONE
                         val dayShape = when {
                             isSelected -> CircleShape
+                            isToday -> todayShape // today always uses diamond
                             type == DayType.PERIOD || type == DayType.ACTIVE_PERIOD -> periodShape
                             type == DayType.OVULATION -> ovulationShape
-                            isToday -> todayShape
                             else -> CircleShape
                         }
                         val bgColor = when {
                             isSelected -> selectedColor
+                            hasOverlap -> todayColor // today overlapping = solid green
                             type == DayType.PERIOD || type == DayType.ACTIVE_PERIOD -> periodColor
                             type == DayType.OVULATION -> ovulationColor
                             isInRange -> primary.copy(alpha = 0.15f)
@@ -273,6 +280,7 @@ private fun CalendarMonth(
                         }
                         val textColor = when {
                             isSelected -> MaterialTheme.colorScheme.onPrimary
+                            hasOverlap -> Color.White // white on green
                             type == DayType.PERIOD || type == DayType.ACTIVE_PERIOD -> Color.White
                             type == DayType.OVULATION -> Color.White
                             type == DayType.PREDICTED_PERIOD -> periodColor.copy(alpha = if (isFuture) 0.5f else 1f)
@@ -303,7 +311,7 @@ private fun CalendarMonth(
                                                 drawCircle(color = dc, style = Stroke(width = 1.5.dp.toPx(),
                                                     pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx()))))
                                             }
-                                        } else if (isToday && !isSelected) {
+                                        } else if (isToday && !isSelected && !hasOverlap) {
                                             Modifier.border(2.5.dp, todayColor, todayShape)
                                         } else Modifier
                                     )

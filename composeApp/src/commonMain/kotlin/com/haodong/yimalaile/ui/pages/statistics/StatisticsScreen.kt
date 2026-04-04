@@ -17,6 +17,7 @@ import com.haodong.yimalaile.domain.menstrual.AddRecordResult
 import com.haodong.yimalaile.domain.menstrual.CycleState
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
+import com.haodong.yimalaile.ui.components.DecorShape
 import com.haodong.yimalaile.ui.components.PrimaryCta
 import com.haodong.yimalaile.ui.theme.expressiveShapes
 import com.haodong.yimalaile.ui.components.SmallSpacer
@@ -108,6 +109,10 @@ fun StatisticsScreen(
                                         val ok = sheetManager.logDay() ?: return@launch
                                         if (ok) { refresh(); snackbar.showSnackbar(successMsg) }
                                     }
+                                    is DetailAction.LogSpecificDay -> {
+                                        val ok = sheetManager.logDay(targetDate = action.date) ?: return@launch
+                                        if (ok) { refresh(); snackbar.showSnackbar(successMsg) }
+                                    }
                                     is DetailAction.Delete -> {
                                         service.deleteRecord(record.id)
                                         refresh()
@@ -153,7 +158,7 @@ private fun RecordCard(record: MenstrualRecord, daysStr: String, onClick: () -> 
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            com.haodong.yimalaile.ui.components.DecorShape(
+            DecorShape(
                 size = 20,
                 shape = if (isActive) MaterialTheme.expressiveShapes.heart
                         else MaterialTheme.expressiveShapes.cookie4,
@@ -199,7 +204,7 @@ private fun RecordCard(record: MenstrualRecord, daysStr: String, onClick: () -> 
                     )
                 }
             } else if (days != null) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Row(verticalAlignment = Alignment.Bottom) {
                     Text("$days", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                     Text(daysStr, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
