@@ -11,6 +11,7 @@ import me.tatarka.inject.annotations.Inject
 private val DISCLAIMER_ACCEPTED = booleanPreferencesKey("disclaimer_accepted")
 private val DARK_MODE = stringPreferencesKey("dark_mode")
 private val LANGUAGE = stringPreferencesKey("language")
+private val HOME_MODE = stringPreferencesKey("home_mode")
 
 @Inject
 open class SettingsRepository(private val dataStore: DataStore<Preferences>) {
@@ -37,5 +38,12 @@ open class SettingsRepository(private val dataStore: DataStore<Preferences>) {
             if (value == null) prefs.remove(LANGUAGE)
             else prefs[LANGUAGE] = value
         }
+    }
+
+    suspend fun getHomeMode(): String =
+        dataStore.data.first()[HOME_MODE] ?: "calendar"
+
+    suspend fun setHomeMode(value: String) {
+        dataStore.edit { prefs -> prefs[HOME_MODE] = value }
     }
 }

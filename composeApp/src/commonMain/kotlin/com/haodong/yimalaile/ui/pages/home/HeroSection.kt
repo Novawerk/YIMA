@@ -87,7 +87,7 @@ private fun resolveHeroDisplay(
 // ============================================================
 
 @Composable
-internal fun ColumnScope.HeroSection(
+internal fun HomeStatistics(
     inPeriod: Boolean,
     heroNumber: Int,
     dayCount: Int?,
@@ -98,17 +98,17 @@ internal fun ColumnScope.HeroSection(
     val display = resolveHeroDisplay(inPeriod, dayCount, heroNumber, phaseInfo)
 
     Column(
-        Modifier.weight(1f).fillMaxWidth().padding(horizontal = 16.dp),
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp),
     ) {
         // Title
         Text(
             display.title,
-            style = MaterialTheme.typography.displaySmall,
+            style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        SmallSpacer(12)
+        SmallSpacer(64)
 
-        GrowSpacer()
+
 
         // Subtitle (when no number)
         if (display.number == null && display.subtitle != null) {

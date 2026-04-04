@@ -1,6 +1,5 @@
 package com.haodong.yimalaile.ui.pages.home
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -8,17 +7,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.CyclePhaseInfo
 import com.haodong.yimalaile.domain.menstrual.CycleState
-import com.haodong.yimalaile.ui.components.DecorShape
-import com.haodong.yimalaile.ui.components.DayType
-import com.haodong.yimalaile.ui.components.SmallSpacer
-import com.haodong.yimalaile.ui.components.buildDateMap
+import com.haodong.yimalaile.ui.components.*
 import kotlinx.datetime.*
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
@@ -43,6 +38,17 @@ internal fun HomeCalendar(
 
     val periodColor = MaterialTheme.colorScheme.error
     val periodLight = MaterialTheme.colorScheme.error.copy(alpha = 0.45f)
+
+    // Build set of next predicted period dates (highlight when no active period)
+    val nextPredictedDates = if (!inPeriod && state.predictions.isNotEmpty()) {
+        val pred = state.predictions.first()
+        val avgPeriod = phaseInfo?.periodLength ?: 5
+        val pEnd = pred.predictedEnd ?: pred.predictedStart.plus(avgPeriod - 1, DateTimeUnit.DAY)
+        buildSet {
+            var d = pred.predictedStart
+            while (d <= pEnd) { add(d); d = d.plus(1, DateTimeUnit.DAY) }
+        }
+    } else emptySet()
 
     val months = (0..1).map { offset ->
         val m = today.plus(offset, DateTimeUnit.MONTH)
@@ -71,16 +77,29 @@ internal fun HomeCalendar(
             }
             SmallSpacer(4)
             Text(
-                if (inPeriod) stringResource(Res.string.home_day_n, dayCount ?: 0)
-                else "${phaseInfo.daysUntilNextPeriod} ${stringResource(Res.string.unit_days)}",
+                when {
+                    inPeriod -> stringResource(Res.string.home_day_n, dayCount ?: 0)
+                    phaseInfo.daysUntilNextPeriod <= 0 -> stringResource(Res.string.legend_today)
+                    else -> "${phaseInfo.daysUntilNextPeriod} ${stringResource(Res.string.unit_days)}"
+                },
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Black,
             )
+            Text(
+                when {
+                    inPeriod -> stringResource(Res.string.home_period_day_title, dayCount ?: 0)
+                    phaseInfo.daysUntilNextPeriod <= 0 -> stringResource(Res.string.home_hero_due_today)
+                    else -> stringResource(Res.string.home_next_period_starts)
+                },
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             SmallSpacer(16)
         }
+        GrowSpacer()
         Column(Modifier.fillMaxWidth(0.6f), ) {
             // This month
-            MonthBlock(months[0], today, dateMap, periodColor, periodLight)
+            MonthBlock(months[0], today, dateMap, periodColor, periodLight, nextPredictedDates)
 
             // Info between months — plain text
             SmallSpacer(32)
@@ -113,10 +132,11 @@ internal fun HomeCalendar(
             SmallSpacer(32)
 
             // Next month
-            MonthBlock(months[1], today, dateMap, periodColor, periodLight)
+            MonthBlock(months[1], today, dateMap, periodColor, periodLight, nextPredictedDates)
 
-            Spacer(Modifier.weight(1f))
         }
+        GrowSpacer()
+        SmallSpacer(32)
 
     }
 }
@@ -130,6 +150,7 @@ private fun MonthBlock(
     dateMap: Map<LocalDate, DayType>,
     periodColor: Color,
     periodLight: Color,
+    nextPredictedDates: Set<LocalDate>,
 ) {
     val firstDay = LocalDate(yearMonth.year, yearMonth.month, 1)
     val startOffset = firstDay.dayOfWeek.ordinal
@@ -145,7 +166,7 @@ private fun MonthBlock(
 
     Column(
         Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.End,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         // Month label
         Text(
@@ -173,19 +194,22 @@ private fun MonthBlock(
 
                         val isPeriod = type == DayType.PERIOD || type == DayType.ACTIVE_PERIOD
                         val isPredictedPeriod = type == DayType.PREDICTED_PERIOD
+                        val isNextPredicted = date in nextPredictedDates
                         val bgColor = when {
                             isPeriod -> periodColor
+                            isNextPredicted -> periodColor // highlight next predicted same as actual
                             isPredictedPeriod -> periodLight
+                            isToday -> MaterialTheme.colorScheme.primary
                             else -> MaterialTheme.colorScheme.surfaceVariant
                         }
                         val textColor = when {
-                            isPeriod -> Color.White
+                            isPeriod || isNextPredicted -> Color.White
                             isPredictedPeriod -> Color.White
+                            isToday -> Color.White
                             isFuture -> onSurface.copy(alpha = 0.15f)
-                            isToday -> onSurface
                             else -> onSurface.copy(alpha = 0.45f)
                         }
-                        val showNumber = isToday || isPeriod || isPredictedPeriod
+                        val showNumber = isToday || isPeriod || isPredictedPeriod || isNextPredicted
                         val size = if (isToday) 34.dp else 30.dp
 
                         Surface(

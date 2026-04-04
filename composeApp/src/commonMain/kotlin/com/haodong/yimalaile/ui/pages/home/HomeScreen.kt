@@ -1,13 +1,13 @@
 package com.haodong.yimalaile.ui.pages.home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -16,8 +16,6 @@ import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.ui.components.DecorShape
 import com.haodong.yimalaile.ui.components.GrowSpacer
 import com.haodong.yimalaile.ui.components.SmallSpacer
-import androidx.compose.material3.TextButton
-import com.haodong.yimalaile.ui.pages.home.phaseDisplayName
 import com.haodong.yimalaile.ui.pages.sheet.SheetManager
 import com.haodong.yimalaile.ui.theme.expressiveShapes
 import kotlinx.coroutines.launch
@@ -26,13 +24,16 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlinx.datetime.until
 import org.jetbrains.compose.resources.stringResource
-import yimalaile.composeapp.generated.resources.*
+import yimalaile.composeapp.generated.resources.Res
+import yimalaile.composeapp.generated.resources.app_name
+import yimalaile.composeapp.generated.resources.record_save_success
 import kotlin.time.Clock
 
 @Composable
 fun HomeScreen(
     service: MenstrualService,
     sheetManager: SheetManager,
+    settings: com.haodong.yimalaile.domain.settings.SettingsRepository,
     onNavigateStatistics: () -> Unit,
     onNavigateSettings: () -> Unit,
 ) {
@@ -56,6 +57,7 @@ fun HomeScreen(
                 val heroNumber = if (inPeriod) dayCount ?: 0 else s.phaseInfo?.daysUntilNextPeriod ?: 0
 
                 var calendarMode by remember { mutableStateOf(true) }
+                LaunchedEffect(Unit) { calendarMode = settings.getHomeMode() == "calendar" }
 
                 Column(Modifier.fillMaxSize()) {
                     // ── App Bar ──
@@ -63,7 +65,11 @@ fun HomeScreen(
                         Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        DecorShape(24, shape = MaterialTheme.expressiveShapes.cookie7, color = MaterialTheme.colorScheme.primary)
+                        DecorShape(
+                            24,
+                            shape = MaterialTheme.expressiveShapes.cookie7,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                         SmallSpacer(8)
                         Text(
                             stringResource(Res.string.app_name),
@@ -80,57 +86,52 @@ fun HomeScreen(
                             }
                         }
                     }
-
-                    // ── Main area: Calendar or Hero ──
-                    if (calendarMode) {
-                        HomeCalendar(
-                            state = s.cycleState,
-                            phaseInfo = s.phaseInfo,
-                            modifier = Modifier.weight(1f).padding(horizontal = 16.dp)
-                                .clickable { showCalendarSheet = true },
-                        )
-                    } else {
-                        SmallSpacer(24)
-                        HeroSection(
-                            inPeriod = inPeriod,
-                            heroNumber = heroNumber,
-                            dayCount = dayCount,
-                            phaseInfo = s.phaseInfo,
-                            onPhaseClick = { showPhaseSheet = true },
-                            onCalendarClick = { calendarMode = true },
-                        )
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        // ── Main area ──
+                        if (calendarMode) {
+                            HomeCalendar(
+                                state = s.cycleState,
+                                phaseInfo = s.phaseInfo,
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                            )
+                        } else {
+                            SmallSpacer(24)
+                            HomeStatistics(
+                                inPeriod = inPeriod,
+                                heroNumber = heroNumber,
+                                dayCount = dayCount,
+                                phaseInfo = s.phaseInfo,
+                                onPhaseClick = { showPhaseSheet = true },
+                            ) { calendarMode = true }
+                        }
                     }
 
-                    // ── Bottom: phase chip + toggle + CTA ──
+
+                    // ── Bottom toolbar ──
                     BottomSection(
-                        state = s.cycleState,
-                        phaseInfo = s.phaseInfo,
-                        today = today,
                         inPeriod = inPeriod,
                         calendarMode = calendarMode,
-                        onToggleMode = { calendarMode = it },
+                        onToggleMode = { mode ->
+                            calendarMode = mode
+                            scope.launch { settings.setHomeMode(if (mode) "calendar" else "stats") }
+                        },
                         onStartPeriod = {
                             scope.launch {
                                 val result = sheetManager.startPeriod() ?: return@launch
-                                if (result is AddRecordResult.Success) { viewModel.refresh(); snackbar.showSnackbar(successMsg) }
+                                if (result is AddRecordResult.Success) {
+                                    viewModel.refresh(); snackbar.showSnackbar(successMsg)
+                                }
                             }
                         },
                         onEndPeriod = {
                             scope.launch {
                                 val ok = sheetManager.endPeriod() ?: return@launch
-                                if (ok) { viewModel.refresh(); snackbar.showSnackbar(successMsg) }
-                            }
-                        },
-                        onLogDay = {
-                            scope.launch {
-                                val ok = sheetManager.logDay() ?: return@launch
-                                if (ok) { viewModel.refresh(); snackbar.showSnackbar(successMsg) }
-                            }
-                        },
-                        onBackfill = {
-                            scope.launch {
-                                val result = sheetManager.backfillPeriod() ?: return@launch
-                                if (result is AddRecordResult.Success) { viewModel.refresh(); snackbar.showSnackbar(successMsg) }
+                                if (ok) {
+                                    viewModel.refresh(); snackbar.showSnackbar(successMsg)
+                                }
                             }
                         },
                     )

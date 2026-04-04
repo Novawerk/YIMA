@@ -77,6 +77,7 @@ fun App(component: AppComponent) {
                         HomeScreen(
                             service = service,
                             sheetManager = sheetManager,
+                            settings = settings,
                             onNavigateStatistics = { navController.navigate(StatisticsRoute) },
                             onNavigateSettings = { navController.navigate(SettingsRoute) },
                         )
