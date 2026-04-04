@@ -1,10 +1,12 @@
 package com.haodong.yimalaile.ui.pages.home
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -13,7 +15,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.CyclePhaseInfo
 import com.haodong.yimalaile.domain.menstrual.CycleState
+import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.ui.components.*
+import com.haodong.yimalaile.ui.pages.sheet.LocalSheetManager
+import kotlinx.coroutines.launch
 import kotlinx.datetime.*
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
@@ -105,7 +110,7 @@ internal fun HomeCalendar(
         GrowSpacer()
         Column(Modifier.fillMaxWidth(0.6f), ) {
             // This month
-            MonthBlock(months[0], today, dateMap, periodColor, periodLight, nextPredictedDates)
+            MonthBlock(months[0], today, dateMap, periodColor, periodLight, nextPredictedDates, state.records)
 
             // Info between months — plain text
             SmallSpacer(32)
@@ -138,7 +143,7 @@ internal fun HomeCalendar(
             SmallSpacer(32)
 
             // Next month
-            MonthBlock(months[1], today, dateMap, periodColor, periodLight, nextPredictedDates)
+            MonthBlock(months[1], today, dateMap, periodColor, periodLight, nextPredictedDates, state.records)
 
         }
         GrowSpacer()
@@ -157,7 +162,10 @@ private fun MonthBlock(
     periodColor: Color,
     periodLight: Color,
     nextPredictedDates: Set<LocalDate>,
+    records: List<MenstrualRecord> = emptyList(),
 ) {
+    val sheetManager = LocalSheetManager.current
+    val scope = rememberCoroutineScope()
     val firstDay = LocalDate(yearMonth.year, yearMonth.month, 1)
     val startOffset = firstDay.dayOfWeek.ordinal
     val daysInMonth = when (yearMonth.month) {
@@ -217,9 +225,20 @@ private fun MonthBlock(
                         val showNumber = isToday || isPeriod || isPredictedPeriod || isNextPredicted
                         val size = if (isToday) 34.dp else 30.dp
 
+                        // Find record covering this date for click handling
+                        val clickable = isPeriod && records.isNotEmpty()
                         Surface(
-                            modifier =
-                            Modifier.size(size),
+                            modifier = Modifier.size(size).then(
+                                if (clickable) Modifier.clickable {
+                                    val record = records.find { r ->
+                                        val rEnd = r.endDate ?: today
+                                        date in r.startDate..rEnd
+                                    }
+                                    if (record != null) {
+                                        scope.launch { sheetManager.showRecordDetail(record) }
+                                    }
+                                } else Modifier
+                            ),
                             shape = cellShape,
                             color = bgColor
                         ) {

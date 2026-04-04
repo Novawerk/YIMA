@@ -77,6 +77,14 @@ sealed class SheetRequest {
 }
 
 // ============================================================
+// CompositionLocal for global access
+// ============================================================
+
+val LocalSheetManager = androidx.compose.runtime.staticCompositionLocalOf<SheetManager> {
+    error("No SheetManager provided")
+}
+
+// ============================================================
 // SheetManager — owns service, exposes suspend APIs
 // ============================================================
 

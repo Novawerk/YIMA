@@ -11,6 +11,7 @@ import com.haodong.yimalaile.ui.pages.disclaimer.DisclaimerScreen
 import com.haodong.yimalaile.ui.pages.home.HomeScreen
 import com.haodong.yimalaile.ui.pages.onboarding.OnboardingScreen
 import com.haodong.yimalaile.ui.pages.settings.SettingsScreen
+import com.haodong.yimalaile.ui.pages.sheet.LocalSheetManager
 import com.haodong.yimalaile.ui.pages.sheet.SheetHost
 import com.haodong.yimalaile.ui.pages.sheet.SheetManager
 import com.haodong.yimalaile.ui.pages.statistics.StatisticsScreen
@@ -47,7 +48,10 @@ fun App(component: AppComponent) {
 
     val route = startRoute ?: return
 
-    CompositionLocalProvider(LocalAppLocale provides language) {
+    CompositionLocalProvider(
+        LocalAppLocale provides language,
+        LocalSheetManager provides sheetManager,
+    ) {
         key(language) {
             AppTheme(darkMode = darkMode) {
                 val navController = rememberNavController()
