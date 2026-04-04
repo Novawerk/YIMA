@@ -13,7 +13,10 @@ import com.haodong.yimalaile.ui.components.CycleCalendarLegend
 import com.haodong.yimalaile.ui.components.PrimaryCta
 import com.haodong.yimalaile.ui.components.SmallSpacer
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Clock
 import yimalaile.composeapp.generated.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -23,6 +26,7 @@ fun EndPeriodSheet(
     onDismiss: () -> Unit,
     onConfirm: (LocalDate) -> Unit,
 ) {
+    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
     var selected by remember { mutableStateOf<LocalDate?>(null) }
 
     val calendarState = remember(existingRecords) {
@@ -43,6 +47,7 @@ fun EndPeriodSheet(
                 state = calendarState, phaseInfo = null,
                 selectedDate = selected,
                 onDateClick = { selected = it },
+                isDateEnabled = { it <= today },
                 modifier = Modifier.height(350.dp),
                 monthRange = -3..0,
             )
