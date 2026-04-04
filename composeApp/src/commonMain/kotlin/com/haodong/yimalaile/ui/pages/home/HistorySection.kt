@@ -44,59 +44,18 @@ internal fun BottomSection(
         shape = MaterialTheme.shapes.extraLarge,
     ) {
         Column(Modifier.padding(16.dp)) {
-            // Toggle: calendar / stats
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                // Phase chip
-                if (phaseInfo != null) {
-                    Surface(
-                        color = MaterialTheme.colorScheme.secondaryContainer,
-                        shape = RoundedCornerShape(50),
-                    ) {
-                        Row(
-                            Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        ) {
-                            com.haodong.yimalaile.ui.components.DecorShape(
-                                size = 10,
-                                shape = phaseShape(phaseInfo.phase),
-                                color = phaseColor(phaseInfo.phase),
-                            )
-                            Text(
-                                phaseDisplayName(phaseInfo.phase),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.SemiBold,
-                            )
-                            if (!inPeriod) {
-                                Text(
-                                    "· ${phaseInfo.daysUntilNextPeriod}${stringResource(Res.string.unit_days)}",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // Toggle
-                val calLabel = stringResource(Res.string.home_cycle_calendar)
-                val statsLabel = stringResource(Res.string.home_past_records)
-                SingleChoiceSegmentedButtonRow {
-                    SegmentedButton(
-                        selected = calendarMode,
-                        onClick = { onToggleMode(true) },
-                        shape = SegmentedButtonDefaults.itemShape(0, 2),
-                    ) { Text("📅", style = MaterialTheme.typography.labelSmall) }
-                    SegmentedButton(
-                        selected = !calendarMode,
-                        onClick = { onToggleMode(false) },
-                        shape = SegmentedButtonDefaults.itemShape(1, 2),
-                    ) { Text("📊", style = MaterialTheme.typography.labelSmall) }
-                }
+            // Toggle — full width
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                SegmentedButton(
+                    selected = calendarMode,
+                    onClick = { onToggleMode(true) },
+                    shape = SegmentedButtonDefaults.itemShape(0, 2),
+                ) { Text(stringResource(Res.string.home_cycle_calendar)) }
+                SegmentedButton(
+                    selected = !calendarMode,
+                    onClick = { onToggleMode(false) },
+                    shape = SegmentedButtonDefaults.itemShape(1, 2),
+                ) { Text(stringResource(Res.string.stats_title)) }
             }
 
             SmallSpacer(12)
@@ -133,12 +92,6 @@ internal fun BottomSection(
                         modifier = Modifier.weight(1f),
                     )
                 }
-                SmallSpacer(8)
-                Text(
-                    "${records.size} ${stringResource(Res.string.home_past_records)}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
             }
 
             SmallSpacer(12)

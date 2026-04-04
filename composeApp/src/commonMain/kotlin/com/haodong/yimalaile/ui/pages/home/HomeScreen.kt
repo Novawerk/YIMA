@@ -82,16 +82,13 @@ fun HomeScreen(
 
                     // ── Main area: Calendar or Hero ──
                     if (calendarMode) {
-                        // Calendar replaces hero
+                        // Mini calendar strip replaces hero
                         Column(Modifier.weight(1f).padding(horizontal = 16.dp)) {
-                            com.haodong.yimalaile.ui.components.CycleCalendarLegend()
-                            SmallSpacer(8)
-                            com.haodong.yimalaile.ui.components.CycleCalendarGrid(
+                            com.haodong.yimalaile.ui.components.MiniCycleCalendar(
                                 state = s.cycleState,
                                 phaseInfo = s.phaseInfo,
-                                modifier = Modifier.weight(1f),
-                                monthRange = -2..2,
                             )
+                            Spacer(Modifier.weight(1f))
                         }
                     } else {
                         SmallSpacer(24)
