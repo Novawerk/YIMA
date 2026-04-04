@@ -9,36 +9,26 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.CyclePhaseInfo
 import com.haodong.yimalaile.domain.menstrual.CycleState
-import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
-import com.haodong.yimalaile.domain.menstrual.PredictedCycle
 import com.haodong.yimalaile.ui.components.SmallSpacer
-import kotlin.time.Clock
-import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.Month
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.number
-import kotlinx.datetime.plus
-import kotlinx.datetime.todayIn
+import kotlinx.datetime.*
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
+import kotlin.time.Clock
 
 // ============================================================
 // Day type for calendar coloring
@@ -126,7 +116,6 @@ internal fun CycleCalendarSheet(
 
     val periodColor = MaterialTheme.colorScheme.error
     val ovulationColor = MaterialTheme.colorScheme.tertiary
-    val predictedAlpha = 0.3f
     val onSurface = MaterialTheme.colorScheme.onSurface
     val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
     val primary = MaterialTheme.colorScheme.primary
@@ -193,7 +182,6 @@ internal fun CycleCalendarSheet(
                         periodColor = periodColor,
                         ovulationColor = ovulationColor,
                         onSurface = onSurface,
-                        onSurfaceVariant = onSurfaceVariant,
                         primary = primary,
                         periodShape = periodShape,
                         ovulationShape = ovulationShape,
@@ -251,7 +239,6 @@ private fun CalendarMonth(
     periodColor: Color,
     ovulationColor: Color,
     onSurface: Color,
-    onSurfaceVariant: Color,
     primary: Color,
     periodShape: androidx.compose.ui.graphics.Shape,
     ovulationShape: androidx.compose.ui.graphics.Shape,
@@ -263,7 +250,6 @@ private fun CalendarMonth(
         Month.AUGUST, Month.OCTOBER, Month.DECEMBER -> 31
         Month.APRIL, Month.JUNE, Month.SEPTEMBER, Month.NOVEMBER -> 30
         Month.FEBRUARY -> if (yearMonth.year % 4 == 0 && (yearMonth.year % 100 != 0 || yearMonth.year % 400 == 0)) 29 else 28
-        else -> 30
     }
     val rows = (startOffset + daysInMonth + 6) / 7
 
@@ -281,7 +267,7 @@ private fun CalendarMonth(
             Row(Modifier.fillMaxWidth().height(36.dp)) {
                 for (col in 0 until 7) {
                     val dayNum = row * 7 + col - startOffset + 1
-                    if (dayNum < 1 || dayNum > daysInMonth) {
+                    if (dayNum !in 1..daysInMonth) {
                         Box(Modifier.weight(1f))
                     } else {
                         val date = LocalDate(yearMonth.year, yearMonth.month, dayNum)
@@ -295,7 +281,6 @@ private fun CalendarMonth(
                             DayType.PREDICTED_PERIOD, DayType.PREDICTED_OVULATION -> CircleShape
                             DayType.NONE -> CircleShape
                         }
-                        val isPredicted = type == DayType.PREDICTED_PERIOD || type == DayType.PREDICTED_OVULATION
                         val bgColor = when (type) {
                             DayType.PERIOD -> periodColor
                             DayType.ACTIVE_PERIOD -> periodColor
@@ -325,10 +310,9 @@ private fun CalendarMonth(
                                     .background(bgColor)
                                     .then(
                                         if (dashedBorderColor != null) {
-                                            val dColor = dashedBorderColor
                                             Modifier.drawBehind {
                                                 drawCircle(
-                                                    color = dColor,
+                                                    color = dashedBorderColor,
                                                     style = Stroke(
                                                         width = 1.5.dp.toPx(),
                                                         pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx())),

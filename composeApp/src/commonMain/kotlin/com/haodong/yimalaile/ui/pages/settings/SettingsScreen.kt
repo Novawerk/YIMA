@@ -23,6 +23,9 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -78,10 +81,15 @@ fun SettingsScreen(
         // ---------- Dark mode ----------
         SectionLabel(stringResource(Res.string.settings_display_mode))
         Spacer(Modifier.height(12.dp))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            ModeChip(stringResource(Res.string.settings_mode_system), selected = currentDarkMode == "system", onClick = { onDarkModeChange("system") }, modifier = Modifier.weight(1f))
-            ModeChip(stringResource(Res.string.settings_mode_light), selected = currentDarkMode == "light", onClick = { onDarkModeChange("light") }, modifier = Modifier.weight(1f))
-            ModeChip(stringResource(Res.string.settings_mode_dark), selected = currentDarkMode == "dark", onClick = { onDarkModeChange("dark") }, modifier = Modifier.weight(1f))
+        val darkModes = listOf("system" to Res.string.settings_mode_system, "light" to Res.string.settings_mode_light, "dark" to Res.string.settings_mode_dark)
+        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+            darkModes.forEachIndexed { index, (value, labelRes) ->
+                SegmentedButton(
+                    selected = currentDarkMode == value,
+                    onClick = { onDarkModeChange(value) },
+                    shape = SegmentedButtonDefaults.itemShape(index, darkModes.size),
+                ) { Text(stringResource(labelRes)) }
+            }
         }
 
         Spacer(Modifier.height(24.dp))
@@ -89,10 +97,15 @@ fun SettingsScreen(
         // ---------- Language ----------
         SectionLabel(stringResource(Res.string.settings_language))
         Spacer(Modifier.height(12.dp))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            ModeChip(stringResource(Res.string.settings_language_follow_system), selected = currentLanguage == null, onClick = { onLanguageChange(null) }, modifier = Modifier.weight(1f))
-            ModeChip(stringResource(Res.string.settings_language_en), selected = currentLanguage == "en", onClick = { onLanguageChange("en") }, modifier = Modifier.weight(1f))
-            ModeChip(stringResource(Res.string.settings_language_zh), selected = currentLanguage == "zh", onClick = { onLanguageChange("zh") }, modifier = Modifier.weight(1f))
+        val langs = listOf(null to Res.string.settings_language_follow_system, "en" to Res.string.settings_language_en, "zh" to Res.string.settings_language_zh)
+        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+            langs.forEachIndexed { index, (value, labelRes) ->
+                SegmentedButton(
+                    selected = currentLanguage == value,
+                    onClick = { onLanguageChange(value) },
+                    shape = SegmentedButtonDefaults.itemShape(index, langs.size),
+                ) { Text(stringResource(labelRes)) }
+            }
         }
 
         Spacer(Modifier.height(24.dp))
@@ -155,27 +168,6 @@ fun SettingsScreen(
 @Composable
 private fun SectionLabel(text: String) {
     Text(text, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
-}
-
-@Composable
-private fun ModeChip(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Box(
-        modifier
-            .clip(RoundedCornerShape(12.dp))
-            .then(
-                if (selected) Modifier.background(MaterialTheme.colorScheme.primary)
-                else Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
-            )
-            .clickable(onClick = onClick)
-            .padding(vertical = 12.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text,
-            style = MaterialTheme.typography.labelMedium,
-            color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
 }
 
 @Composable

@@ -18,8 +18,10 @@ import com.haodong.yimalaile.ui.components.SmallSpacer
 import com.haodong.yimalaile.ui.pages.sheet.SheetManager
 import com.haodong.yimalaile.ui.theme.expressiveShapes
 import kotlinx.coroutines.launch
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
+import kotlinx.datetime.until
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.Res
 import yimalaile.composeapp.generated.resources.app_name
@@ -44,6 +46,13 @@ fun HomeScreen(
             is HomeUiState.Loading -> {}
             is HomeUiState.Ready -> {
                 val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+                var showPhaseSheet by remember { mutableStateOf(false) }
+                var showCalendarSheet by remember { mutableStateOf(false) }
+                val inPeriod = s.cycleState.activePeriod != null
+                val dayCount = if (inPeriod) {
+                    s.cycleState.activePeriod.startDate.until(today, DateTimeUnit.DAY).toInt() + 1
+                } else null
+                val heroNumber = if (inPeriod) dayCount ?: 0 else s.phaseInfo?.daysUntilNextPeriod ?: 0
 
                 Column(Modifier.fillMaxSize()) {
                     // ── App Bar ──
@@ -70,11 +79,22 @@ fun HomeScreen(
                     }
                     SmallSpacer(24)
 
-                    // ── Unified Content ──
-                    HomeContent(
+                    // ── Hero ──
+                    HeroSection(
+                        inPeriod = inPeriod,
+                        heroNumber = heroNumber,
+                        dayCount = dayCount,
+                        phaseInfo = s.phaseInfo,
+                        onPhaseClick = { showPhaseSheet = true },
+                        onCalendarClick = { showCalendarSheet = true },
+                    )
+
+                    // ── History + CTA ──
+                    HistorySection(
                         state = s.cycleState,
                         phaseInfo = s.phaseInfo,
                         today = today,
+                        inPeriod = inPeriod,
                         onStartPeriod = {
                             scope.launch {
                                 val result = sheetManager.startPeriod() ?: return@launch
@@ -99,6 +119,22 @@ fun HomeScreen(
                                 if (result is AddRecordResult.Success) { viewModel.refresh(); snackbar.showSnackbar(successMsg) }
                             }
                         },
+                        onCalendarClick = { showCalendarSheet = true },
+                    )
+                }
+
+                // ── Sheets ──
+                if (showPhaseSheet && s.phaseInfo != null) {
+                    PhaseExplanationSheet(
+                        phaseInfo = s.phaseInfo,
+                        onDismiss = { showPhaseSheet = false },
+                    )
+                }
+                if (showCalendarSheet) {
+                    CycleCalendarSheet(
+                        state = s.cycleState,
+                        phaseInfo = s.phaseInfo,
+                        onDismiss = { showCalendarSheet = false },
                     )
                 }
             }
