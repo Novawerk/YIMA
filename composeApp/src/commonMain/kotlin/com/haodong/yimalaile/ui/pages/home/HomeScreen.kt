@@ -44,6 +44,12 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val successMsg = stringResource(Res.string.record_save_success)
 
+    // Auto-refresh when any sheet closes (e.g. record detail edit from calendar)
+    val activeSheet by sheetManager.activeSheet.collectAsState()
+    LaunchedEffect(activeSheet) {
+        if (activeSheet == null) viewModel.refresh()
+    }
+
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).safeDrawingPadding()) {
         when (val s = uiState) {
             is HomeUiState.Loading -> {}
