@@ -15,6 +15,8 @@ import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.ui.components.DecorShape
 import com.haodong.yimalaile.ui.components.GrowSpacer
 import com.haodong.yimalaile.ui.components.SmallSpacer
+import androidx.compose.material3.TextButton
+import com.haodong.yimalaile.ui.pages.home.phaseDisplayName
 import com.haodong.yimalaile.ui.pages.sheet.SheetManager
 import com.haodong.yimalaile.ui.theme.expressiveShapes
 import kotlinx.coroutines.launch
@@ -23,9 +25,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlinx.datetime.until
 import org.jetbrains.compose.resources.stringResource
-import yimalaile.composeapp.generated.resources.Res
-import yimalaile.composeapp.generated.resources.app_name
-import yimalaile.composeapp.generated.resources.record_save_success
+import yimalaile.composeapp.generated.resources.*
 import kotlin.time.Clock
 
 @Composable
@@ -82,13 +82,53 @@ fun HomeScreen(
 
                     // ── Main area: Calendar or Hero ──
                     if (calendarMode) {
-                        // Mini calendar strip replaces hero
-                        Column(Modifier.weight(1f).padding(horizontal = 16.dp)) {
-                            com.haodong.yimalaile.ui.components.MiniCycleCalendar(
+                        // Status header + compact calendar
+                        Column(
+                            Modifier.weight(1f).padding(horizontal = 16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            // Status: phase + day count
+                            if (s.phaseInfo != null) {
+                                Text(
+                                    phaseDisplayName(s.phaseInfo.phase),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                                if (inPeriod) {
+                                    Text(
+                                        stringResource(Res.string.home_day_n, dayCount ?: 0),
+                                        style = MaterialTheme.typography.headlineMedium,
+                                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                    )
+                                } else {
+                                    Text(
+                                        "${s.phaseInfo.daysUntilNextPeriod} ${stringResource(Res.string.unit_days)}",
+                                        style = MaterialTheme.typography.headlineMedium,
+                                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                    )
+                                }
+                            }
+                            SmallSpacer(8)
+
+                            // Compact calendar grid
+                            com.haodong.yimalaile.ui.components.CycleCalendarGrid(
                                 state = s.cycleState,
                                 phaseInfo = s.phaseInfo,
+                                modifier = Modifier.weight(1f),
+                                monthRange = 0..1,
                             )
-                            Spacer(Modifier.weight(1f))
+
+                            // Info text below calendar
+                            SmallSpacer(8)
+                            if (s.phaseInfo?.nextPeriodStart != null) {
+                                val np = s.phaseInfo.nextPeriodStart
+                                Text(
+                                    "${stringResource(Res.string.home_next_period_starts)}: ${np.monthNumber}/${np.dayOfMonth}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            SmallSpacer(4)
                         }
                     } else {
                         SmallSpacer(24)

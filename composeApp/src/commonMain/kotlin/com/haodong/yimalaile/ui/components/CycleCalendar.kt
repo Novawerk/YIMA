@@ -239,14 +239,14 @@ private fun CalendarMonth(
     Column(Modifier.fillMaxWidth()) {
         Text(
             "${monthName(yearMonth.month)} ${yearMonth.year}",
-            modifier = Modifier.padding(start = 4.dp, top = 12.dp, bottom = 8.dp),
-            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 4.dp),
+            style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.SemiBold,
-            color = onSurface,
+            color = onSurface.copy(alpha = 0.5f),
         )
 
         for (row in 0 until rows) {
-            Row(Modifier.fillMaxWidth().height(36.dp)) {
+            Row(Modifier.fillMaxWidth().height(32.dp)) {
                 for (col in 0 until 7) {
                     val dayNum = row * 7 + col - startOffset + 1
                     if (dayNum < 1 || dayNum > daysInMonth) {
@@ -302,7 +302,7 @@ private fun CalendarMonth(
                             contentAlignment = Alignment.Center,
                         ) {
                             Box(
-                                Modifier.size(30.dp).clip(dayShape)
+                                Modifier.size(26.dp).clip(dayShape)
                                     .background(bgColor)
                                     .then(
                                         if (dashedBorderColor != null) {
