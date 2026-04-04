@@ -1,6 +1,8 @@
 package com.haodong.yimalaile.ui.pages.onboarding
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -13,7 +15,9 @@ import com.haodong.yimalaile.domain.menstrual.AddRecordResult
 import com.haodong.yimalaile.domain.menstrual.CycleState
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.ui.components.CycleCalendarGrid
+import com.haodong.yimalaile.ui.components.CycleCalendarLegend
 import com.haodong.yimalaile.ui.components.PrimaryCta
+import com.haodong.yimalaile.ui.theme.expressiveShapes
 import com.haodong.yimalaile.ui.components.SmallSpacer
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
@@ -57,13 +61,23 @@ fun OnboardingScreen(
             // ── Step 0: Welcome ──
             0 -> {
                 Spacer(Modifier.weight(1f))
-                Text(
-                    stringResource(Res.string.app_name),
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
                     modifier = Modifier.fillMaxWidth(),
-                )
+                ) {
+                    com.haodong.yimalaile.ui.components.DecorShape(
+                        size = 32,
+                        shape = MaterialTheme.expressiveShapes.cookie7,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    SmallSpacer(10)
+                    Text(
+                        stringResource(Res.string.app_name),
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
                 SmallSpacer(24)
                 Text(
                     stringResource(Res.string.onboarding_welcome),
@@ -121,13 +135,17 @@ fun OnboardingScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                SmallSpacer(12)
+                SmallSpacer(8)
+                CycleCalendarLegend()
+                SmallSpacer(8)
 
+                // Show start date on calendar by using selectedStart
                 CycleCalendarGrid(
                     state = calendarState,
                     phaseInfo = null,
-                    selectedDate = periodEnd,
-                    onDateClick = { periodEnd = it },
+                    selectedStart = periodStart,
+                    selectedEnd = periodEnd,
+                    onDateClick = { if (it >= periodStart!!) periodEnd = it },
                     isDateEnabled = { it >= periodStart!! },
                     modifier = Modifier.weight(1f),
                     monthRange = -6..0,
@@ -182,10 +200,15 @@ fun OnboardingScreen(
 
             // ── Step 3: Confirm estimated past cycles ──
             3 -> {
+                val periodLabels = listOf(
+                    stringResource(Res.string.onboarding_period_prev),
+                    stringResource(Res.string.onboarding_period_prev2),
+                )
+
                 if (adjustingIndex >= 0) {
                     // Adjusting a specific period
                     Text(
-                        stringResource(Res.string.onboarding_period_n, adjustingIndex + 2),
+                        periodLabels.getOrElse(adjustingIndex) { "" },
                         style = MaterialTheme.typography.titleLarge,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
@@ -245,6 +268,40 @@ fun OnboardingScreen(
                     )
                     SmallSpacer(24)
 
+                    // User's manually input period — tap edit icon to go back to step 1
+                    val userDateRange = if (stillInPeriod) {
+                        "${periodStart!!.monthNumber}/${periodStart!!.dayOfMonth} — ${stringResource(Res.string.history_in_progress)}"
+                    } else {
+                        "${periodStart!!.monthNumber}/${periodStart!!.dayOfMonth} — ${periodEnd!!.monthNumber}/${periodEnd!!.dayOfMonth}"
+                    }
+                    Surface(
+                        tonalElevation = 2.dp,
+                        shape = MaterialTheme.shapes.large,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f)) {
+                                Text(
+                                    stringResource(Res.string.onboarding_period_current),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                                SmallSpacer(4)
+                                Text(userDateRange, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            }
+                            if (!stillInPeriod) {
+                                val userDays = periodStart!!.until(periodEnd!!, DateTimeUnit.DAY).toInt() + 1
+                                Text("${userDays}${stringResource(Res.string.unit_days)}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            SmallSpacer(8)
+                            IconButton(onClick = { step = 1 }, modifier = Modifier.size(32.dp)) {
+                                Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
+                            }
+                        }
+                    }
+                    SmallSpacer(8)
+
+                    // Estimated past periods
                     estimated.forEachIndexed { index, (start, end) ->
                         val days = start.until(end, DateTimeUnit.DAY).toInt() + 1
                         Surface(
@@ -258,7 +315,7 @@ fun OnboardingScreen(
                             ) {
                                 Column(Modifier.weight(1f)) {
                                     Text(
-                                        stringResource(Res.string.onboarding_period_n, index + 2),
+                                        periodLabels.getOrElse(index) { "" },
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
@@ -274,13 +331,16 @@ fun OnboardingScreen(
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
-                                SmallSpacer(12)
-                                TextButton(onClick = {
-                                    adjustingIndex = index
-                                    adjustStart = start
-                                    adjustEnd = end
-                                }) {
-                                    Text(stringResource(Res.string.onboarding_adjust))
+                                SmallSpacer(8)
+                                IconButton(
+                                    onClick = {
+                                        adjustingIndex = index
+                                        adjustStart = start
+                                        adjustEnd = end
+                                    },
+                                    modifier = Modifier.size(32.dp),
+                                ) {
+                                    Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
                                 }
                             }
                         }

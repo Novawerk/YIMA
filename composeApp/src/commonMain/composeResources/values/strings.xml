@@ -177,7 +177,9 @@
     <string name="onboarding_all_set_hint">3 cycles recorded. Predictions are now enabled.</string>
     <string name="onboarding_get_started">Get started</string>
     <string name="onboarding_next">Next</string>
-    <string name="onboarding_period_n">Period %1$d</string>
+    <string name="onboarding_period_current">Your input</string>
+    <string name="onboarding_period_prev">Last cycle</string>
+    <string name="onboarding_period_prev2">Cycle before last</string>
     <string name="onboarding_adjust">Adjust</string>
     <string name="onboarding_confirm">Confirm</string>
     <string name="onboarding_back">Back</string>

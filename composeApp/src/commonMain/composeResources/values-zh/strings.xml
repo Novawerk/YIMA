@@ -177,7 +177,9 @@
     <string name="onboarding_all_set_hint">已记录3个周期，预测功能已开启。</string>
     <string name="onboarding_get_started">开始使用</string>
     <string name="onboarding_next">下一步</string>
-    <string name="onboarding_period_n">第%1$d次月经</string>
+    <string name="onboarding_period_current">你输入的</string>
+    <string name="onboarding_period_prev">上个月经周期</string>
+    <string name="onboarding_period_prev2">上上个月经周期</string>
     <string name="onboarding_adjust">调整</string>
     <string name="onboarding_confirm">确认</string>
     <string name="onboarding_back">返回</string>
