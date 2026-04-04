@@ -218,8 +218,6 @@ private fun CalendarMonth(
                             !enabled -> onSurface.copy(alpha = 0.15f)
                             else -> onSurface.copy(alpha = 0.45f)
                         }
-                        val showNumber = isToday || isPeriod || isPredictedPeriod || isSelected || isInRange
-
                         Surface(
                             modifier = Modifier.weight(1f).height(32.dp)
                                 .then(if (enabled && onDateClick != null) Modifier.clickable { onDateClick(date) } else Modifier),
@@ -227,14 +225,12 @@ private fun CalendarMonth(
                             color = bgColor,
                         ) {
                             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                if (showNumber) {
-                                    Text(
-                                        "$dayNum",
-                                        fontSize = 12.sp,
-                                        fontWeight = if (isToday || isSelected) FontWeight.Bold else FontWeight.Normal,
-                                        color = textColor,
-                                    )
-                                }
+                                Text(
+                                    "$dayNum",
+                                    fontSize = 12.sp,
+                                    fontWeight = if (isToday || isSelected) FontWeight.Bold else FontWeight.Normal,
+                                    color = textColor,
+                                )
                             }
                         }
                     }
