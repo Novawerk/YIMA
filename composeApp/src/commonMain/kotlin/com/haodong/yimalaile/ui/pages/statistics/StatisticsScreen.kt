@@ -1,5 +1,6 @@
 package com.haodong.yimalaile.ui.pages.statistics
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -51,7 +52,7 @@ fun StatisticsScreen(
     } ?: emptyList()
 
     Column(
-        Modifier.fillMaxSize()
+        Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
             .safeDrawingPadding()
             .padding(horizontal = 20.dp),
     ) {

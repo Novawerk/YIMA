@@ -27,7 +27,8 @@ import com.haodong.yimalaile.domain.menstrual.AddRecordResult
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.ui.components.PrimaryCta
-import com.haodong.yimalaile.ui.components.RangeCalendar
+import com.haodong.yimalaile.domain.menstrual.CycleState
+import com.haodong.yimalaile.ui.components.CycleCalendarGrid
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.stringResource
@@ -79,13 +80,13 @@ fun OnboardingScreen(
             1 -> {
                 Text(stringResource(Res.string.onboarding_when_start), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
                 Spacer(Modifier.height(8.dp))
-                RangeCalendar(
-                    existingRecords = createdRecords,
-                    selectedStart = selectedSingle,
-                    selectedEnd = selectedSingle,
+                CycleCalendarGrid(
+                    state = CycleState(activePeriod = null, recentPeriods = createdRecords.filter { it.endDate != null }, predictions = emptyList()),
+                    phaseInfo = null,
+                    selectedDate = selectedSingle,
                     onDateClick = { selectedSingle = it },
-                    singleSelectMode = true,
                     modifier = Modifier.weight(1f),
+                    monthRange = -6..0,
                 )
                 PrimaryCta(
                     text = stringResource(Res.string.onboarding_confirm),
@@ -147,8 +148,9 @@ fun OnboardingScreen(
             3 -> {
                 Text(stringResource(Res.string.onboarding_select_range), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
                 Spacer(Modifier.height(8.dp))
-                RangeCalendar(
-                    existingRecords = createdRecords,
+                CycleCalendarGrid(
+                    state = CycleState(activePeriod = null, recentPeriods = createdRecords.filter { it.endDate != null }, predictions = emptyList()),
+                    phaseInfo = null,
                     selectedStart = rangeStart,
                     selectedEnd = rangeEnd,
                     onDateClick = { date ->
@@ -163,6 +165,7 @@ fun OnboardingScreen(
                         }
                     },
                     modifier = Modifier.weight(1f),
+                    monthRange = -12..0,
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextButton(onClick = { step = 2 }, Modifier.weight(1f)) { Text(stringResource(Res.string.onboarding_back)) }

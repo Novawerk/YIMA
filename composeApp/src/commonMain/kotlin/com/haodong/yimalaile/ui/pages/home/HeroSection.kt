@@ -132,6 +132,7 @@ internal fun ColumnScope.HeroSection(
                     "${display.number}",
                     style = MaterialTheme.typography.displayLargeEmphasized,
                     fontSize = 128.sp,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.Black,
                 )
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
