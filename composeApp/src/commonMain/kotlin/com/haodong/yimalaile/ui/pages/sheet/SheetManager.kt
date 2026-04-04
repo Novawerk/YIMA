@@ -146,6 +146,19 @@ class SheetManager(private val service: MenstrualService) {
         return service.logDay(active.id, day)
     }
 
+    /** Log a day for a specific record (not just the active period). */
+    suspend fun logDayForRecord(recordId: String, targetDate: LocalDate): Boolean? {
+        val result = showLogDaySheet(targetDate) ?: return null
+        val day = DailyRecord(
+            date = targetDate,
+            intensity = result.intensity,
+            mood = result.mood,
+            symptoms = result.symptoms,
+            notes = result.notes,
+        )
+        return service.logDay(recordId, day)
+    }
+
     suspend fun backfillPeriod(): AddRecordResult? {
         val (start, end) = showBackfillSheet() ?: return null
         return service.backfillPeriod(start, end)

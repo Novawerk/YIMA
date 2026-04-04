@@ -110,7 +110,7 @@ fun StatisticsScreen(
                                         if (ok) { refresh(); snackbar.showSnackbar(successMsg) }
                                     }
                                     is DetailAction.LogSpecificDay -> {
-                                        val ok = sheetManager.logDay(targetDate = action.date) ?: return@launch
+                                        val ok = sheetManager.logDayForRecord(record.id, action.date) ?: return@launch
                                         if (ok) { refresh(); snackbar.showSnackbar(successMsg) }
                                     }
                                     is DetailAction.Delete -> {
@@ -161,9 +161,9 @@ private fun RecordCard(record: MenstrualRecord, daysStr: String, onClick: () -> 
             DecorShape(
                 size = 20,
                 shape = if (isActive) MaterialTheme.expressiveShapes.heart
-                        else MaterialTheme.expressiveShapes.cookie4,
+                        else MaterialTheme.expressiveShapes.bun,
                 color = if (isActive) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
+                        else MaterialTheme.colorScheme.tertiary,
             )
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -204,9 +204,10 @@ private fun RecordCard(record: MenstrualRecord, daysStr: String, onClick: () -> 
                     )
                 }
             } else if (days != null) {
-                Row(verticalAlignment = Alignment.Bottom) {
-                    Text("$days", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                    Text(daysStr, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("$days", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                    SmallSpacer(4)
+                    Text(daysStr, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }

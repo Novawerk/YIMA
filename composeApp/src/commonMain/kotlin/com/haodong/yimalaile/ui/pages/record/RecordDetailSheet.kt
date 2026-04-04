@@ -62,61 +62,27 @@ fun RecordDetailSheet(
         shape = MaterialTheme.shapes.extraLarge,
     ) {
         Column(Modifier.fillMaxWidth()) {
-            // ── Header ──
+            // ── App Bar ──
+            val dateRange = "${record.startDate.monthNumber}/${record.startDate.dayOfMonth}" +
+                    if (record.endDate != null) " — ${record.endDate.monthNumber}/${record.endDate.dayOfMonth}" else ""
+            val subtitle = buildString {
+                append(record.startDate.year)
+                if (days != null) append(" · $days${stringResource(Res.string.unit_days)}")
+                if (isActive) append(" · ${stringResource(Res.string.history_in_progress)}")
+            }
+
             Row(
-                Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(Modifier.weight(1f)) {
-                    if (isActive) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = MaterialTheme.shapes.small,
-                        ) {
-                            Text(
-                                stringResource(Res.string.history_in_progress),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
-                            )
-                        }
-                        SmallSpacer(4)
-                    }
-                    Text(
-                        "${record.startDate.monthNumber}/${record.startDate.dayOfMonth}" +
-                                if (record.endDate != null) " — ${record.endDate.monthNumber}/${record.endDate.dayOfMonth}" else "",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Text(
-                        "${record.startDate.year}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                if (days != null) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("$days", fontSize = 40.sp, fontWeight = FontWeight.Bold)
-                        Text(stringResource(Res.string.unit_days), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
+                    Text(dateRange, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
-
-            SmallSpacer(12)
-
-            // ── Action chips ──
-            Row(
-                Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                ActionChip(stringResource(Res.string.detail_edit_start), onClick = onEditStart, modifier = Modifier.weight(1f))
-                ActionChip(stringResource(Res.string.detail_edit_end), onClick = onEditEnd, modifier = Modifier.weight(1f))
-            }
-
-            SmallSpacer(16)
 
             // ── Day-by-day list ──
+            SmallSpacer(8)
             Text(
                 stringResource(Res.string.detail_daily_records),
                 style = MaterialTheme.typography.titleSmall,
@@ -143,17 +109,15 @@ fun RecordDetailSheet(
                 }
             }
 
-            // ── Delete ──
+            // ── All actions together at bottom ──
             SmallSpacer(8)
-            TextButton(
-                onClick = { showDeleteConfirm = true },
-                modifier = Modifier.align(Alignment.CenterHorizontally),
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Text(
-                    stringResource(Res.string.detail_delete),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.error,
-                )
+                ActionChip(stringResource(Res.string.detail_edit_start), onClick = onEditStart, modifier = Modifier.weight(1f))
+                ActionChip(stringResource(Res.string.detail_edit_end), onClick = onEditEnd, modifier = Modifier.weight(1f))
+                ActionChip(stringResource(Res.string.detail_delete), onClick = { showDeleteConfirm = true }, modifier = Modifier.weight(1f), destructive = true)
             }
             SmallSpacer(16)
         }
@@ -177,7 +141,7 @@ fun RecordDetailSheet(
 }
 
 @Composable
-private fun ActionChip(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun ActionChip(label: String, onClick: () -> Unit, modifier: Modifier = Modifier, destructive: Boolean = false) {
     Surface(
         onClick = onClick,
         modifier = modifier,
@@ -185,7 +149,11 @@ private fun ActionChip(label: String, onClick: () -> Unit, modifier: Modifier = 
         tonalElevation = 2.dp,
     ) {
         Box(Modifier.padding(vertical = 12.dp), contentAlignment = Alignment.Center) {
-            Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+            Text(
+                label,
+                style = MaterialTheme.typography.labelMedium,
+                color = if (destructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+            )
         }
     }
 }
