@@ -5,6 +5,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.domain.menstrual.CycleState
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
@@ -18,8 +19,13 @@ import yimalaile.composeapp.generated.resources.*
 import kotlin.time.Clock
 
 /**
- * "姨妈来了" sheet — uses CycleCalendarGrid for date picking.
- * If start date is > 3 days ago, also allows selecting end date (auto-filled from avg).
+ * "姨妈来了" sheet — two-phase date picker.
+ *
+ * Phase 1: Pick start date.
+ * Phase 2: If start > 3 days ago, pick end date (auto-filled from avg period length,
+ *          user can adjust by tapping a different date).
+ *
+ * Tapping the start date chip resets to phase 1.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,15 +38,20 @@ fun StartPeriodSheet(
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
     var selectedStart by remember { mutableStateOf<LocalDate?>(null) }
     var selectedEnd by remember { mutableStateOf<LocalDate?>(null) }
+    // Explicit phase tracking: false = picking start, true = picking end
+    var selectingEnd by remember { mutableStateOf(false) }
 
-    // Whether the selected start is old enough to also require end date
     val needsEndDate = selectedStart != null &&
             selectedStart!!.until(today, DateTimeUnit.DAY).toInt() > 3
 
-    // Auto-fill end date when start is selected and > 3 days ago
+    // When start is picked and > 3 days ago, switch to end-selection mode
     LaunchedEffect(selectedStart) {
-        if (needsEndDate && selectedEnd == null && selectedStart != null) {
+        if (needsEndDate && !selectingEnd) {
+            selectingEnd = true
             selectedEnd = selectedStart!!.plus(avgPeriodLength - 1, DateTimeUnit.DAY)
+        } else if (!needsEndDate) {
+            selectingEnd = false
+            selectedEnd = null
         }
     }
 
@@ -53,43 +64,78 @@ fun StartPeriodSheet(
         CycleState(records = existingRecords, predictions = emptyList(), currentPeriod = null, inPredictedPeriod = false)
     }
 
+    // Title and hint text
+    val title = if (selectingEnd)
+        stringResource(Res.string.end_period_question)
+    else
+        stringResource(Res.string.start_period_question)
+
+    val hint = when {
+        selectingEnd && selectedStart != null && selectedEnd != null ->
+            "${selectedStart!!.monthNumber}/${selectedStart!!.dayOfMonth} — ${selectedEnd!!.monthNumber}/${selectedEnd!!.dayOfMonth}"
+        selectedStart != null ->
+            "${selectedStart!!.monthNumber}/${selectedStart!!.dayOfMonth}"
+        else -> stringResource(Res.string.start_period_hint)
+    }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
         Column(Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp)) {
-            Text(
-                stringResource(Res.string.start_period_question),
-                style = MaterialTheme.typography.titleLarge,
-            )
+            Text(title, style = MaterialTheme.typography.titleLarge)
             SmallSpacer(4)
-            // Show selected range feedback
-            val hint = when {
-                selectedStart != null && needsEndDate && selectedEnd != null ->
-                    "${selectedStart!!.monthNumber}/${selectedStart!!.dayOfMonth} — ${selectedEnd!!.monthNumber}/${selectedEnd!!.dayOfMonth}"
-                selectedStart != null ->
-                    "${selectedStart!!.monthNumber}/${selectedStart!!.dayOfMonth}"
-                else -> stringResource(Res.string.start_period_hint)
+            // Date chip — tappable to reset when in end-selection mode
+            if (selectingEnd && selectedStart != null) {
+                Row {
+                    Text(
+                        hint,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.weight(1f))
+                    TextButton(onClick = {
+                        selectingEnd = false
+                        selectedEnd = null
+                        selectedStart = null
+                    }) {
+                        Text(
+                            stringResource(Res.string.onboarding_adjust),
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                    }
+                }
+            } else {
+                Text(
+                    hint,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
-            Text(
-                hint,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+
             SmallSpacer(12)
             CycleCalendarLegend()
             SmallSpacer(8)
             CycleCalendarGrid(
                 state = calendarState,
                 phaseInfo = null,
-                selectedStart = selectedStart,
-                selectedEnd = if (needsEndDate) selectedEnd else null,
-                selectedDate = if (!needsEndDate) selectedStart else null,
+                selectedStart = if (selectingEnd) selectedStart else null,
+                selectedEnd = if (selectingEnd) selectedEnd else null,
+                selectedDate = if (!selectingEnd) selectedStart else null,
                 onDateClick = { date ->
-                    if (needsEndDate && selectedStart != null && date > selectedStart!!) {
-                        selectedEnd = date
+                    if (selectingEnd && selectedStart != null) {
+                        if (date >= selectedStart!!) {
+                            // Tap on or after start → set end date
+                            selectedEnd = date
+                        } else {
+                            // Tap before start → re-pick start, reset end mode
+                            selectingEnd = false
+                            selectedEnd = null
+                            selectedStart = date
+                        }
                     } else {
+                        // In start-selection mode
                         selectedStart = date
                         selectedEnd = null
                     }
@@ -100,15 +146,6 @@ fun StartPeriodSheet(
                 modifier = Modifier.height(350.dp),
                 monthRange = -6..0,
             )
-
-            if (needsEndDate) {
-                SmallSpacer(4)
-                Text(
-                    stringResource(Res.string.end_period_question),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
 
             SmallSpacer(16)
             PrimaryCta(
