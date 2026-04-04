@@ -124,18 +124,20 @@ fun StartPeriodSheet(
                 selectedEnd = if (selectingEnd) selectedEnd else null,
                 selectedDate = if (!selectingEnd) selectedStart else null,
                 onDateClick = { date ->
-                    if (selectingEnd && selectedStart != null) {
+                    if (date == selectedStart || date == selectedEnd) {
+                        // Tap on already-selected date → clear all
+                        selectedStart = null
+                        selectedEnd = null
+                        selectingEnd = false
+                    } else if (selectingEnd && selectedStart != null) {
                         if (date >= selectedStart!!) {
-                            // Tap on or after start → set end date
                             selectedEnd = date
                         } else {
-                            // Tap before start → re-pick start, reset end mode
                             selectingEnd = false
                             selectedEnd = null
                             selectedStart = date
                         }
                     } else {
-                        // In start-selection mode
                         selectedStart = date
                         selectedEnd = null
                     }
