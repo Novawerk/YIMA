@@ -54,6 +54,8 @@ fun HomeScreen(
                 } else null
                 val heroNumber = if (inPeriod) dayCount ?: 0 else s.phaseInfo?.daysUntilNextPeriod ?: 0
 
+                var calendarMode by remember { mutableStateOf(true) }
+
                 Column(Modifier.fillMaxSize()) {
                     // ── App Bar ──
                     Row(
@@ -77,24 +79,40 @@ fun HomeScreen(
                             }
                         }
                     }
-                    SmallSpacer(24)
 
-                    // ── Hero ──
-                    HeroSection(
-                        inPeriod = inPeriod,
-                        heroNumber = heroNumber,
-                        dayCount = dayCount,
-                        phaseInfo = s.phaseInfo,
-                        onPhaseClick = { showPhaseSheet = true },
-                        onCalendarClick = { showCalendarSheet = true },
-                    )
+                    // ── Main area: Calendar or Hero ──
+                    if (calendarMode) {
+                        // Calendar replaces hero
+                        Column(Modifier.weight(1f).padding(horizontal = 16.dp)) {
+                            com.haodong.yimalaile.ui.components.CycleCalendarLegend()
+                            SmallSpacer(8)
+                            com.haodong.yimalaile.ui.components.CycleCalendarGrid(
+                                state = s.cycleState,
+                                phaseInfo = s.phaseInfo,
+                                modifier = Modifier.weight(1f),
+                                monthRange = -2..2,
+                            )
+                        }
+                    } else {
+                        SmallSpacer(24)
+                        HeroSection(
+                            inPeriod = inPeriod,
+                            heroNumber = heroNumber,
+                            dayCount = dayCount,
+                            phaseInfo = s.phaseInfo,
+                            onPhaseClick = { showPhaseSheet = true },
+                            onCalendarClick = { calendarMode = true },
+                        )
+                    }
 
-                    // ── Bottom: Calendar/Stats toggle + CTA ──
+                    // ── Bottom: phase chip + toggle + CTA ──
                     BottomSection(
                         state = s.cycleState,
                         phaseInfo = s.phaseInfo,
                         today = today,
                         inPeriod = inPeriod,
+                        calendarMode = calendarMode,
+                        onToggleMode = { calendarMode = it },
                         onStartPeriod = {
                             scope.launch {
                                 val result = sheetManager.startPeriod() ?: return@launch
@@ -127,13 +145,6 @@ fun HomeScreen(
                     PhaseExplanationSheet(
                         phaseInfo = s.phaseInfo,
                         onDismiss = { showPhaseSheet = false },
-                    )
-                }
-                if (showCalendarSheet) {
-                    CycleCalendarSheet(
-                        state = s.cycleState,
-                        phaseInfo = s.phaseInfo,
-                        onDismiss = { showCalendarSheet = false },
                     )
                 }
             }

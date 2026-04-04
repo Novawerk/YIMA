@@ -31,12 +31,13 @@ internal fun BottomSection(
     phaseInfo: CyclePhaseInfo?,
     today: LocalDate,
     inPeriod: Boolean,
+    calendarMode: Boolean,
+    onToggleMode: (Boolean) -> Unit,
     onStartPeriod: () -> Unit,
     onEndPeriod: () -> Unit,
     onLogDay: () -> Unit,
     onBackfill: () -> Unit,
 ) {
-    var calendarMode by remember { mutableStateOf(true) }
 
     Surface(
         tonalElevation = 1.dp,
@@ -87,12 +88,12 @@ internal fun BottomSection(
                 SingleChoiceSegmentedButtonRow {
                     SegmentedButton(
                         selected = calendarMode,
-                        onClick = { calendarMode = true },
+                        onClick = { onToggleMode(true) },
                         shape = SegmentedButtonDefaults.itemShape(0, 2),
                     ) { Text("📅", style = MaterialTheme.typography.labelSmall) }
                     SegmentedButton(
                         selected = !calendarMode,
-                        onClick = { calendarMode = false },
+                        onClick = { onToggleMode(false) },
                         shape = SegmentedButtonDefaults.itemShape(1, 2),
                     ) { Text("📊", style = MaterialTheme.typography.labelSmall) }
                 }
@@ -100,17 +101,7 @@ internal fun BottomSection(
 
             SmallSpacer(12)
 
-            if (calendarMode) {
-                // Calendar mode
-                CycleCalendarLegend()
-                SmallSpacer(8)
-                CycleCalendarGrid(
-                    state = state,
-                    phaseInfo = phaseInfo,
-                    modifier = Modifier.height(300.dp),
-                    monthRange = -2..2,
-                )
-            } else {
+            if (!calendarMode) {
                 // Stats mode — compact stats
                 val records = state.recentPeriods
                 val avgCycle = if (records.size >= 2) {
