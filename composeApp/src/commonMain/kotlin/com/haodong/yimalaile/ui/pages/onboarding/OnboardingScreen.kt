@@ -54,8 +54,33 @@ fun OnboardingScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         when (step) {
-            // ── Step 0: When did your last period start? ──
+            // ── Step 0: Welcome ──
             0 -> {
+                Spacer(Modifier.weight(1f))
+                Text(
+                    stringResource(Res.string.app_name),
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                SmallSpacer(24)
+                Text(
+                    stringResource(Res.string.onboarding_welcome),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(Modifier.weight(1f))
+                PrimaryCta(
+                    text = stringResource(Res.string.onboarding_next),
+                    onClick = { step = 1 },
+                )
+            }
+
+            // ── Step 1: When did your last period start? ──
+            1 -> {
                 Text(
                     stringResource(Res.string.onboarding_when_last_start),
                     style = MaterialTheme.typography.headlineMedium,
@@ -74,65 +99,72 @@ fun OnboardingScreen(
                 SmallSpacer(16)
                 PrimaryCta(
                     text = stringResource(Res.string.onboarding_next),
-                    onClick = { step = 1 },
+                    onClick = { step = 2 },
                     enabled = periodStart != null,
                 )
             }
 
-            // ── Step 1: When did it end? ──
-            1 -> {
+            // ── Step 2: When did it end? ──
+            2 -> {
                 Text(
                     stringResource(Res.string.onboarding_when_end),
                     style = MaterialTheme.typography.headlineMedium,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                SmallSpacer(8)
+                SmallSpacer(4)
+                // Show selected start date
+                Text(
+                    "${stringResource(Res.string.onboarding_when_last_start).substringBefore("？").substringBefore("?")} ${periodStart!!.monthNumber}/${periodStart!!.dayOfMonth}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                SmallSpacer(12)
 
-                // "Still in period" toggle
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                ) {
-                    FilterChip(
-                        selected = stillInPeriod,
-                        onClick = {
-                            stillInPeriod = !stillInPeriod
-                            if (stillInPeriod) periodEnd = null
-                        },
-                        label = { Text(stringResource(Res.string.onboarding_still_in_period)) },
-                    )
-                }
-                SmallSpacer(8)
-
-                if (!stillInPeriod) {
-                    CycleCalendarGrid(
-                        state = calendarState,
-                        phaseInfo = null,
-                        selectedDate = periodEnd,
-                        onDateClick = { periodEnd = it },
-                        isDateEnabled = { it >= (periodStart ?: it) },
-                        modifier = Modifier.weight(1f),
-                        monthRange = -6..0,
-                    )
-                } else {
-                    Spacer(Modifier.weight(1f))
-                }
+                CycleCalendarGrid(
+                    state = calendarState,
+                    phaseInfo = null,
+                    selectedDate = periodEnd,
+                    onDateClick = { periodEnd = it },
+                    isDateEnabled = { it >= periodStart!! },
+                    modifier = Modifier.weight(1f),
+                    monthRange = -6..0,
+                )
 
                 SmallSpacer(16)
+                // "Still in period" as action button
+                OutlinedButton(
+                    onClick = {
+                        stillInPeriod = true
+                        periodEnd = null
+                        val start = periodStart!!
+                        val duration = 5
+                        val cycleLen = 28
+                        estimated = listOf(
+                            start.minus(cycleLen, DateTimeUnit.DAY) to
+                                    start.minus(cycleLen, DateTimeUnit.DAY).plus(duration - 1, DateTimeUnit.DAY),
+                            start.minus(cycleLen * 2, DateTimeUnit.DAY) to
+                                    start.minus(cycleLen * 2, DateTimeUnit.DAY).plus(duration - 1, DateTimeUnit.DAY),
+                        )
+                        step = 3
+                    },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                ) {
+                    Text(stringResource(Res.string.onboarding_still_in_period))
+                }
+                SmallSpacer(8)
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedButton(
-                        onClick = { step = 0 },
+                        onClick = { step = 1 },
                         modifier = Modifier.weight(1f).height(56.dp),
                     ) { Text(stringResource(Res.string.onboarding_back)) }
                     PrimaryCta(
                         text = stringResource(Res.string.onboarding_next),
                         onClick = {
-                            // Generate 2 estimated past periods
                             val start = periodStart!!
-                            val duration = if (stillInPeriod) 5 else {
-                                start.until(periodEnd!!, DateTimeUnit.DAY).toInt() + 1
-                            }
+                            val duration = start.until(periodEnd!!, DateTimeUnit.DAY).toInt() + 1
                             val cycleLen = 28
                             estimated = listOf(
                                 start.minus(cycleLen, DateTimeUnit.DAY) to
@@ -140,16 +172,16 @@ fun OnboardingScreen(
                                 start.minus(cycleLen * 2, DateTimeUnit.DAY) to
                                         start.minus(cycleLen * 2, DateTimeUnit.DAY).plus(duration - 1, DateTimeUnit.DAY),
                             )
-                            step = 2
+                            step = 3
                         },
-                        enabled = stillInPeriod || periodEnd != null,
+                        enabled = periodEnd != null,
                         modifier = Modifier.weight(1f),
                     )
                 }
             }
 
-            // ── Step 2: Confirm estimated past cycles ──
-            2 -> {
+            // ── Step 3: Confirm estimated past cycles ──
+            3 -> {
                 if (adjustingIndex >= 0) {
                     // Adjusting a specific period
                     Text(
@@ -272,15 +304,15 @@ fun OnboardingScreen(
                                 estimated.forEach { (s, e) ->
                                     service.backfillPeriod(s, e)
                                 }
-                                step = 3
+                                step = 4
                             }
                         },
                     )
                 }
             }
 
-            // ── Step 3: All set! ──
-            3 -> {
+            // ── Step 4: All set! ──
+            4 -> {
                 Spacer(Modifier.weight(1f))
                 Text(
                     stringResource(Res.string.onboarding_all_set),

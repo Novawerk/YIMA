@@ -166,6 +166,7 @@
     <string name="detail_delete_confirm">删除</string>
 
     <!-- Onboarding -->
+    <string name="onboarding_welcome">在开始使用前，我们需要您回答几个问题，以帮助我们更好地了解您的月经周期。请放心，您的数据只会存储于本地，并且可以在任何时间被完全删除。</string>
     <string name="onboarding_when_last_start">上次月经是什么时候开始的？</string>
     <string name="onboarding_when_end">什么时候结束的？</string>
     <string name="onboarding_still_in_period">还没结束</string>

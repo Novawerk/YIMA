@@ -166,6 +166,7 @@
     <string name="detail_delete_confirm">Delete</string>
 
     <!-- Onboarding -->
+    <string name="onboarding_welcome">Before we begin, we need a few details about your cycle to provide accurate predictions. Your data is stored locally and can be deleted at any time.</string>
     <string name="onboarding_when_last_start">When did your last period start?</string>
     <string name="onboarding_when_end">When did it end?</string>
     <string name="onboarding_still_in_period">Still in period</string>
