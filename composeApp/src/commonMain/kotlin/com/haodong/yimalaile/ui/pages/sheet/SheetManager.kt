@@ -184,6 +184,21 @@ class SheetManager(private val service: MenstrualService) {
         return deferred.await().also { _activeSheet.value = null }
     }
 
+    /**
+     * Show record detail and handle all actions internally.
+     * Callers don't need to handle DetailAction — just call and forget.
+     */
+    suspend fun showAndHandleRecordDetail(record: MenstrualRecord) {
+        val action = showRecordDetail(record) ?: return
+        when (action) {
+            is DetailAction.EditStart -> recordPeriodStart()
+            is DetailAction.EditEnd -> recordPeriodEnd()
+            is DetailAction.LogDay -> logDay()
+            is DetailAction.LogSpecificDay -> logDayForRecord(record.id, action.date)
+            is DetailAction.Delete -> service.deleteRecord(record.id)
+        }
+    }
+
     /** Show prediction detail (read-only). Suspends until dismissed. */
     suspend fun showPredictionDetail(prediction: PredictedCycle, avgPeriodLength: Int) {
         val deferred = CompletableDeferred<Unit?>()

@@ -235,7 +235,7 @@ private fun MonthBlock(
                                         date in r.startDate..rEnd
                                     }
                                     if (record != null) {
-                                        scope.launch { sheetManager.showRecordDetail(record) }
+                                        scope.launch { sheetManager.showAndHandleRecordDetail(record) }
                                     }
                                 } else Modifier
                             ),

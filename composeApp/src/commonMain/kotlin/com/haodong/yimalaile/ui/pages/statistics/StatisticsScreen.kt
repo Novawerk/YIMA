@@ -21,7 +21,6 @@ import com.haodong.yimalaile.ui.components.DecorShape
 import com.haodong.yimalaile.ui.components.PrimaryCta
 import com.haodong.yimalaile.ui.theme.expressiveShapes
 import com.haodong.yimalaile.ui.components.SmallSpacer
-import com.haodong.yimalaile.ui.pages.sheet.DetailAction
 import com.haodong.yimalaile.ui.pages.sheet.SheetManager
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
@@ -93,27 +92,8 @@ fun StatisticsScreen(
                         daysStr = daysStr,
                         onClick = {
                             scope.launch {
-                                val action = sheetManager.showRecordDetail(record) ?: return@launch
-                                when (action) {
-                                    is DetailAction.EditStart -> { sheetManager.recordPeriodStart(); refresh() }
-                                    is DetailAction.EditEnd -> {
-                                        val ok = sheetManager.recordPeriodEnd() ?: return@launch
-                                        if (ok) { refresh(); snackbar.showSnackbar(successMsg) }
-                                    }
-                                    is DetailAction.LogDay -> {
-                                        val ok = sheetManager.logDay() ?: return@launch
-                                        if (ok) { refresh(); snackbar.showSnackbar(successMsg) }
-                                    }
-                                    is DetailAction.LogSpecificDay -> {
-                                        val ok = sheetManager.logDayForRecord(record.id, action.date) ?: return@launch
-                                        if (ok) { refresh(); snackbar.showSnackbar(successMsg) }
-                                    }
-                                    is DetailAction.Delete -> {
-                                        service.deleteRecord(record.id)
-                                        refresh()
-                                        snackbar.showSnackbar(deletedMsg)
-                                    }
-                                }
+                                sheetManager.showAndHandleRecordDetail(record)
+                                refresh()
                             }
                         },
                     )
