@@ -253,6 +253,7 @@
     <string name="phase_luteal">Luteal</string>
     <string name="home_next_visit">Next visit</string>
     <string name="home_current_phase">Current phase</string>
+    <string name="home_last_period">Last period</string>
     <string name="home_next_period_starts">Next period starts</string>
     <string name="home_past_records">Past records</string>
     <string name="home_day_in_cycle">Day %1$d of %2$d</string>

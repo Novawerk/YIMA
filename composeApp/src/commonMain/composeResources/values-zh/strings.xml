@@ -252,6 +252,7 @@
     <string name="phase_luteal">黄体期</string>
     <string name="home_next_visit">下次姨妈造访</string>
     <string name="home_current_phase">当前阶段</string>
+    <string name="home_last_period">上次月经</string>
     <string name="home_next_period_starts">预计下个经期开始</string>
     <string name="home_past_records">过去的记录</string>
     <string name="home_day_in_cycle">第%1$d天 / 共%2$d天</string>

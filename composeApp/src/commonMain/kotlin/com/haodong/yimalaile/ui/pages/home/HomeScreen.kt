@@ -1,6 +1,7 @@
 package com.haodong.yimalaile.ui.pages.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.History
@@ -85,7 +86,8 @@ fun HomeScreen(
                         HomeCalendar(
                             state = s.cycleState,
                             phaseInfo = s.phaseInfo,
-                            modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
+                            modifier = Modifier.weight(1f).padding(horizontal = 16.dp)
+                                .clickable { showCalendarSheet = true },
                         )
                     } else {
                         SmallSpacer(24)
@@ -139,6 +141,13 @@ fun HomeScreen(
                     PhaseExplanationSheet(
                         phaseInfo = s.phaseInfo,
                         onDismiss = { showPhaseSheet = false },
+                    )
+                }
+                if (showCalendarSheet) {
+                    CycleCalendarSheet(
+                        state = s.cycleState,
+                        phaseInfo = s.phaseInfo,
+                        onDismiss = { showCalendarSheet = false },
                     )
                 }
             }

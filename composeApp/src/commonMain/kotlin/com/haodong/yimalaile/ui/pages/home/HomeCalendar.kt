@@ -1,11 +1,7 @@
 package com.haodong.yimalaile.ui.pages.home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -28,7 +24,6 @@ import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
 import kotlin.time.Clock
 
-private val TODAY_COLOR = Color(0xFF4CAF50)
 
 /**
  * Minimal home calendar — square grid with M3 Expressive theme colors.
@@ -43,13 +38,11 @@ internal fun HomeCalendar(
     val dateMap = buildDateMap(state, phaseInfo, today)
     val inPeriod = state.activePeriod != null
     val dayCount = if (inPeriod) {
-        state.activePeriod!!.startDate.until(today, DateTimeUnit.DAY).toInt() + 1
+        state.activePeriod.startDate.until(today, DateTimeUnit.DAY).toInt() + 1
     } else null
 
     val periodColor = MaterialTheme.colorScheme.error
-    val periodLight = MaterialTheme.colorScheme.errorContainer
-    val ovulationColor = MaterialTheme.colorScheme.tertiary
-    val ovulationLight = MaterialTheme.colorScheme.tertiaryContainer
+    val periodLight = MaterialTheme.colorScheme.error.copy(alpha = 0.45f)
 
     val months = (0..1).map { offset ->
         val m = today.plus(offset, DateTimeUnit.MONTH)
@@ -80,67 +73,51 @@ internal fun HomeCalendar(
             Text(
                 if (inPeriod) stringResource(Res.string.home_day_n, dayCount ?: 0)
                 else "${phaseInfo.daysUntilNextPeriod} ${stringResource(Res.string.unit_days)}",
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Black,
             )
             SmallSpacer(16)
         }
+        Column(Modifier.fillMaxWidth(0.6f), ) {
+            // This month
+            MonthBlock(months[0], today, dateMap, periodColor, periodLight)
 
-        // Month grids
-        LazyColumn(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            items(months, key = { "${it.year}-${it.month}" }) { ym ->
-                MonthBlock(
-                    ym, today, dateMap,
-                    periodColor, periodLight,
-                    ovulationColor, ovulationLight,
+            // Info between months — plain text
+            SmallSpacer(32)
+            val lastPeriod = state.recentPeriods.maxByOrNull { it.startDate }
+            if (lastPeriod != null) {
+                Text(
+                    stringResource(Res.string.home_last_period),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    "${lastPeriod.startDate.monthNumber}月${lastPeriod.startDate.dayOfMonth}日",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-
-            // Info cards
-            item {
-                SmallSpacer(8)
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    val lastPeriod = state.recentPeriods.maxByOrNull { it.startDate }
-                    if (lastPeriod != null) {
-                        InfoChip(
-                            label = stringResource(Res.string.home_past_records),
-                            value = "${lastPeriod.startDate.monthNumber}/${lastPeriod.startDate.dayOfMonth}",
-                            color = periodColor,
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
-                    if (phaseInfo?.nextPeriodStart != null) {
-                        InfoChip(
-                            label = stringResource(Res.string.home_next_period_starts),
-                            value = "${phaseInfo.nextPeriodStart.monthNumber}/${phaseInfo.nextPeriodStart.dayOfMonth}",
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
-                }
+            SmallSpacer(12)
+            if (phaseInfo?.nextPeriodStart != null) {
+                Text(
+                    stringResource(Res.string.home_next_period_starts),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    "${phaseInfo.nextPeriodStart.monthNumber}月${phaseInfo.nextPeriodStart.dayOfMonth}日",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
-        }
-    }
-}
+            SmallSpacer(32)
 
-@Composable
-private fun InfoChip(label: String, value: String, color: Color, modifier: Modifier = Modifier) {
-    Surface(
-        tonalElevation = 1.dp,
-        shape = MaterialTheme.shapes.medium,
-        modifier = modifier,
-    ) {
-        Column(Modifier.padding(12.dp)) {
-            Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            SmallSpacer(2)
-            Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = color)
+            // Next month
+            MonthBlock(months[1], today, dateMap, periodColor, periodLight)
+
+            Spacer(Modifier.weight(1f))
         }
+
     }
 }
 
@@ -153,8 +130,6 @@ private fun MonthBlock(
     dateMap: Map<LocalDate, DayType>,
     periodColor: Color,
     periodLight: Color,
-    ovulationColor: Color,
-    ovulationLight: Color,
 ) {
     val firstDay = LocalDate(yearMonth.year, yearMonth.month, 1)
     val startOffset = firstDay.dayOfWeek.ordinal
@@ -170,13 +145,13 @@ private fun MonthBlock(
 
     Column(
         Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.End,
     ) {
         // Month label
         Text(
             "${yearMonth.year}年${yearMonth.month.number}月",
-            style = MaterialTheme.typography.labelSmall,
-            color = onSurface.copy(alpha = 0.4f),
+            style = MaterialTheme.typography.bodyMedium,
+            color = onSurface.copy(alpha = 0.7f),
         )
         SmallSpacer(6)
 
@@ -188,7 +163,7 @@ private fun MonthBlock(
             ) {
                 for (col in 0 until 7) {
                     val dayNum = row * 7 + col - startOffset + 1
-                    if (dayNum < 1 || dayNum > daysInMonth) {
+                    if (dayNum !in 1..daysInMonth) {
                         Spacer(Modifier.size(30.dp))
                     } else {
                         val date = LocalDate(yearMonth.year, yearMonth.month, dayNum)
@@ -196,44 +171,38 @@ private fun MonthBlock(
                         val isToday = date == today
                         val isFuture = date > today
 
+                        val isPeriod = type == DayType.PERIOD || type == DayType.ACTIVE_PERIOD
+                        val isPredictedPeriod = type == DayType.PREDICTED_PERIOD
                         val bgColor = when {
-                            isToday && type != DayType.NONE -> TODAY_COLOR
-                            type == DayType.PERIOD || type == DayType.ACTIVE_PERIOD -> periodColor
-                            type == DayType.OVULATION -> ovulationColor
-                            type == DayType.PREDICTED_PERIOD -> periodLight
-                            type == DayType.PREDICTED_OVULATION -> ovulationLight
-                            else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                            isPeriod -> periodColor
+                            isPredictedPeriod -> periodLight
+                            else -> MaterialTheme.colorScheme.surfaceVariant
                         }
                         val textColor = when {
-                            isToday && type != DayType.NONE -> Color.White
-                            type == DayType.PERIOD || type == DayType.ACTIVE_PERIOD -> Color.White
-                            type == DayType.OVULATION -> Color.White
-                            isToday -> TODAY_COLOR
-                            type == DayType.PREDICTED_PERIOD -> periodColor
-                            type == DayType.PREDICTED_OVULATION -> ovulationColor
+                            isPeriod -> Color.White
+                            isPredictedPeriod -> Color.White
                             isFuture -> onSurface.copy(alpha = 0.15f)
-                            else -> onSurface.copy(alpha = 0.5f)
+                            isToday -> onSurface
+                            else -> onSurface.copy(alpha = 0.45f)
                         }
-                        val showNumber = isToday ||
-                                type != DayType.NONE
+                        val showNumber = isToday || isPeriod || isPredictedPeriod
+                        val size = if (isToday) 34.dp else 30.dp
 
-                        Box(
-                            Modifier.size(30.dp).clip(cellShape)
-                                .background(bgColor)
-                                .then(
-                                    if (isToday && type == DayType.NONE)
-                                        Modifier.border(2.dp, TODAY_COLOR, cellShape)
-                                    else Modifier
-                                ),
-                            contentAlignment = Alignment.Center,
+                        Surface(
+                            modifier =
+                            Modifier.size(size),
+                            shape = cellShape,
+                            color = bgColor
                         ) {
-                            if (showNumber) {
-                                Text(
-                                    "$dayNum",
-                                    fontSize = 11.sp,
-                                    fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
-                                    color = textColor,
-                                )
+                            Box(modifier = Modifier.size(size), contentAlignment = Alignment.Center) {
+                                if (showNumber) {
+                                    Text(
+                                        "$dayNum",
+                                        fontSize = if (isToday) 13.sp else 11.sp,
+                                        fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
+                                        color = textColor,
+                                    )
+                                }
                             }
                         }
                     }
