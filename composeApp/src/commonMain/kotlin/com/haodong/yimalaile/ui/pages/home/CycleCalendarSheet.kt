@@ -319,8 +319,8 @@ private fun CalendarMonth(
                                                     ),
                                                 )
                                             }
-                                        } else if (isToday && type == DayType.NONE) {
-                                            Modifier.border(1.5.dp, primary, CircleShape)
+                                        } else if (isToday) {
+                                            Modifier.border(2.dp, primary, dayShape)
                                         } else if (type == DayType.ACTIVE_PERIOD) {
                                             Modifier.border(2.dp, periodColor, periodShape)
                                         } else Modifier

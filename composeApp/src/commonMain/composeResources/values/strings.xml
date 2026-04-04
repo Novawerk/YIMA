@@ -223,6 +223,10 @@
     <string name="settings_about">About Us</string>
     <string name="settings_about_org">Novawerk</string>
     <string name="settings_about_motto">In an era where action is cheapest, remaking every app the non-profit way.</string>
+    <string name="about_team_title">Team</string>
+    <string name="about_team_members">Made with ♥ by the Novawerk team</string>
+    <string name="about_links_title">Links</string>
+    <string name="about_github">github.com/Novawerk/yimalaile</string>
 
     <!-- Weekday labels -->
     <string name="calendar_month_label">%1$d</string>

@@ -230,7 +230,7 @@ internal fun HistoryCard(
             )
             Text(
                 label,
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = if (style == HistoryCardStyle.PREDICTED) FontWeight.Normal else FontWeight.Bold,
                 color = textColor,
             )
@@ -279,7 +279,7 @@ private fun TodaySummaryCard(record: com.haodong.yimalaile.domain.menstrual.Dail
                         }
                         Text(
                             intensityLabel,
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
                         )

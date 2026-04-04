@@ -223,6 +223,10 @@
     <string name="settings_about">关于我们</string>
     <string name="settings_about_org">Novawerk</string>
     <string name="settings_about_motto">在行动最便宜的时代，用非盈利的方式重新制作每一个App</string>
+    <string name="about_team_title">团队</string>
+    <string name="about_team_members">由 Novawerk 团队用 ♥ 制作</string>
+    <string name="about_links_title">链接</string>
+    <string name="about_github">github.com/Novawerk/yimalaile</string>
 
     <string name="calendar_month_label">%1$d月</string>
     <string name="history_date_start">%1$d月%2$d日</string>

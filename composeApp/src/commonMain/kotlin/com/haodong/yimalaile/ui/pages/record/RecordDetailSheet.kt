@@ -133,9 +133,9 @@ fun RecordDetailSheet(
 
             // Action buttons — two rows, rounded cards
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                ActionCard("📅", stringResource(Res.string.detail_edit_start), onClick = onEditStart, modifier = Modifier.weight(1f))
-                ActionCard("🏁", stringResource(Res.string.detail_edit_end), onClick = onEditEnd, modifier = Modifier.weight(1f))
-                ActionCard("📝", stringResource(Res.string.detail_add_record), onClick = onLogDay, modifier = Modifier.weight(1f))
+                ActionCard(stringResource(Res.string.detail_edit_start), onClick = onEditStart, modifier = Modifier.weight(1f))
+                ActionCard(stringResource(Res.string.detail_edit_end), onClick = onEditEnd, modifier = Modifier.weight(1f))
+                ActionCard(stringResource(Res.string.detail_add_record), onClick = onLogDay, modifier = Modifier.weight(1f))
             }
 
             // Daily records
@@ -200,20 +200,18 @@ fun RecordDetailSheet(
 }
 
 @Composable
-private fun ActionCard(emoji: String, label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun ActionCard(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
         onClick = onClick,
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         tonalElevation = 2.dp,
     ) {
-        Column(
-            Modifier.padding(vertical = 16.dp, horizontal = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Box(
+            Modifier.padding(vertical = 14.dp, horizontal = 8.dp),
+            contentAlignment = Alignment.Center,
         ) {
-            Text(emoji, fontSize = 20.sp)
-            Spacer(Modifier.height(4.dp))
-            Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+            Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
         }
     }
 }

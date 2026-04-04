@@ -17,6 +17,7 @@ import com.haodong.yimalaile.domain.menstrual.CycleState
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.ui.components.PrimaryCta
+import com.haodong.yimalaile.ui.theme.expressiveShapes
 import com.haodong.yimalaile.ui.components.SmallSpacer
 import com.haodong.yimalaile.ui.pages.sheet.DetailAction
 import com.haodong.yimalaile.ui.pages.sheet.SheetManager
@@ -149,7 +150,15 @@ private fun RecordCard(record: MenstrualRecord, daysStr: String, onClick: () -> 
         Row(
             Modifier.fillMaxWidth().padding(20.dp),
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            com.haodong.yimalaile.ui.components.DecorShape(
+                size = 20,
+                shape = if (isActive) MaterialTheme.expressiveShapes.heart
+                        else MaterialTheme.expressiveShapes.cookie4,
+                color = if (isActive) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
+            )
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(

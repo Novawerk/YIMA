@@ -146,7 +146,7 @@ internal fun ColumnScope.HeroSection(
                     SmallSpacer(48)
                     Text(
                         text = stringResource(Res.string.unit_days),
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.titleLarge,
                     )
                     SmallSpacer(24)
                 }
@@ -168,7 +168,7 @@ internal fun ColumnScope.HeroSection(
                 ) {
                     Text(
                         stringResource(Res.string.home_current_phase),
-                        style = MaterialTheme.typography.labelMediumEmphasized,
+                        style = MaterialTheme.typography.bodyMediumEmphasized,
                         color = MaterialTheme.colorScheme.secondary,
                         fontWeight = FontWeight.Black,
                     )
@@ -199,7 +199,7 @@ internal fun ColumnScope.HeroSection(
                     ) {
                         Text(
                             stringResource(Res.string.home_next_period_starts),
-                            style = MaterialTheme.typography.labelMediumEmphasized,
+                            style = MaterialTheme.typography.bodyMediumEmphasized,
                             color = MaterialTheme.colorScheme.secondary,
                             fontWeight = FontWeight.Black,
                         )
