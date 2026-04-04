@@ -8,7 +8,9 @@ import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.domain.menstrual.Mood
 import com.haodong.yimalaile.domain.menstrual.PredictedCycle
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlin.time.Clock
 import kotlinx.datetime.DateTimeUnit
@@ -93,6 +95,10 @@ class SheetManager(private val service: MenstrualService) {
     private val _activeSheet = MutableStateFlow<SheetRequest?>(null)
     val activeSheet: StateFlow<SheetRequest?> = _activeSheet
 
+    private val _dataChanged = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    /** Emitted after any data-modifying operation completes. */
+    val dataChanged: SharedFlow<Unit> = _dataChanged
+
     // ---- Low-level: show sheet and suspend until result ----
 
     private suspend fun showStartPeriodSheet(): Pair<LocalDate, LocalDate?>? {
@@ -132,13 +138,13 @@ class SheetManager(private val service: MenstrualService) {
     /** "姨妈来了" — record period arrival */
     suspend fun recordPeriodStart(): AddRecordResult? {
         val (start, end) = showStartPeriodSheet() ?: return null
-        return service.recordPeriodStart(start, end)
+        return service.recordPeriodStart(start, end).also { _dataChanged.tryEmit(Unit) }
     }
 
     /** "姨妈走了" — record period departure */
     suspend fun recordPeriodEnd(): Boolean? {
         val date = showEndPeriodSheet() ?: return null
-        return service.recordPeriodEnd(date)
+        return service.recordPeriodEnd(date).also { _dataChanged.tryEmit(Unit) }
     }
 
     suspend fun logDay(targetDate: LocalDate? = null): Boolean? {
@@ -197,6 +203,7 @@ class SheetManager(private val service: MenstrualService) {
             is DetailAction.LogSpecificDay -> logDayForRecord(record.id, action.date)
             is DetailAction.Delete -> service.deleteRecord(record.id)
         }
+        _dataChanged.tryEmit(Unit)
     }
 
     /** Show prediction detail (read-only). Suspends until dismissed. */

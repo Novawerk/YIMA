@@ -180,7 +180,7 @@ private fun MonthBlock(
 
     Column(
         Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.End,
     ) {
         // Month label
         Text(
