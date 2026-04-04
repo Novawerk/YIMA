@@ -94,9 +94,24 @@ fun CycleCalendarGrid(
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = initialIndex)
     LaunchedEffect(Unit) { listState.scrollToItem(initialIndex) }
 
+    Column(modifier) {
+        // Weekday header
+        Row(Modifier.fillMaxWidth()) {
+            listOf("M", "T", "W", "T", "F", "S", "S").forEach { day ->
+                Text(
+                    day,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                )
+            }
+        }
+        SmallSpacer(4)
+
     LazyColumn(
         state = listState,
-        modifier = modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().weight(1f),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         items(months, key = { "${it.year}-${it.month}" }) { ym ->
@@ -112,6 +127,7 @@ fun CycleCalendarGrid(
             )
         }
     }
+    } // Column
 }
 
 // ============================================================
@@ -202,21 +218,21 @@ private fun CalendarMonth(
 
                         val bgColor = when {
                             isSelected -> primary
-                            isInRange -> primary.copy(alpha = 0.15f)
+                            isInRange -> primary.copy(alpha = 0.12f)
                             isPeriod -> periodColor
+                            isPredictedPeriod -> periodColor.copy(alpha = 0.35f)
                             isToday -> TODAY_COLOR
-                            isPredictedPeriod -> periodColor.copy(alpha = 0.4f)
-                            else -> MaterialTheme.colorScheme.surfaceVariant
+                            else -> Color.Transparent
                         }
                         val textColor = when {
                             isSelected -> Color.White
-                            isInRange -> primary
                             isPeriod -> Color.White
-                            isToday -> Color.White
                             isPredictedPeriod -> Color.White
-                            isFuture -> onSurface.copy(alpha = 0.15f)
-                            !enabled -> onSurface.copy(alpha = 0.15f)
-                            else -> onSurface.copy(alpha = 0.45f)
+                            isToday -> Color.White
+                            isInRange -> primary
+                            !enabled -> onSurface.copy(alpha = 0.2f)
+                            isFuture -> onSurface.copy(alpha = 0.3f)
+                            else -> onSurface
                         }
                         Surface(
                             modifier = Modifier.weight(1f).height(32.dp)
