@@ -2,6 +2,11 @@ package com.haodong.yimalaile.ui.pages.home
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -69,49 +74,62 @@ internal fun HomeCalendar(
         YearMonth(m.year, m.month)
     }
 
+    var showPhaseSheet by remember { mutableStateOf(false) }
+
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        // Status header with phase shape
+        // Status header — clickable to open phase explanation
         if (phaseInfo != null) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth(),
+            Surface(
+                onClick = { showPhaseSheet = true },
+                color = MaterialTheme.colorScheme.background,
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                DecorShape(
-                    size = 16,
-                    shape = phaseShape(phaseInfo.phase),
-                    color = phaseColor(phaseInfo.phase),
-                )
-                SmallSpacer(8)
-                Text(
-                    phaseDisplayName(phaseInfo.phase),
-                    style = MaterialTheme.typography.bodyMediumEmphasized,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        DecorShape(
+                            size = 16,
+                            shape = phaseShape(phaseInfo.phase),
+                            color = phaseColor(phaseInfo.phase),
+                        )
+                        SmallSpacer(8)
+                        Text(
+                            phaseDisplayName(phaseInfo.phase),
+                            style = MaterialTheme.typography.bodyMediumEmphasized,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    SmallSpacer(4)
+                    Text(
+                        when {
+                            inPeriod -> stringResource(Res.string.home_day_n, dayCount ?: 0)
+                            phaseInfo.daysUntilNextPeriod <= 0 -> stringResource(Res.string.legend_today)
+                            else -> "${phaseInfo.daysUntilNextPeriod} ${stringResource(Res.string.unit_days)}"
+                        },
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Black,
+                    )
+                    Text(
+                        when {
+                            inPeriod -> stringResource(Res.string.home_in_period)
+                            phaseInfo.daysUntilNextPeriod <= 0 -> stringResource(Res.string.home_hero_due_today)
+                            else -> stringResource(Res.string.home_next_period_starts)
+                        },
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
-            SmallSpacer(4)
-            Text(
-                when {
-                    inPeriod -> stringResource(Res.string.home_day_n, dayCount ?: 0)
-                    phaseInfo.daysUntilNextPeriod <= 0 -> stringResource(Res.string.legend_today)
-                    else -> "${phaseInfo.daysUntilNextPeriod} ${stringResource(Res.string.unit_days)}"
-                },
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Black,
-            )
-            Text(
-                when {
-                    inPeriod -> stringResource(Res.string.home_in_period)
-                    phaseInfo.daysUntilNextPeriod <= 0 -> stringResource(Res.string.home_hero_due_today)
-                    else -> stringResource(Res.string.home_next_period_starts)
-                },
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
             SmallSpacer(16)
         }
         GrowSpacer()
-        Column(Modifier.fillMaxWidth(0.6f), ) {
+        Column(Modifier.fillMaxWidth(0.6f)) {
             // This month
             MonthBlock(months[0], today, dateMap, periodColor, periodLight, nextPredictedDates, state.records)
 
@@ -151,7 +169,14 @@ internal fun HomeCalendar(
         }
         GrowSpacer()
         SmallSpacer(128)
+    }
 
+    // Phase explanation sheet
+    if (showPhaseSheet && phaseInfo != null) {
+        PhaseExplanationSheet(
+            phaseInfo = phaseInfo,
+            onDismiss = { showPhaseSheet = false },
+        )
     }
 }
 
