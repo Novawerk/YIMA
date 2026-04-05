@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <string name="app_name">Petalia</string>
+    <string name="app_name">Moonpetal</string>
     <string name="disclaimer_title">Privacy &amp; Non-medical Disclaimer</string>
     <string name="disclaimer_body">This app stores data locally on your device and does not send it anywhere. It is for educational and planning purposes only and does not provide medical advice. Do not rely on it for diagnosis or treatment. By continuing, you acknowledge and accept these terms.</string>
     <string name="disclaimer_accept">I understand</string>

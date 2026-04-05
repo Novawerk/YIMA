@@ -2,6 +2,7 @@ package com.haodong.yimalaile.ui.pages.home
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.draw.clip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -207,16 +208,16 @@ private fun MonthBlock(
         )
         SmallSpacer(6)
 
-        // Grid
+        // Grid — each cell uses weight(1f) to fill width evenly
         for (row in 0 until rows) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(3.dp),
-                modifier = Modifier.padding(vertical = 1.5.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 1.5.dp),
             ) {
                 for (col in 0 until 7) {
                     val dayNum = row * 7 + col - startOffset + 1
                     if (dayNum !in 1..daysInMonth) {
-                        Spacer(Modifier.size(30.dp))
+                        Spacer(Modifier.weight(1f).aspectRatio(1f))
                     } else {
                         val date = LocalDate(yearMonth.year, yearMonth.month, dayNum)
                         val type = dateMap[date] ?: DayType.NONE
@@ -240,26 +241,27 @@ private fun MonthBlock(
                             else -> onSurface.copy(alpha = 0.45f)
                         }
                         val showNumber = isToday || isPeriod || isPredictedPeriod || isNextPredicted
-                        val size = if (isToday) 34.dp else 30.dp
 
-                        // Find record covering this date for click handling
                         val clickable = isPeriod && records.isNotEmpty()
                         Surface(
-                            modifier = Modifier.size(size).then(
-                                if (clickable) Modifier.clickable {
-                                    val record = records.find { r ->
-                                        val rEnd = r.endDate ?: today
-                                        date in r.startDate..rEnd
-                                    }
-                                    if (record != null) {
-                                        scope.launch { sheetManager.showAndHandleRecordDetail(record) }
-                                    }
-                                } else Modifier
-                            ),
+                            modifier = Modifier
+                                .weight(1f)
+                                .aspectRatio(1f)
+                                .then(
+                                    if (clickable) Modifier.clip(cellShape).clickable {
+                                        val record = records.find { r ->
+                                            val rEnd = r.endDate ?: today
+                                            date in r.startDate..rEnd
+                                        }
+                                        if (record != null) {
+                                            scope.launch { sheetManager.showAndHandleRecordDetail(record) }
+                                        }
+                                    } else Modifier
+                                ),
                             shape = cellShape,
-                            color = bgColor
+                            color = bgColor,
                         ) {
-                            Box(modifier = Modifier.size(size), contentAlignment = Alignment.Center) {
+                            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                                 if (showNumber) {
                                     Text(
                                         "$dayNum",
