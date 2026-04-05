@@ -88,6 +88,10 @@ For iOS, open `iosApp/` in Xcode and build normally.
 
 We welcome contributions! Please open an issue or submit a pull request.
 
+For iOS development, copy `iosApp/Configuration/Config.xcconfig.template` to `Config.xcconfig` and fill in your Team ID.
+
 ## License
 
-Non-profit open source by [Novawerk](https://github.com/Novawerk).
+This project is licensed under the [MIT License](LICENSE).
+
+Copyright (c) 2025-2026 [Novawerk](https://github.com/Novawerk). You are free to use, modify, and distribute this software, as long as the original copyright notice is included.

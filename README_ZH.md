@@ -88,6 +88,10 @@ iOS 端请在 Xcode 中打开 `iosApp/` 并正常构建。
 
 欢迎贡献代码！请提交 Issue 或 Pull Request。
 
-## 许可
+iOS 开发请将 `iosApp/Configuration/Config.xcconfig.template` 复制为 `Config.xcconfig` 并填入你的 Team ID。
 
-由 [Novawerk](https://github.com/Novawerk) 非盈利开源。
+## 许可协议
+
+本项目基于 [MIT 许可协议](LICENSE) 开源。
+
+Copyright (c) 2025-2026 [Novawerk](https://github.com/Novawerk)。你可以自由使用、修改和分发本软件，只需保留原始版权声明。
