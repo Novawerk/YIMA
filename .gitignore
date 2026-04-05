@@ -19,3 +19,10 @@ mcp_config.json
 **/xcshareddata/WorkspaceSettings.xcsettings
 *.jks
 *.keystore
+
+# JVM crash logs
+hs_err_pid*.log
+
+# Claude local settings
+.claude/settings.local.json
+iosApp/Configuration/Config.xcconfig
