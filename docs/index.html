@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YIMA: Period Calendar</title>
+    <style>
+        :root {
+            --primary: #6B4EAA;
+            --primary-light: #E8E0F4;
+            --bg: #FDFAFF;
+            --text: #1C1B1F;
+            --text-muted: #49454F;
+            --card-bg: #F5F0FA;
+            --radius: 24px;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #1C1B1F;
+                --text: #E6E1E5;
+                --text-muted: #CAC4D0;
+                --card-bg: #2B2930;
+                --primary-light: #332D41;
+            }
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 80px 0 48px;
+        }
+        .hero img {
+            width: 96px;
+            height: 96px;
+            border-radius: 24px;
+            margin-bottom: 24px;
+        }
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .hero .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+        .hero .badges {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            border-radius: 50px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+        .badge:hover { opacity: 0.85; }
+        .badge.outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            padding: 32px 0;
+        }
+        .feature {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 24px;
+        }
+        .feature h3 { font-size: 1rem; margin-bottom: 4px; }
+        .feature p { font-size: 0.85rem; color: var(--text-muted); }
+
+        /* Sections */
+        .section {
+            padding: 48px 0;
+        }
+        .section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        /* Legal */
+        .legal {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        .legal h3 {
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+        }
+        .legal p, .legal ul {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+        .legal ul { padding-left: 20px; }
+        .legal li { margin-bottom: 6px; }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 48px 0 32px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        footer a { color: var(--primary); text-decoration: none; }
+
+        /* Nav */
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            padding: 16px 0;
+            font-size: 0.9rem;
+        }
+        nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+        nav a:hover { color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <nav>
+        <a href="#features">Features</a>
+        <a href="#privacy">Privacy</a>
+        <a href="#terms">Terms</a>
+        <a href="https://github.com/Novawerk/yimalaile">GitHub</a>
+    </nav>
+
+    <div class="hero">
+        <img src="icon.png" alt="YIMA logo">
+        <h1>YIMA</h1>
+        <p class="subtitle">Privacy-first period calendar. No accounts. No cloud. No ads.</p>
+        <div class="badges">
+            <a href="https://github.com/Novawerk/yimalaile" class="badge">View on GitHub</a>
+            <a href="https://github.com/Novawerk/yimalaile/releases" class="badge outline">Download</a>
+        </div>
+    </div>
+
+    <div id="features" class="features">
+        <div class="feature">
+            <h3>Smart Predictions</h3>
+            <p>Predicts your next periods after just 2 cycles.</p>
+        </div>
+        <div class="feature">
+            <h3>Cycle Phases</h3>
+            <p>Real-time phase tracking with explanations.</p>
+        </div>
+        <div class="feature">
+            <h3>Statistics</h3>
+            <p>Visual charts, trends, and outlier detection.</p>
+        </div>
+        <div class="feature">
+            <h3>100% Private</h3>
+            <p>All data stays on your device. Always.</p>
+        </div>
+        <div class="feature">
+            <h3>Open Source</h3>
+            <p>Verify our privacy claims yourself on GitHub.</p>
+        </div>
+        <div class="feature">
+            <h3>Bilingual</h3>
+            <p>Full English and Chinese support.</p>
+        </div>
+    </div>
+
+    <div id="privacy" class="section">
+        <h2>Privacy Policy</h2>
+        <div class="legal">
+            <h3>Data Storage</h3>
+            <p>YIMA: Period Calendar stores all data exclusively on your device using local storage (DataStore). No data is ever transmitted to any server, cloud service, or third party.</p>
+
+            <h3>Data Collection</h3>
+            <p>We do not collect, process, or store any personal data. Specifically:</p>
+            <ul>
+                <li>No user accounts or registration required</li>
+                <li>No analytics or tracking of any kind</li>
+                <li>No advertising or ad-related data collection</li>
+                <li>No crash reporting that transmits personal data</li>
+                <li>No access to contacts, photos, location, or other device data</li>
+            </ul>
+
+            <h3>Data You Enter</h3>
+            <p>Period dates, daily records (flow intensity, mood, symptoms, notes), and app preferences are stored locally on your device only. This data is never shared with anyone.</p>
+
+            <h3>Data Deletion</h3>
+            <p>You can delete all your data at any time from Settings > Clear All Data. Uninstalling the app also removes all data permanently.</p>
+
+            <h3>Third-Party Services</h3>
+            <p>This app does not integrate with any third-party services, APIs, or SDKs that collect user data.</p>
+
+            <h3>Children's Privacy</h3>
+            <p>This app does not knowingly collect data from children. Since no data leaves the device, there is no risk of children's data being transmitted or stored externally.</p>
+
+            <h3>Changes to This Policy</h3>
+            <p>Any changes to this privacy policy will be reflected in this page and in app updates. Since we collect no data, changes are unlikely.</p>
+
+            <p><strong>Last updated:</strong> April 2026</p>
+        </div>
+    </div>
+
+    <div id="terms" class="section">
+        <h2>Terms of Use (AGB)</h2>
+        <div class="legal">
+            <h3>1. Acceptance</h3>
+            <p>By downloading, installing, or using YIMA: Period Calendar ("the App"), you agree to these Terms of Use. If you do not agree, do not use the App.</p>
+
+            <h3>2. Description of Service</h3>
+            <p>The App is a menstrual cycle tracking and prediction tool for personal, non-commercial use. It helps users record period dates, track symptoms, and view cycle predictions.</p>
+
+            <h3>3. No Medical Advice</h3>
+            <p>The App is for educational and planning purposes only. It does not provide medical advice, diagnosis, or treatment. Predictions and cycle phase information are estimates based on your data and should not be used as a substitute for professional medical advice. Always consult a qualified healthcare provider for medical concerns.</p>
+
+            <h3>4. Accuracy</h3>
+            <p>While we strive for accurate predictions, the App cannot guarantee the accuracy of any predictions, calculations, or information displayed. Cycle predictions are statistical estimates and may not reflect your actual cycle.</p>
+
+            <h3>5. User Responsibility</h3>
+            <p>You are responsible for the accuracy of the data you enter. The App relies on your input to generate predictions and statistics.</p>
+
+            <h3>6. Privacy</h3>
+            <p>Your privacy is our priority. Please refer to our <a href="#privacy">Privacy Policy</a> for details on how your data is handled. In summary: all data stays on your device.</p>
+
+            <h3>7. Open Source</h3>
+            <p>The App is open-source software developed by Novawerk on a non-profit basis. The source code is available at <a href="https://github.com/Novawerk/yimalaile">github.com/Novawerk/yimalaile</a>.</p>
+
+            <h3>8. Limitation of Liability</h3>
+            <p>The App is provided "as is" without warranties of any kind. Novawerk and its contributors shall not be liable for any damages arising from the use or inability to use the App, including but not limited to health decisions made based on the App's information.</p>
+
+            <h3>9. Changes</h3>
+            <p>We may update these terms from time to time. Continued use of the App after changes constitutes acceptance of the new terms.</p>
+
+            <p><strong>Last updated:</strong> April 2026</p>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>Made with care by <a href="https://github.com/Novawerk">Novawerk</a></p>
+    <p>Open-source apps, made with care. Remaking everyday tools the non-profit way.</p>
+</footer>
+
+</body>
+</html>
