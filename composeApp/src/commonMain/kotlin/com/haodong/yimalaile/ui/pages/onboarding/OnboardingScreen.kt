@@ -1,6 +1,8 @@
 package com.haodong.yimalaile.ui.pages.onboarding
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,6 +15,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.domain.menstrual.AddRecordResult
 import com.haodong.yimalaile.domain.menstrual.CycleState
+import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.ui.components.CycleCalendarGrid
 import com.haodong.yimalaile.ui.components.CycleCalendarLegend
@@ -47,9 +50,33 @@ fun OnboardingScreen(
     var adjustStart by remember { mutableStateOf<LocalDate?>(null) }
     var adjustEnd by remember { mutableStateOf<LocalDate?>(null) }
 
-    // Calendar state for display
-    val calendarState = remember { CycleState(records = emptyList(), predictions = emptyList(), currentPeriod = null, inPredictedPeriod = false) }
+    // Calendar state — build records from user input + estimated for display
+    val calendarRecords = remember(periodStart, periodEnd, stillInPeriod, estimated) {
+        val records = mutableListOf<MenstrualRecord>()
+        if (periodStart != null) {
+            records.add(MenstrualRecord(
+                id = "onboard_current", startDate = periodStart!!,
+                endDate = if (stillInPeriod) null else periodEnd,
+                endConfirmed = periodEnd != null && !stillInPeriod,
+                createdAtEpochMillis = 0, updatedAtEpochMillis = 0,
+            ))
+        }
+        estimated.forEachIndexed { i, (s, e) ->
+            records.add(MenstrualRecord(
+                id = "onboard_est_$i", startDate = s, endDate = e,
+                endConfirmed = true, createdAtEpochMillis = 0, updatedAtEpochMillis = 0,
+            ))
+        }
+        records.toList()
+    }
+    val calendarState = remember(calendarRecords) {
+        CycleState(records = calendarRecords, predictions = emptyList(), currentPeriod = null, inPredictedPeriod = false)
+    }
 
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background,
+    ) {
     Column(
         Modifier.fillMaxSize()
             .safeDrawingPadding()
@@ -60,32 +87,40 @@ fun OnboardingScreen(
         when (step) {
             // ── Step 0: Welcome ──
             0 -> {
-                Spacer(Modifier.weight(1f))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth(),
+                Spacer(Modifier.weight(0.5f))
+
+                // Logo
+                androidx.compose.foundation.Image(
+                    org.jetbrains.compose.resources.painterResource(Res.drawable.logo),
+                    contentDescription = null,
+                    modifier = Modifier.size(80.dp),
+                )
+                SmallSpacer(16)
+
+                // App name
+                Text(
+                    stringResource(Res.string.app_name),
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                SmallSpacer(32)
+
+                // Welcome text in rounded card
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(40.dp))
+                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f))
+                        .padding(28.dp),
                 ) {
-                    com.haodong.yimalaile.ui.components.DecorShape(
-                        size = 32,
-                        shape = MaterialTheme.expressiveShapes.cookie7,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                    SmallSpacer(10)
                     Text(
-                        stringResource(Res.string.app_name),
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
+                        stringResource(Res.string.onboarding_welcome),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
                     )
                 }
-                SmallSpacer(24)
-                Text(
-                    stringResource(Res.string.onboarding_welcome),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+
                 Spacer(Modifier.weight(1f))
                 PrimaryCta(
                     text = stringResource(Res.string.onboarding_next),
@@ -396,5 +431,6 @@ fun OnboardingScreen(
                 )
             }
         }
+    }
     }
 }

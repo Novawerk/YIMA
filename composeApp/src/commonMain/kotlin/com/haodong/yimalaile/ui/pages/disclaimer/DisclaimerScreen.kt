@@ -1,5 +1,6 @@
 package com.haodong.yimalaile.ui.pages.disclaimer
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,9 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,37 +21,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.haodong.yimalaile.ui.components.HeartDecoration
 import com.haodong.yimalaile.ui.components.PrimaryCta
 import org.jetbrains.compose.resources.stringResource
-import yimalaile.composeapp.generated.resources.Res
-import yimalaile.composeapp.generated.resources.app_name
-import yimalaile.composeapp.generated.resources.disclaimer_accept
-import yimalaile.composeapp.generated.resources.disclaimer_body
-import yimalaile.composeapp.generated.resources.disclaimer_title
+import yimalaile.composeapp.generated.resources.*
 
 @Composable
 fun DisclaimerScreen(onAccept: () -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background,
+    ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
         Spacer(Modifier.weight(0.5f))
 
-        // Heart icon
-        Box(
-            Modifier
-                .size(56.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text("♥", color = MaterialTheme.colorScheme.background, style = MaterialTheme.typography.titleLarge)
-        }
+        // App logo
+        Image(
+            org.jetbrains.compose.resources.painterResource(Res.drawable.logo),
+            contentDescription = null,
+            modifier = Modifier.size(80.dp),
+        )
         Spacer(Modifier.height(16.dp))
 
         // App name
@@ -95,5 +90,6 @@ fun DisclaimerScreen(onAccept: () -> Unit) {
         )
 
         Spacer(Modifier.height(32.dp))
+    }
     }
 }
