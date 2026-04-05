@@ -200,6 +200,16 @@
     <string name="stats_empty_message">Record at least 2 periods to see your statistics</string>
     <string name="stats_empty_progress">Current: %1$d complete cycle(s)</string>
     <string name="stats_see_more">View Stats</string>
+    <string name="stats_avg_section_title">Average of last %1$d cycles</string>
+    <string name="stats_period_days">Period days</string>
+    <string name="stats_cycle_days">Cycle days</string>
+    <string name="stats_col_start_date">Start date</string>
+    <string name="stats_col_period">Period</string>
+    <string name="stats_col_cycle">Cycle</string>
+    <string name="stats_current_cycle">Current</string>
+    <string name="stats_chart_title">Cycle (days)</string>
+    <string name="stats_legend_actual">Actual days</string>
+    <string name="stats_legend_predicted">Predicted days</string>
 
     <!-- Settings Screen -->
     <string name="settings_profile">My Profile</string>
