@@ -52,6 +52,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(compose.materialIconsExtended)
             implementation(libs.kotlinx.datetime)
+            implementation(libs.kotlinx.datetime.names)
             implementation(libs.datastore.preferences)
             implementation(libs.kotlin.inject.runtime)
             implementation(libs.navigation.compose)
@@ -92,12 +93,14 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
 }
 
 dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
     debugImplementation(compose.uiTooling)
     add("kspAndroid", libs.kotlin.inject.compiler)
     add("kspIosX64", libs.kotlin.inject.compiler)

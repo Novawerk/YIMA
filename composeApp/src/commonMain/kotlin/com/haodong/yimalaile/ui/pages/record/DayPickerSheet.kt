@@ -115,7 +115,7 @@ private fun DayChip(day: Int, month: Int, hasRecord: Boolean, onClick: () -> Uni
             )
         }
         Text(
-            "${month}月",
+            stringResource(Res.string.calendar_month_label, month),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
         )

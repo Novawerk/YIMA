@@ -14,7 +14,6 @@ import com.haodong.yimalaile.ui.pages.settings.SettingsScreen
 import com.haodong.yimalaile.ui.pages.sheet.LocalSheetManager
 import com.haodong.yimalaile.ui.pages.sheet.SheetHost
 import com.haodong.yimalaile.ui.pages.sheet.SheetManager
-import com.haodong.yimalaile.ui.pages.statistics.StatisticsScreen
 import com.haodong.yimalaile.ui.theme.AppTheme
 import kotlinx.coroutines.launch
 
@@ -81,16 +80,8 @@ fun App(component: AppComponent) {
                         HomeScreen(
                             service = service,
                             sheetManager = sheetManager,
-                            onNavigateStatistics = { navController.navigate(StatisticsRoute) },
+                            settings = settings,
                             onNavigateSettings = { navController.navigate(SettingsRoute) },
-                        )
-                    }
-
-                    composable<StatisticsRoute> {
-                        StatisticsScreen(
-                            service = service,
-                            sheetManager = sheetManager,
-                            onBack = { navController.popBackStack() },
                         )
                     }
 

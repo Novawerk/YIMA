@@ -22,6 +22,7 @@ kotlin-inject-compiler = { module = "me.tatarka.inject:kotlin-inject-compiler-ks
 kotlin-inject-runtime = { module = "me.tatarka.inject:kotlin-inject-runtime-kmp", version.ref = "kotlin-inject" }
 
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
+kotlinx-datetime-names = { module = "io.github.adrcotfas:kotlinx-datetime-names", version = "0.1.1" }
 material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation-compose" }
 

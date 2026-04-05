@@ -12,9 +12,12 @@ import com.haodong.yimalaile.ui.components.CycleCalendarGrid
 import com.haodong.yimalaile.ui.components.CycleCalendarLegend
 import com.haodong.yimalaile.ui.components.PrimaryCta
 import com.haodong.yimalaile.ui.components.SmallSpacer
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
+import kotlinx.datetime.until
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Clock
 import yimalaile.composeapp.generated.resources.*
@@ -27,7 +30,25 @@ fun EndPeriodSheet(
     onConfirm: (LocalDate) -> Unit,
 ) {
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-    var selected by remember { mutableStateOf<LocalDate?>(null) }
+
+    // Default to predicted end date or today
+    val defaultDate = remember(existingRecords) {
+        val currentPeriod = existingRecords
+            .filter { !it.isDeleted && !it.endConfirmed && it.endDate != null }
+            .maxByOrNull { it.startDate }
+        if (currentPeriod != null) {
+            // Use the predicted end date (start + avg period - 1), capped at today
+            val completed = existingRecords.filter { !it.isDeleted && it.endDate != null && it.endConfirmed }
+            val avgPeriod = if (completed.isNotEmpty()) {
+                completed.map { it.startDate.until(it.endDate!!, DateTimeUnit.DAY).toInt() + 1 }.average().toInt()
+            } else 5
+            val predictedEnd = currentPeriod.startDate.plus(avgPeriod - 1, DateTimeUnit.DAY)
+            if (predictedEnd <= today) predictedEnd else today
+        } else {
+            today
+        }
+    }
+    var selected by remember { mutableStateOf<LocalDate?>(defaultDate) }
 
     val calendarState = remember(existingRecords) {
         CycleState(records = existingRecords, predictions = emptyList(), currentPeriod = null, inPredictedPeriod = false)

@@ -4,109 +4,35 @@
     <string name="disclaimer_title">隐私与非医疗免责声明</string>
     <string name="disclaimer_body">本应用仅在您的设备本地存储数据，不会上传或分享任何信息。仅用于教育与计划参考，不构成医疗建议。请勿将其用于诊断或治疗。继续使用即表示您已阅读并接受以上条款。</string>
     <string name="disclaimer_accept">我已理解</string>
-    <string name="disclaimer_view_again">查看免责声明</string>
     <string name="settings_title">设置</string>
     <string name="settings_language">语言</string>
     <string name="settings_language_follow_system">跟随系统</string>
     <string name="settings_language_en">English</string>
     <string name="settings_language_zh">中文</string>
-
     <!-- Navigation -->
-    <string name="nav_back">返回</string>
-
     <!-- Home Screen -->
-    <string name="home_title">月经期预测</string>
-    <string name="status_not_here">没来</string>
-    <string name="status_waiting_desc">正在等待你的好消息</string>
-    <string name="status_here">来了</string>
-    <string name="status_here_desc">多喝热水，注意保暖</string>
-    <string name="status_soon">快了</string>
-    <string name="status_soon_desc">大概就在这两天了</string>
-    <string name="status_relax_desc">享受轻松的时光吧</string>
-    <string name="status_no_prediction">暂无预测</string>
-    <string name="status_predicted_date">预计 %1$d月%2$d日</string>
-    <string name="stat_cycle_length">周期长度</string>
-    <string name="stat_period_length">经期时长</string>
     <string name="unit_days">天</string>
-    <string name="home_motivational_quote">\"照顾好自己，多喝温水.\"</string>
-    <string name="btn_record_period">姨妈来了</string>
-
+    <string name="btn_record_period">姨妈来了？</string>
     <!-- Home — in period state -->
-    <string name="home_take_care">照顾好自己</string>
     <string name="home_in_period">经期中</string>
     <string name="home_day_n">第 %1$d 天</string>
-    <string name="home_remaining_days">预计还有 %1$d 天结束</string>
-    <string name="home_exceeded_avg">已超过平均经期时长</string>
-    <string name="home_period_overdue_title">经期比平时长了，第%1$d天</string>
-    <string name="home_period_overdue_sub">考虑结束了吗？</string>
-    <string name="home_period_day_title">经期造访中，这是第%1$d天，还剩</string>
     <string name="home_hero_due_today">今天姨妈该来了</string>
-    <string name="home_hero_due_today_sub">来了吗？</string>
-    <string name="home_section_past">过去</string>
-    <string name="home_section_current">当前</string>
-    <string name="home_section_predicted">预测</string>
     <string name="home_cycle_calendar">周期日历</string>
     <string name="legend_period">经期</string>
-    <string name="legend_ovulation">排卵期</string>
     <string name="legend_predicted">预测</string>
     <string name="legend_today">今天</string>
-    <string name="home_log_today">✦ 记录今天</string>
-    <string name="home_end_period">姨妈走了</string>
-
+    <string name="home_end_period">姨妈走了？</string>
     <!-- Home — not in period states -->
-    <string name="home_hero_overdue_sub">已经推迟了</string>
-    <string name="home_hero_overdue">该来了</string>
-    <string name="home_hero_soon_sub">就快到了</string>
-    <string name="home_hero_soon">快了</string>
-    <string name="home_hero_early_sub">暂时安心</string>
-    <string name="home_hero_early">还早</string>
-    <string name="home_predicted_delayed">预计 %1$d月%2$d日 (已推迟%3$d天)</string>
-    <string name="home_predicted_in_days">预计 %1$d月%2$d日 (%3$d天后)</string>
-    <string name="home_prediction_confidence">预测置信度</string>
     <string name="home_backfill_to_predict">补录更多，开始预测</string>
-    <string name="home_log_today_hint">记录今天的情况</string>
-    <string name="home_tap_to_add">点击补充</string>
-    <string name="home_these_days">这几天</string>
-
     <!-- Snackbar messages -->
     <string name="record_save_success">记录成功</string>
-    <string name="record_duplicate_date">该日期已有记录</string>
-    <string name="record_too_close">两次月经记录之间至少需要间隔 15 天</string>
-    <string name="record_save_error">保存失败</string>
-    <string name="record_deleted">已删除</string>
-
     <!-- Calendar / History Screen -->
-    <string name="calendar_title">日历记录</string>
-    <string name="calendar_prev_month">上个月</string>
-    <string name="calendar_next_month">下个月</string>
-    <string name="calendar_year_month">%1$d年 %2$d月</string>
-    <string name="calendar_month_overview">本月概览</string>
-    <string name="calendar_period_days_count">经期天数: %1$d天</string>
-    <string name="calendar_period_days_none">经期天数: 暂无记录</string>
-    <string name="calendar_cycle_length_count">周期长度: %1$d天</string>
-    <string name="calendar_cycle_length_none">周期长度: 暂无数据</string>
-    <string name="calendar_history">历史记录</string>
-    <string name="calendar_no_records">暂无记录</string>
-    <string name="calendar_record_start_only">(仅开始日)</string>
-    <string name="calendar_record_days">(%1$d天)</string>
-    <string name="date_month_day">%1$d月%2$d日</string>
-    <string name="calendar_day_sun">日</string>
-    <string name="calendar_day_mon">一</string>
-    <string name="calendar_day_tue">二</string>
-    <string name="calendar_day_wed">三</string>
-    <string name="calendar_day_thu">四</string>
-    <string name="calendar_day_fri">五</string>
-    <string name="calendar_day_sat">六</string>
-    <string name="history_title">历史记录</string>
     <string name="history_in_progress">进行中</string>
-    <string name="history_n_daily_records">%1$d条记录</string>
     <string name="history_backfill">补录</string>
     <string name="history_view_all">查看全部 %1$d 条记录 →</string>
-
     <!-- Record Today Dialog -->
     <string name="record_dialog_title">记录今天</string>
     <string name="record_date_title">记录 %1$d月%2$d日</string>
-    <string name="record_today_label">今天</string>
     <string name="record_flow_intensity">经量强度</string>
     <string name="intensity_light">少量</string>
     <string name="intensity_medium">中量</string>
@@ -126,45 +52,29 @@
     <string name="record_save_btn">保存记录</string>
     <string name="record_start_date">开始日期</string>
     <string name="record_end_date">结束日期</string>
-    <string name="record_date_range_error">结束日期不能早于开始日期</string>
     <string name="dialog_confirm">确定</string>
     <string name="dialog_cancel">取消</string>
-
     <!-- Start / End Period Sheets -->
     <string name="start_period_question">什么时候开始的？</string>
     <string name="start_period_hint">选择经期开始日期</string>
     <string name="end_period_question">什么时候结束的？</string>
-    <string name="end_period_from">从 %1$d月%2$d日 开始</string>
-    <string name="end_period_trim_title">移除多余记录？</string>
-    <string name="end_period_trim_body">结束日期之后有 %1$d 条每日记录，确认后将被移除。</string>
-
     <!-- Backfill -->
     <string name="backfill_title">补录经期</string>
     <string name="backfill_hint">选择开始和结束日期</string>
     <string name="backfill_selected_start">已选开始：%1$d月%2$d日，再选结束日期</string>
     <string name="backfill_selected_range">%1$d月%2$d日 — %3$d月%4$d日</string>
-
     <!-- Day Picker -->
     <string name="day_picker_title">选择日期</string>
     <string name="day_picker_hint">选择要补充记录的日期</string>
     <string name="day_picker_recorded">已记录</string>
-
     <!-- Record Detail Sheet -->
-    <string name="detail_title">经期详情</string>
-    <string name="detail_unit_days">天</string>
-    <string name="detail_in_progress">进行中</string>
-    <string name="detail_date_range">%1$d月%2$d日 — %3$d月%4$d日</string>
-    <string name="detail_date_start_only">%1$d月%2$d日 — %3$s</string>
     <string name="detail_edit_start">修改开始</string>
     <string name="detail_edit_end">修改结束</string>
-    <string name="detail_add_record">补充记录</string>
     <string name="detail_daily_records">每日记录</string>
-    <string name="detail_no_records">还没有每日记录\n点击上方「补充记录」添加</string>
     <string name="detail_delete">删除此记录</string>
     <string name="detail_delete_title">确认删除</string>
     <string name="detail_delete_body">删除后无法恢复，确定要删除这条经期记录吗？</string>
     <string name="detail_delete_confirm">删除</string>
-
     <!-- Onboarding -->
     <string name="onboarding_welcome">在开始使用前，我们需要您回答几个问题，以帮助我们更好地了解您的月经周期。请放心，您的数据只会存储于本地，并且可以在任何时间被完全删除。</string>
     <string name="onboarding_when_last_start">上次月经是什么时候开始的？</string>
@@ -184,47 +94,19 @@
     <string name="onboarding_confirm">确认</string>
     <string name="onboarding_back">返回</string>
     <string name="onboarding_save">保存</string>
-
     <!-- Statistics Screen -->
-    <string name="stats_title">我的统计</string>
-    <string name="stats_avg_cycle">平均周期</string>
-    <string name="stats_avg_period">平均经期</string>
-    <string name="stats_cycle_trend">周期趋势</string>
-    <string name="stats_last_n_cycles">过去 %1$d 个周期</string>
-    <string name="stats_period_duration">经期时长</string>
-    <string name="stats_prediction_confidence">预测置信度</string>
-    <string name="stats_confidence_high">高</string>
-    <string name="stats_confidence_medium">中</string>
-    <string name="stats_confidence_low">低</string>
-    <string name="stats_encouragement">你的身体很有规律，继续保持记录吧</string>
     <string name="stats_empty_message">记录至少 2 次月经，即可查看统计数据</string>
-    <string name="stats_empty_progress">当前: %1$d 个完整周期</string>
-    <string name="stats_see_more">查看统计</string>
     <string name="stats_avg_section_title">最近%1$d个周期的平均值</string>
     <string name="stats_period_days">经期天数</string>
     <string name="stats_cycle_days">周期天数</string>
-    <string name="stats_col_start_date">开始日期</string>
     <string name="stats_col_period">经期</string>
     <string name="stats_col_cycle">周期</string>
     <string name="stats_current_cycle">当前周期</string>
     <string name="stats_chart_title">周期（天）</string>
     <string name="stats_legend_actual">实际的天数</string>
     <string name="stats_legend_predicted">预测的天数</string>
-
     <!-- Settings Screen -->
-    <string name="settings_profile">我的小档案</string>
-    <string name="settings_period_length">经期长度</string>
-    <string name="settings_period_length_value">5 天</string>
-    <string name="settings_cycle_length">周期长度</string>
-    <string name="settings_cycle_length_value">28 天</string>
-    <string name="settings_reminders">提醒设置</string>
-    <string name="settings_reminders_on">开启</string>
-    <string name="settings_privacy">隐私说明</string>
     <string name="app_version">版本 1.0.0</string>
-    <string name="settings_color_palette">配色方案</string>
-    <string name="settings_palette_warm">温暖</string>
-    <string name="settings_palette_vivid">鲜明</string>
-    <string name="settings_palette_mono">简约</string>
     <string name="settings_display_mode">显示模式</string>
     <string name="settings_mode_system">跟随系统</string>
     <string name="settings_mode_light">浅色</string>
@@ -235,38 +117,24 @@
     <string name="settings_clear_body">这将删除所有经期记录并重新开始引导。此操作无法撤销。</string>
     <string name="settings_about">关于我们</string>
     <string name="settings_about_org">Novawerk</string>
-    <string name="settings_about_motto">在行动最便宜的时代，用非盈利的方式重新制作每一个App</string>
+    <string name="settings_made_by">由 Novawerk 制作</string>
+    <string name="settings_about_motto">开源应用，用心打造。以非盈利的方式重新制作每一个日常工具。</string>
     <string name="about_team_title">团队</string>
     <string name="about_team_members">由 Novawerk 团队用 ♥ 制作</string>
     <string name="about_links_title">链接</string>
     <string name="about_github">github.com/Novawerk/yimalaile</string>
     <string name="settings_review">去App Store评分</string>
-
     <string name="calendar_month_label">%1$d月</string>
-    <string name="history_date_start">%1$d月%2$d日</string>
-    <string name="history_date_range">— %1$d月%2$d日</string>
-
     <!-- Weekday labels -->
-    <string name="weekday_mon">一</string>
-    <string name="weekday_tue">二</string>
-    <string name="weekday_wed">三</string>
-    <string name="weekday_thu">四</string>
-    <string name="weekday_fri">五</string>
-    <string name="weekday_sat">六</string>
-    <string name="weekday_sun">日</string>
-
     <!-- Cycle phases -->
     <string name="phase_menstrual">经期</string>
     <string name="phase_follicular">卵泡期</string>
     <string name="phase_ovulation">排卵期</string>
     <string name="phase_luteal">黄体期</string>
-    <string name="home_next_visit">下次姨妈造访</string>
     <string name="home_current_phase">当前阶段</string>
     <string name="home_last_period">上次月经</string>
     <string name="home_next_period_starts">预计下个经期开始</string>
-    <string name="home_past_records">过去的记录</string>
     <string name="home_day_in_cycle">第%1$d天 / 共%2$d天</string>
-    <string name="home_estimated_remaining">剩%1$d天</string>
     <string name="phase_menstrual_desc">子宫内膜脱落，注意休息保暖。</string>
     <string name="phase_follicular_desc">身体为排卵做准备，精力逐渐恢复。</string>
     <string name="phase_ovulation_desc">卵子释放，受孕几率最高。</string>

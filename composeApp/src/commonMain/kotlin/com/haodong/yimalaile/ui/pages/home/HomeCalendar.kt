@@ -18,6 +18,8 @@ import com.haodong.yimalaile.domain.menstrual.CycleState
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.ui.components.*
 import com.haodong.yimalaile.ui.pages.sheet.LocalSheetManager
+import io.github.adrcotfas.datetime.names.TextStyle
+import io.github.adrcotfas.datetime.names.getDisplayName
 import kotlinx.coroutines.launch
 import kotlinx.datetime.*
 import org.jetbrains.compose.resources.stringResource
@@ -122,7 +124,7 @@ internal fun HomeCalendar(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    "${lastPeriod.startDate.monthNumber}月${lastPeriod.startDate.dayOfMonth}日",
+                    formatDateWithWeekday(lastPeriod.startDate),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -135,7 +137,7 @@ internal fun HomeCalendar(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    "${phaseInfo.nextPeriodStart.monthNumber}月${phaseInfo.nextPeriodStart.dayOfMonth}日",
+                    formatDateWithWeekday(phaseInfo.nextPeriodStart),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -147,9 +149,24 @@ internal fun HomeCalendar(
 
         }
         GrowSpacer()
-        SmallSpacer(32)
+        SmallSpacer(128)
 
     }
+}
+
+private fun formatYearMonth(year: Int, month: Month): String {
+    val monthName = month.getDisplayName(TextStyle.FULL)
+    return "$monthName $year"
+}
+
+private fun formatDateWithWeekday(date: LocalDate): String {
+    val formatted = date.format(LocalDate.Format {
+        monthNumber()
+        chars("/")
+        dayOfMonth()
+    })
+    val weekday = date.dayOfWeek.getDisplayName(TextStyle.FULL)
+    return "$formatted $weekday"
 }
 
 private data class YearMonth(val year: Int, val month: Month)
@@ -184,7 +201,7 @@ private fun MonthBlock(
     ) {
         // Month label
         Text(
-            "${yearMonth.year}年${yearMonth.month.number}月",
+            formatYearMonth(yearMonth.year, yearMonth.month),
             style = MaterialTheme.typography.bodyMedium,
             color = onSurface.copy(alpha = 0.7f),
         )
