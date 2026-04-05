@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YIMA: Period Calendar</title>
+    <title>YIMA: Period Calendar | 姨妈来了</title>
     <style>
         :root {
             --primary: #6B4EAA;
@@ -32,243 +32,244 @@
         }
         .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
 
-        /* Hero */
-        .hero {
-            text-align: center;
-            padding: 80px 0 48px;
-        }
-        .hero img {
-            width: 96px;
-            height: 96px;
-            border-radius: 24px;
-            margin-bottom: 24px;
-        }
-        .hero h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 8px;
-        }
-        .hero .subtitle {
-            font-size: 1.1rem;
-            color: var(--text-muted);
-            margin-bottom: 32px;
-        }
-        .hero .badges {
+        /* Language toggle */
+        .lang-toggle {
             display: flex;
-            gap: 12px;
             justify-content: center;
-            flex-wrap: wrap;
+            gap: 4px;
+            padding: 12px 0;
         }
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 10px 20px;
+        .lang-btn {
+            padding: 6px 16px;
             border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: transparent;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+        .lang-btn.active {
             background: var(--primary);
             color: white;
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 600;
+        }
+
+        /* i18n */
+        [lang="zh"] .en, [lang="en"] .zh { display: none; }
+
+        /* Hero */
+        .hero { text-align: center; padding: 60px 0 48px; }
+        .hero img { width: 96px; height: 96px; border-radius: 24px; margin-bottom: 24px; }
+        .hero h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 8px; }
+        .hero .subtitle { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 32px; }
+        .badges { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 10px 20px; border-radius: 50px;
+            background: var(--primary); color: white;
+            text-decoration: none; font-size: 0.9rem; font-weight: 600;
             transition: opacity 0.2s;
         }
         .badge:hover { opacity: 0.85; }
-        .badge.outline {
-            background: transparent;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-        }
+        .badge.outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
 
         /* Features */
         .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            padding: 32px 0;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px; padding: 32px 0;
         }
-        .feature {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 24px;
-        }
+        .feature { background: var(--card-bg); border-radius: var(--radius); padding: 24px; }
         .feature h3 { font-size: 1rem; margin-bottom: 4px; }
         .feature p { font-size: 0.85rem; color: var(--text-muted); }
 
         /* Sections */
-        .section {
-            padding: 48px 0;
-        }
-        .section h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 24px;
-        }
+        .section { padding: 48px 0; }
+        .section h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; }
 
         /* Legal */
-        .legal {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 32px;
-            margin-bottom: 24px;
-        }
-        .legal h3 {
-            font-size: 1.1rem;
-            margin-bottom: 12px;
-        }
-        .legal p, .legal ul {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-bottom: 12px;
-        }
+        .legal { background: var(--card-bg); border-radius: var(--radius); padding: 32px; margin-bottom: 24px; }
+        .legal h3 { font-size: 1.1rem; margin-bottom: 12px; }
+        .legal p, .legal ul { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px; }
         .legal ul { padding-left: 20px; }
         .legal li { margin-bottom: 6px; }
 
         /* Footer */
-        footer {
-            text-align: center;
-            padding: 48px 0 32px;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
+        footer { text-align: center; padding: 48px 0 32px; color: var(--text-muted); font-size: 0.85rem; }
         footer a { color: var(--primary); text-decoration: none; }
 
-        /* Nav */
-        nav {
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-            padding: 16px 0;
-            font-size: 0.9rem;
-        }
-        nav a {
-            color: var(--text-muted);
-            text-decoration: none;
-        }
+        nav { display: flex; justify-content: center; gap: 24px; padding: 8px 0; font-size: 0.9rem; }
+        nav a { color: var(--text-muted); text-decoration: none; }
         nav a:hover { color: var(--primary); }
     </style>
 </head>
 <body>
 
 <div class="container">
+
+    <!-- Language toggle -->
+    <div class="lang-toggle">
+        <button class="lang-btn active" onclick="setLang('en')">EN</button>
+        <button class="lang-btn" onclick="setLang('zh')">中文</button>
+    </div>
+
     <nav>
-        <a href="#features">Features</a>
-        <a href="#privacy">Privacy</a>
-        <a href="#terms">Terms</a>
-        <a href="https://github.com/Novawerk/yimalaile">GitHub</a>
+        <a href="#features"><span class="en">Features</span><span class="zh">功能</span></a>
+        <a href="#privacy"><span class="en">Privacy</span><span class="zh">隐私</span></a>
+        <a href="#terms"><span class="en">Terms</span><span class="zh">条款</span></a>
+        <a href="https://github.com/Novawerk/YIMA">GitHub</a>
     </nav>
 
+    <!-- Hero -->
     <div class="hero">
         <img src="icon.png" alt="YIMA logo">
-        <h1>YIMA</h1>
-        <p class="subtitle">Privacy-first period calendar. No accounts. No cloud. No ads.</p>
+        <h1>
+            <span class="en">YIMA</span>
+            <span class="zh">姨妈来了</span>
+        </h1>
+        <p class="subtitle">
+            <span class="en">Privacy-first period calendar. No accounts. No cloud. No ads.</span>
+            <span class="zh">隐私优先的经期日历。无需账号，无云同步，无广告。</span>
+        </p>
         <div class="badges">
-            <a href="https://github.com/Novawerk/yimalaile" class="badge">View on GitHub</a>
-            <a href="https://github.com/Novawerk/yimalaile/releases" class="badge outline">Download</a>
+            <a href="https://github.com/Novawerk/YIMA" class="badge">
+                <span class="en">View on GitHub</span>
+                <span class="zh">GitHub 源码</span>
+            </a>
+            <a href="https://github.com/Novawerk/YIMA/releases" class="badge outline">
+                <span class="en">Download</span>
+                <span class="zh">下载</span>
+            </a>
         </div>
     </div>
 
+    <!-- Features -->
     <div id="features" class="features">
         <div class="feature">
-            <h3>Smart Predictions</h3>
-            <p>Predicts your next periods after just 2 cycles.</p>
+            <h3><span class="en">Smart Predictions</span><span class="zh">智能预测</span></h3>
+            <p><span class="en">Predicts your next periods after just 2 cycles.</span><span class="zh">只需 2 个周期，自动预测下次经期。</span></p>
         </div>
         <div class="feature">
-            <h3>Cycle Phases</h3>
-            <p>Real-time phase tracking with explanations.</p>
+            <h3><span class="en">Cycle Phases</span><span class="zh">周期阶段</span></h3>
+            <p><span class="en">Real-time phase tracking with explanations.</span><span class="zh">实时显示当前阶段及详细说明。</span></p>
         </div>
         <div class="feature">
-            <h3>Statistics</h3>
-            <p>Visual charts, trends, and outlier detection.</p>
+            <h3><span class="en">Statistics</span><span class="zh">统计数据</span></h3>
+            <p><span class="en">Visual charts, trends, and outlier detection.</span><span class="zh">可视化图表、趋势分析和异常检测。</span></p>
         </div>
         <div class="feature">
-            <h3>100% Private</h3>
-            <p>All data stays on your device. Always.</p>
+            <h3><span class="en">100% Private</span><span class="zh">完全私密</span></h3>
+            <p><span class="en">All data stays on your device. Always.</span><span class="zh">所有数据始终留在你的设备上。</span></p>
         </div>
         <div class="feature">
-            <h3>Open Source</h3>
-            <p>Verify our privacy claims yourself on GitHub.</p>
+            <h3><span class="en">Open Source</span><span class="zh">开源项目</span></h3>
+            <p><span class="en">Verify our privacy claims yourself on GitHub.</span><span class="zh">在 GitHub 上亲自验证我们的隐私承诺。</span></p>
         </div>
         <div class="feature">
-            <h3>Bilingual</h3>
-            <p>Full English and Chinese support.</p>
+            <h3><span class="en">Bilingual</span><span class="zh">双语支持</span></h3>
+            <p><span class="en">Full English and Chinese support.</span><span class="zh">完整的中文和英文支持。</span></p>
         </div>
     </div>
 
+    <!-- Privacy Policy -->
     <div id="privacy" class="section">
-        <h2>Privacy Policy</h2>
+        <h2><span class="en">Privacy Policy</span><span class="zh">隐私政策</span></h2>
         <div class="legal">
-            <h3>Data Storage</h3>
-            <p>YIMA: Period Calendar stores all data exclusively on your device using local storage (DataStore). No data is ever transmitted to any server, cloud service, or third party.</p>
+            <h3><span class="en">Data Storage</span><span class="zh">数据存储</span></h3>
+            <p><span class="en">YIMA: Period Calendar stores all data exclusively on your device using local storage (DataStore). No data is ever transmitted to any server, cloud service, or third party.</span><span class="zh">姨妈来了使用本地存储 (DataStore) 将所有数据存储在你的设备上。数据不会被传输到任何服务器、云服务或第三方。</span></p>
 
-            <h3>Data Collection</h3>
-            <p>We do not collect, process, or store any personal data. Specifically:</p>
+            <h3><span class="en">Data Collection</span><span class="zh">数据收集</span></h3>
+            <p><span class="en">We do not collect, process, or store any personal data. Specifically:</span><span class="zh">我们不收集、处理或存储任何个人数据。具体来说：</span></p>
             <ul>
-                <li>No user accounts or registration required</li>
-                <li>No analytics or tracking of any kind</li>
-                <li>No advertising or ad-related data collection</li>
-                <li>No crash reporting that transmits personal data</li>
-                <li>No access to contacts, photos, location, or other device data</li>
+                <li><span class="en">No user accounts or registration required</span><span class="zh">无需用户账号或注册</span></li>
+                <li><span class="en">No analytics or tracking of any kind</span><span class="zh">没有任何形式的分析或追踪</span></li>
+                <li><span class="en">No advertising or ad-related data collection</span><span class="zh">没有广告或广告相关的数据收集</span></li>
+                <li><span class="en">No crash reporting that transmits personal data</span><span class="zh">没有传输个人数据的崩溃报告</span></li>
+                <li><span class="en">No access to contacts, photos, location, or other device data</span><span class="zh">不访问通讯录、照片、位置或其他设备数据</span></li>
             </ul>
 
-            <h3>Data You Enter</h3>
-            <p>Period dates, daily records (flow intensity, mood, symptoms, notes), and app preferences are stored locally on your device only. This data is never shared with anyone.</p>
+            <h3><span class="en">Data You Enter</span><span class="zh">你输入的数据</span></h3>
+            <p><span class="en">Period dates, daily records (flow intensity, mood, symptoms, notes), and app preferences are stored locally on your device only. This data is never shared with anyone.</span><span class="zh">经期日期、每日记录（经量、心情、症状、笔记）和应用偏好设置仅存储在你的设备本地。这些数据绝不会与任何人共享。</span></p>
 
-            <h3>Data Deletion</h3>
-            <p>You can delete all your data at any time from Settings > Clear All Data. Uninstalling the app also removes all data permanently.</p>
+            <h3><span class="en">Data Deletion</span><span class="zh">数据删除</span></h3>
+            <p><span class="en">You can delete all your data at any time from Settings > Clear All Data. Uninstalling the app also removes all data permanently.</span><span class="zh">你可以随时通过 设置 > 清除所有数据 删除全部数据。卸载应用也会永久删除所有数据。</span></p>
 
-            <h3>Third-Party Services</h3>
-            <p>This app does not integrate with any third-party services, APIs, or SDKs that collect user data.</p>
+            <h3><span class="en">Third-Party Services</span><span class="zh">第三方服务</span></h3>
+            <p><span class="en">This app does not integrate with any third-party services, APIs, or SDKs that collect user data.</span><span class="zh">本应用不集成任何收集用户数据的第三方服务、API 或 SDK。</span></p>
 
-            <h3>Children's Privacy</h3>
-            <p>This app does not knowingly collect data from children. Since no data leaves the device, there is no risk of children's data being transmitted or stored externally.</p>
+            <h3><span class="en">Children's Privacy</span><span class="zh">儿童隐私</span></h3>
+            <p><span class="en">This app does not knowingly collect data from children. Since no data leaves the device, there is no risk of children's data being transmitted or stored externally.</span><span class="zh">本应用不会故意收集儿童数据。由于没有数据离开设备，不存在儿童数据被传输或外部存储的风险。</span></p>
 
-            <h3>Changes to This Policy</h3>
-            <p>Any changes to this privacy policy will be reflected in this page and in app updates. Since we collect no data, changes are unlikely.</p>
+            <h3><span class="en">Changes to This Policy</span><span class="zh">政策变更</span></h3>
+            <p><span class="en">Any changes to this privacy policy will be reflected in this page and in app updates.</span><span class="zh">隐私政策的任何变更将反映在此页面和应用更新中。</span></p>
 
-            <p><strong>Last updated:</strong> April 2026</p>
+            <p><strong><span class="en">Last updated:</span><span class="zh">最后更新：</span></strong> <span class="en">April 2026</span><span class="zh">2026 年 4 月</span></p>
         </div>
     </div>
 
+    <!-- Terms of Use -->
     <div id="terms" class="section">
-        <h2>Terms of Use (AGB)</h2>
+        <h2><span class="en">Terms of Use</span><span class="zh">使用条款</span></h2>
         <div class="legal">
-            <h3>1. Acceptance</h3>
-            <p>By downloading, installing, or using YIMA: Period Calendar ("the App"), you agree to these Terms of Use. If you do not agree, do not use the App.</p>
+            <h3><span class="en">1. Acceptance</span><span class="zh">1. 接受条款</span></h3>
+            <p><span class="en">By downloading, installing, or using YIMA: Period Calendar ("the App"), you agree to these Terms of Use. If you do not agree, do not use the App.</span><span class="zh">下载、安装或使用姨妈来了（"本应用"）即表示你同意这些使用条款。如果你不同意，请勿使用本应用。</span></p>
 
-            <h3>2. Description of Service</h3>
-            <p>The App is a menstrual cycle tracking and prediction tool for personal, non-commercial use. It helps users record period dates, track symptoms, and view cycle predictions.</p>
+            <h3><span class="en">2. Description of Service</span><span class="zh">2. 服务描述</span></h3>
+            <p><span class="en">The App is a menstrual cycle tracking and prediction tool for personal, non-commercial use. It helps users record period dates, track symptoms, and view cycle predictions.</span><span class="zh">本应用是用于个人、非商业用途的经期周期追踪和预测工具。它帮助用户记录经期日期、追踪症状和查看周期预测。</span></p>
 
-            <h3>3. No Medical Advice</h3>
-            <p>The App is for educational and planning purposes only. It does not provide medical advice, diagnosis, or treatment. Predictions and cycle phase information are estimates based on your data and should not be used as a substitute for professional medical advice. Always consult a qualified healthcare provider for medical concerns.</p>
+            <h3><span class="en">3. No Medical Advice</span><span class="zh">3. 非医疗建议</span></h3>
+            <p><span class="en">The App is for educational and planning purposes only. It does not provide medical advice, diagnosis, or treatment. Predictions and cycle phase information are estimates based on your data and should not be used as a substitute for professional medical advice.</span><span class="zh">本应用仅用于教育和计划目的。不提供医疗建议、诊断或治疗。预测和周期阶段信息是基于你的数据的估算，不应替代专业医疗建议。</span></p>
 
-            <h3>4. Accuracy</h3>
-            <p>While we strive for accurate predictions, the App cannot guarantee the accuracy of any predictions, calculations, or information displayed. Cycle predictions are statistical estimates and may not reflect your actual cycle.</p>
+            <h3><span class="en">4. Accuracy</span><span class="zh">4. 准确性</span></h3>
+            <p><span class="en">While we strive for accurate predictions, the App cannot guarantee the accuracy of any predictions, calculations, or information displayed. Cycle predictions are statistical estimates and may not reflect your actual cycle.</span><span class="zh">虽然我们力求准确的预测，但本应用不能保证任何预测、计算或显示信息的准确性。周期预测是统计估算，可能与你的实际周期不符。</span></p>
 
-            <h3>5. User Responsibility</h3>
-            <p>You are responsible for the accuracy of the data you enter. The App relies on your input to generate predictions and statistics.</p>
+            <h3><span class="en">5. User Responsibility</span><span class="zh">5. 用户责任</span></h3>
+            <p><span class="en">You are responsible for the accuracy of the data you enter. The App relies on your input to generate predictions and statistics.</span><span class="zh">你对输入数据的准确性负责。本应用依赖你的输入来生成预测和统计。</span></p>
 
-            <h3>6. Privacy</h3>
-            <p>Your privacy is our priority. Please refer to our <a href="#privacy">Privacy Policy</a> for details on how your data is handled. In summary: all data stays on your device.</p>
+            <h3><span class="en">6. Privacy</span><span class="zh">6. 隐私</span></h3>
+            <p><span class="en">Your privacy is our priority. Please refer to our <a href="#privacy">Privacy Policy</a> for details. In summary: all data stays on your device.</span><span class="zh">你的隐私是我们的首要关注。详情请参阅我们的<a href="#privacy">隐私政策</a>。简而言之：所有数据留在你的设备上。</span></p>
 
-            <h3>7. Open Source</h3>
-            <p>The App is open-source software developed by Novawerk on a non-profit basis. The source code is available at <a href="https://github.com/Novawerk/yimalaile">github.com/Novawerk/yimalaile</a>.</p>
+            <h3><span class="en">7. Open Source</span><span class="zh">7. 开源</span></h3>
+            <p><span class="en">The App is open-source software developed by Novawerk under the <a href="https://github.com/Novawerk/YIMA/blob/main/LICENSE">MIT License</a>.</span><span class="zh">本应用是由 Novawerk 基于 <a href="https://github.com/Novawerk/YIMA/blob/main/LICENSE">MIT 许可协议</a>开发的开源软件。</span></p>
 
-            <h3>8. Limitation of Liability</h3>
-            <p>The App is provided "as is" without warranties of any kind. Novawerk and its contributors shall not be liable for any damages arising from the use or inability to use the App, including but not limited to health decisions made based on the App's information.</p>
+            <h3><span class="en">8. Limitation of Liability</span><span class="zh">8. 责任限制</span></h3>
+            <p><span class="en">The App is provided "as is" without warranties of any kind. Novawerk and its contributors shall not be liable for any damages arising from the use or inability to use the App.</span><span class="zh">本应用按"现状"提供，不附带任何形式的保证。Novawerk 及其贡献者不对因使用或无法使用本应用而产生的任何损害承担责任。</span></p>
 
-            <h3>9. Changes</h3>
-            <p>We may update these terms from time to time. Continued use of the App after changes constitutes acceptance of the new terms.</p>
+            <h3><span class="en">9. Changes</span><span class="zh">9. 变更</span></h3>
+            <p><span class="en">We may update these terms from time to time. Continued use of the App after changes constitutes acceptance of the new terms.</span><span class="zh">我们可能会不时更新这些条款。在变更后继续使用本应用即表示接受新条款。</span></p>
 
-            <p><strong>Last updated:</strong> April 2026</p>
+            <p><strong><span class="en">Last updated:</span><span class="zh">最后更新：</span></strong> <span class="en">April 2026</span><span class="zh">2026 年 4 月</span></p>
         </div>
     </div>
 </div>
 
 <footer>
-    <p>Made with care by <a href="https://github.com/Novawerk">Novawerk</a></p>
-    <p>Open-source apps, made with care. Remaking everyday tools the non-profit way.</p>
+    <p>
+        <span class="en">Made with care by <a href="https://github.com/Novawerk">Novawerk</a></span>
+        <span class="zh">由 <a href="https://github.com/Novawerk">Novawerk</a> 用心打造</span>
+    </p>
+    <p>
+        <span class="en">Open-source apps, made with care. Remaking everyday tools the non-profit way.</span>
+        <span class="zh">开源应用，用心制作。以非盈利的方式重新制作每一个日常工具。</span>
+    </p>
 </footer>
+
+<script>
+function setLang(lang) {
+    document.documentElement.lang = lang;
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.trim() === (lang === 'en' ? 'EN' : '中文'));
+    });
+    localStorage.setItem('lang', lang);
+}
+// Auto-detect language
+(function() {
+    var saved = localStorage.getItem('lang');
+    if (saved) { setLang(saved); return; }
+    var browserLang = navigator.language || navigator.userLanguage || 'en';
+    setLang(browserLang.startsWith('zh') ? 'zh' : 'en');
+})();
+</script>
 
 </body>
 </html>
-<!-- deployed -->
