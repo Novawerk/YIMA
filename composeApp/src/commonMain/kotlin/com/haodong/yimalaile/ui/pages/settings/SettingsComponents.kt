@@ -81,13 +81,13 @@ internal fun SliderDialog(
     )
 }
 
-internal data class ToggleItem(val value: String, val label: String, val icon: ImageVector)
+internal data class ToggleItem<T>(val value: T, val label: String, val icon: ImageVector)
 
 @Composable
-internal fun InlineIconToggle(
-    items: List<ToggleItem>,
-    selected: String,
-    onSelect: (String) -> Unit,
+internal fun <T> InlineIconToggle(
+    items: List<ToggleItem<T>>,
+    selected: T,
+    onSelect: (T) -> Unit,
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerHigh,

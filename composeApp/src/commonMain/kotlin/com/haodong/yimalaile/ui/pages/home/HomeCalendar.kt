@@ -26,6 +26,7 @@ import com.haodong.yimalaile.domain.menstrual.CycleState
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.ui.components.*
 import com.haodong.yimalaile.ui.pages.sheet.LocalSheetManager
+import com.haodong.yimalaile.ui.pages.sheet.sheets.PhaseExplanationSheet
 import io.github.adrcotfas.datetime.names.TextStyle
 import io.github.adrcotfas.datetime.names.getDisplayName
 import kotlinx.coroutines.launch

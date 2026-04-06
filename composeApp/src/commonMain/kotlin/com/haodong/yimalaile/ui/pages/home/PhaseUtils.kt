@@ -2,6 +2,7 @@ package com.haodong.yimalaile.ui.pages.home
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import com.haodong.yimalaile.domain.menstrual.CyclePhase
 import com.haodong.yimalaile.ui.theme.expressiveShapes
@@ -9,7 +10,7 @@ import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
 
 @Composable
-internal fun phaseDisplayName(phase: CyclePhase): String = when (phase) {
+internal fun CyclePhase.displayName(): String = when (this) {
     CyclePhase.MENSTRUAL -> stringResource(Res.string.phase_menstrual)
     CyclePhase.FOLLICULAR -> stringResource(Res.string.phase_follicular)
     CyclePhase.OVULATION -> stringResource(Res.string.phase_ovulation)
@@ -17,7 +18,7 @@ internal fun phaseDisplayName(phase: CyclePhase): String = when (phase) {
 }
 
 @Composable
-internal fun phaseDescription(phase: CyclePhase): String = when (phase) {
+internal fun CyclePhase.description(): String = when (this) {
     CyclePhase.MENSTRUAL -> stringResource(Res.string.phase_menstrual_desc)
     CyclePhase.FOLLICULAR -> stringResource(Res.string.phase_follicular_desc)
     CyclePhase.OVULATION -> stringResource(Res.string.phase_ovulation_desc)
@@ -25,7 +26,7 @@ internal fun phaseDescription(phase: CyclePhase): String = when (phase) {
 }
 
 @Composable
-internal fun phaseShape(phase: CyclePhase): Shape = when (phase) {
+internal fun CyclePhase.shape(): Shape = when (this) {
     CyclePhase.MENSTRUAL -> MaterialTheme.expressiveShapes.arrow
     CyclePhase.FOLLICULAR -> MaterialTheme.expressiveShapes.flower
     CyclePhase.OVULATION -> MaterialTheme.expressiveShapes.sunny
@@ -33,7 +34,7 @@ internal fun phaseShape(phase: CyclePhase): Shape = when (phase) {
 }
 
 @Composable
-internal fun phaseColor(phase: CyclePhase) = when (phase) {
+internal fun CyclePhase.color(): Color = when (this) {
     CyclePhase.MENSTRUAL -> MaterialTheme.colorScheme.error
     CyclePhase.FOLLICULAR -> MaterialTheme.colorScheme.primary
     CyclePhase.OVULATION -> MaterialTheme.colorScheme.tertiary

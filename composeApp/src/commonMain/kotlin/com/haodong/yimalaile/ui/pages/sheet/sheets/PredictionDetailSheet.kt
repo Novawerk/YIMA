@@ -1,4 +1,4 @@
-package com.haodong.yimalaile.ui.pages.record
+package com.haodong.yimalaile.ui.pages.sheet.sheets
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape

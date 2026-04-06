@@ -57,11 +57,6 @@
     <string name="date_yesterday">昨天</string>
     <string name="date_n_days_ago">%1$d天前</string>
     <!-- Backfill -->
-    <string name="backfill_title">补录经期</string>
-    <string name="backfill_hint">选择开始和结束日期</string>
-    <string name="backfill_selected_start">已选开始：%1$d月%2$d日，再选结束日期</string>
-    <string name="backfill_selected_range">%1$d月%2$d日 — %3$d月%4$d日</string>
-    <!-- Day Picker -->
     <string name="day_picker_title">选择日期</string>
     <string name="day_picker_hint">选择要补充记录的日期</string>
     <string name="day_picker_recorded">已记录</string>

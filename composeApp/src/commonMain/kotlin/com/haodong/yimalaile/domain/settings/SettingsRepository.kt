@@ -25,11 +25,11 @@ open class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { prefs -> prefs[DISCLAIMER_ACCEPTED] = value }
     }
 
-    suspend fun getDarkMode(): String =
-        dataStore.data.first()[DARK_MODE] ?: "system"
+    suspend fun getDarkMode(): AppDarkMode =
+        AppDarkMode.fromValue(dataStore.data.first()[DARK_MODE])
 
-    suspend fun setDarkMode(value: String) {
-        dataStore.edit { prefs -> prefs[DARK_MODE] = value }
+    suspend fun setDarkMode(value: AppDarkMode) {
+        dataStore.edit { prefs -> prefs[DARK_MODE] = value.value }
     }
 
     suspend fun getLanguage(): String? =

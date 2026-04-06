@@ -1,4 +1,4 @@
-package com.haodong.yimalaile.ui.pages.record
+package com.haodong.yimalaile.ui.pages.sheet.sheets
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

@@ -1,4 +1,4 @@
-package com.haodong.yimalaile.ui.pages.home
+package com.haodong.yimalaile.ui.pages.sheet.sheets
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
@@ -12,7 +12,10 @@ import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.domain.menstrual.CyclePhase
 import com.haodong.yimalaile.domain.menstrual.CyclePhaseInfo
 import com.haodong.yimalaile.ui.components.SmallSpacer
-import com.haodong.yimalaile.ui.theme.expressiveShapes
+import com.haodong.yimalaile.ui.pages.home.color
+import com.haodong.yimalaile.ui.pages.home.description
+import com.haodong.yimalaile.ui.pages.home.displayName
+import com.haodong.yimalaile.ui.pages.home.shape
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
 
@@ -56,7 +59,7 @@ internal fun PhaseExplanationSheet(
                 Surface(
                     tonalElevation = if (isCurrent) 3.dp else 0.dp,
                     shape = MaterialTheme.shapes.large,
-                    border = if (isCurrent) BorderStroke(2.dp, phaseColor(phase)) else null,
+                    border = if (isCurrent) BorderStroke(2.dp, phase.color()) else null,
                 ) {
                     Row(
                         Modifier.fillMaxWidth().padding(16.dp),
@@ -64,19 +67,19 @@ internal fun PhaseExplanationSheet(
                     ) {
                         Surface(
                             modifier = Modifier.size(24.dp),
-                            color = phaseColor(phase),
-                            shape = phaseShape(phase),
+                            color = phase.color(),
+                            shape = phase.shape(),
                         ) { }
                         SmallSpacer(12)
                         Column(Modifier.weight(1f)) {
                             Text(
-                                phaseDisplayName(phase),
+                                phase.displayName(),
                                 style = MaterialTheme.typography.bodyLargeEmphasized,
                                 fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
                             )
                             SmallSpacer(2)
                             Text(
-                                phaseDescription(phase),
+                                phase.description(),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -85,7 +88,7 @@ internal fun PhaseExplanationSheet(
                         Text(
                             timingLabel,
                             style = MaterialTheme.typography.labelMediumEmphasized,
-                            color = if (isCurrent) phaseColor(phase)
+                            color = if (isCurrent) phase.color()
                                     else MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }

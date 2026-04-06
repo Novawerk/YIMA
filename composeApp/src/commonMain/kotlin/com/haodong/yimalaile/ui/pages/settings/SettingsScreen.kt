@@ -21,16 +21,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalUriHandler
+import com.haodong.yimalaile.domain.settings.AppDarkMode
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
 
 @Composable
 fun SettingsScreen(
-    currentDarkMode: String,
+    currentDarkMode: AppDarkMode,
     currentLanguage: String?,
     currentCycleLength: Int,
     currentPeriodDuration: Int,
-    onDarkModeChange: (String) -> Unit,
+    onDarkModeChange: (AppDarkMode) -> Unit,
     onLanguageChange: (String?) -> Unit,
     onCycleLengthChange: (Int) -> Unit,
     onPeriodDurationChange: (Int) -> Unit,
@@ -69,9 +70,9 @@ fun SettingsScreen(
         Spacer(Modifier.height(12.dp))
         InlineIconToggle(
             items = listOf(
-                ToggleItem("system", stringResource(Res.string.settings_mode_system), Icons.Outlined.Smartphone),
-                ToggleItem("light", stringResource(Res.string.settings_mode_light), Icons.Outlined.LightMode),
-                ToggleItem("dark", stringResource(Res.string.settings_mode_dark), Icons.Outlined.DarkMode),
+                ToggleItem(AppDarkMode.SYSTEM, stringResource(Res.string.settings_mode_system), Icons.Outlined.Smartphone),
+                ToggleItem(AppDarkMode.LIGHT, stringResource(Res.string.settings_mode_light), Icons.Outlined.LightMode),
+                ToggleItem(AppDarkMode.DARK, stringResource(Res.string.settings_mode_dark), Icons.Outlined.DarkMode),
             ),
             selected = currentDarkMode,
             onSelect = onDarkModeChange,

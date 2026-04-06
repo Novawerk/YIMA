@@ -1,25 +1,13 @@
 package com.haodong.yimalaile.ui.pages.sheet
 
-import com.haodong.yimalaile.domain.menstrual.AddRecordResult
-import com.haodong.yimalaile.domain.menstrual.DailyRecord
-import com.haodong.yimalaile.domain.menstrual.Intensity
-import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
-import com.haodong.yimalaile.domain.menstrual.MenstrualService
-import com.haodong.yimalaile.domain.menstrual.Mood
-import com.haodong.yimalaile.domain.menstrual.PredictedCycle
+import com.haodong.yimalaile.domain.menstrual.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.datetime.*
 import kotlin.time.Clock
-import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.minus
-import kotlinx.datetime.plus
-import kotlinx.datetime.todayIn
-import kotlinx.datetime.until
 
 // ============================================================
 // Result types
@@ -61,11 +49,6 @@ sealed class SheetRequest {
     data class LogDay(
         val targetDate: LocalDate?,
         val result: CompletableDeferred<LogDayResult?>,
-    ) : SheetRequest() { override val deferred get() = result }
-
-    data class Backfill(
-        val records: List<MenstrualRecord>,
-        val result: CompletableDeferred<Pair<LocalDate, LocalDate>?>,
     ) : SheetRequest() { override val deferred get() = result }
 
     data class RecordDetail(
@@ -142,13 +125,7 @@ class SheetManager(private val service: MenstrualService) {
         _activeSheet.value = SheetRequest.LogDay(targetDate, deferred)
         return deferred.await().also { _activeSheet.value = null }
     }
-
-    private suspend fun showBackfillSheet(): Pair<LocalDate, LocalDate>? {
-        val state = service.getCycleState()
-        val deferred = CompletableDeferred<Pair<LocalDate, LocalDate>?>()
-        _activeSheet.value = SheetRequest.Backfill(state.records, deferred)
-        return deferred.await().also { _activeSheet.value = null }
-    }
+    
 
     suspend fun showDatePicker(
         title: String,
@@ -207,10 +184,6 @@ class SheetManager(private val service: MenstrualService) {
         return service.logDay(recordId, day)
     }
 
-    suspend fun backfillPeriod(): AddRecordResult? {
-        val (start, end) = showBackfillSheet() ?: return null
-        return service.backfillPeriod(start, end)
-    }
 
     /** Show record detail. Returns the action the user chose, or null if dismissed. */
     suspend fun showRecordDetail(record: MenstrualRecord, defaultCycleLength: Int): DetailAction? {

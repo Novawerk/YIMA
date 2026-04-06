@@ -1,4 +1,4 @@
-package com.haodong.yimalaile.ui.pages.record
+package com.haodong.yimalaile.ui.pages.sheet.sheets
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,47 +21,53 @@ import io.github.adrcotfas.datetime.names.TextStyle
 import io.github.adrcotfas.datetime.names.getDisplayName
 import kotlinx.datetime.*
 import org.jetbrains.compose.resources.stringResource
-import kotlin.time.Clock
 import yimalaile.composeapp.generated.resources.*
+import kotlin.time.Clock
 
+/**
+ * "姨妈来了" sheet — date list picker.
+ *
+ * Phase 1: Pick start date from a reverse-chronological list (today → 1 month ago).
+ * Phase 2: If start > 3 days ago, pick end date from a list (start date → today).
+ *
+ * Tapping the adjust button resets to phase 1.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EndPeriodSheet(
+fun StartPeriodSheet(
     existingRecords: List<MenstrualRecord> = emptyList(),
+    avgPeriodLength: Int = 5,
     onDismiss: () -> Unit,
-    onConfirm: (LocalDate) -> Unit,
+    onConfirm: (start: LocalDate, end: LocalDate?) -> Unit,
 ) {
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+    var selectedStart by remember { mutableStateOf<LocalDate?>(today) }
+    var selectedEnd by remember { mutableStateOf<LocalDate?>(null) }
+    var selectingEnd by remember { mutableStateOf(false) }
 
-    // Find the current period's start date to limit the list
-    val currentPeriodStart = remember(existingRecords) {
-        existingRecords
-            .filter { !it.isDeleted && !it.endConfirmed && it.endDate != null }
-            .maxByOrNull { it.startDate }
-            ?.startDate
-    }
+    val needsEndDate = selectedStart != null &&
+            selectedStart!!.until(today, DateTimeUnit.DAY).toInt() > 3
 
-    // Default to predicted end date or today
-    val defaultDate = remember(existingRecords) {
-        val currentPeriod = existingRecords
-            .filter { !it.isDeleted && !it.endConfirmed && it.endDate != null }
-            .maxByOrNull { it.startDate }
-        if (currentPeriod != null) {
-            val completed = existingRecords.filter { !it.isDeleted && it.endDate != null && it.endConfirmed }
-            val avgPeriod = if (completed.isNotEmpty()) {
-                completed.map { it.startDate.until(it.endDate!!, DateTimeUnit.DAY).toInt() + 1 }.average().toInt()
-            } else 5
-            val predictedEnd = currentPeriod.startDate.plus(avgPeriod - 1, DateTimeUnit.DAY)
-            if (predictedEnd <= today) predictedEnd else today
-        } else {
-            today
+    LaunchedEffect(selectedStart) {
+        if (needsEndDate && !selectingEnd) {
+            selectingEnd = true
+            selectedEnd = selectedStart!!.plus(avgPeriodLength - 1, DateTimeUnit.DAY)
+                .let { if (it > today) today else it }
+        } else if (!needsEndDate) {
+            selectingEnd = false
+            selectedEnd = null
         }
     }
-    var selected by remember { mutableStateOf<LocalDate?>(defaultDate) }
 
-    // Build date list from today back to period start (or 1 month ago)
-    val dates = remember(today, currentPeriodStart) {
-        val earliest = currentPeriodStart ?: today.minus(1, DateTimeUnit.MONTH)
+    val minDate = existingRecords
+        .filter { it.endDate != null }
+        .maxByOrNull { it.endDate!! }
+        ?.endDate?.plus(1, DateTimeUnit.DAY)
+
+    // Build date lists
+    val oneMonthAgo = today.minus(1, DateTimeUnit.MONTH)
+    val startDates = remember(today, minDate) {
+        val earliest = if (minDate != null && minDate > oneMonthAgo) minDate else oneMonthAgo
         buildList {
             var d = today
             while (d >= earliest) {
@@ -71,33 +77,86 @@ fun EndPeriodSheet(
         }
     }
 
+    val endDates = remember(selectedStart, today) {
+        if (selectedStart == null) emptyList()
+        else buildList {
+            var d = today
+            while (d >= selectedStart!!) {
+                add(d)
+                d = d.minus(1, DateTimeUnit.DAY)
+            }
+        }
+    }
+
+    val title = if (selectingEnd)
+        stringResource(Res.string.end_period_question)
+    else
+        stringResource(Res.string.start_period_question)
+
+    val hint = when {
+        selectingEnd && selectedStart != null && selectedEnd != null ->
+            "${selectedStart!!.monthNumber}/${selectedStart!!.dayOfMonth} — ${selectedEnd!!.monthNumber}/${selectedEnd!!.dayOfMonth}"
+        selectedStart != null ->
+            "${selectedStart!!.monthNumber}/${selectedStart!!.dayOfMonth}"
+        else -> stringResource(Res.string.start_period_hint)
+    }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
         Column(Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp)) {
-            Text(stringResource(Res.string.end_period_question), style = MaterialTheme.typography.titleLarge)
+            Text(title, style = MaterialTheme.typography.titleLarge)
             SmallSpacer(4)
-            Text(
-                if (selected != null) "${selected!!.monthNumber}/${selected!!.dayOfMonth}"
-                else stringResource(Res.string.start_period_hint),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            if (selectingEnd && selectedStart != null) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        hint,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.weight(1f))
+                    TextButton(onClick = {
+                        selectingEnd = false
+                        selectedEnd = null
+                        selectedStart = null
+                    }) {
+                        Text(
+                            stringResource(Res.string.onboarding_adjust),
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                    }
+                }
+            } else {
+                Text(
+                    hint,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
 
             SmallSpacer(12)
+
+            val dates = if (selectingEnd) endDates else startDates
+            val selected = if (selectingEnd) selectedEnd else selectedStart
 
             LazyColumn(
                 modifier = Modifier.height(350.dp),
                 state = rememberLazyListState(),
             ) {
                 items(dates, key = { it.toEpochDays() }) { date ->
-                    EndDateListItem(
+                    DateListItem(
                         date = date,
                         today = today,
                         isSelected = date == selected,
-                        onClick = { selected = date },
+                        onClick = {
+                            if (selectingEnd) {
+                                selectedEnd = date
+                            } else {
+                                selectedStart = date
+                            }
+                        },
                     )
                 }
             }
@@ -106,17 +165,18 @@ fun EndPeriodSheet(
             PrimaryCta(
                 text = stringResource(Res.string.onboarding_confirm),
                 onClick = {
-                    val endDate = selected ?: return@PrimaryCta
-                    onConfirm(endDate)
+                    selectedStart?.let { start ->
+                        onConfirm(start, if (needsEndDate) selectedEnd else null)
+                    }
                 },
-                enabled = selected != null,
+                enabled = selectedStart != null && (!needsEndDate || selectedEnd != null),
             )
         }
     }
 }
 
 @Composable
-private fun EndDateListItem(
+private fun DateListItem(
     date: LocalDate,
     today: LocalDate,
     isSelected: Boolean,
@@ -143,7 +203,7 @@ private fun EndDateListItem(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                formatEndDateDisplay(date),
+                formatDateDisplay(date),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = if (isToday || isSelected) FontWeight.SemiBold else FontWeight.Normal,
                 color = contentColor,
@@ -171,7 +231,7 @@ private fun EndDateListItem(
     }
 }
 
-private fun formatEndDateDisplay(date: LocalDate): String {
+private fun formatDateDisplay(date: LocalDate): String {
     val weekday = date.dayOfWeek.getDisplayName(TextStyle.SHORT)
     return "${date.monthNumber}/${date.dayOfMonth} $weekday"
 }

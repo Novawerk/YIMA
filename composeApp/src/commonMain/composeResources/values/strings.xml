@@ -57,11 +57,6 @@
     <string name="date_yesterday">Yesterday</string>
     <string name="date_n_days_ago">%1$d days ago</string>
     <!-- Backfill -->
-    <string name="backfill_title">Backfill Period</string>
-    <string name="backfill_hint">Select start and end dates</string>
-    <string name="backfill_selected_start">Start: %1$d/%2$d — now select end date</string>
-    <string name="backfill_selected_range">%1$d/%2$d — %3$d/%4$d</string>
-    <!-- Day Picker -->
     <string name="day_picker_title">Select Date</string>
     <string name="day_picker_hint">Select a date to add a record</string>
     <string name="day_picker_recorded">Recorded</string>

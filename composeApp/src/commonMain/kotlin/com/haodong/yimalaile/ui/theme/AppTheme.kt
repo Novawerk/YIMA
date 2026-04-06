@@ -1,5 +1,6 @@
 package com.haodong.yimalaile.ui.theme
 
+import com.haodong.yimalaile.domain.settings.AppDarkMode
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -190,15 +191,15 @@ private fun expressiveShapes() = ExpressiveShapes(
 
 @Composable
 fun AppTheme(
-    darkMode: String = "system", // "system" | "light" | "dark"
+    darkMode: AppDarkMode = AppDarkMode.SYSTEM,
     content: @Composable () -> Unit
 ) {
 
 
     val isDarkTheme = when (darkMode) {
-        "dark" -> true
-        "light" -> false
-        else -> isSystemInDarkTheme()
+        AppDarkMode.DARK -> true
+        AppDarkMode.LIGHT -> false
+        AppDarkMode.SYSTEM -> isSystemInDarkTheme()
     }
     val colorScheme =
         when {

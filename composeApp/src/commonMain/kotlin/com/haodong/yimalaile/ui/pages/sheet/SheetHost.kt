@@ -3,13 +3,12 @@ package com.haodong.yimalaile.ui.pages.sheet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import com.haodong.yimalaile.ui.pages.record.BackfillSheet
-import com.haodong.yimalaile.ui.pages.record.EndPeriodSheet
-import com.haodong.yimalaile.ui.pages.record.GenericDatePickerSheet
-import com.haodong.yimalaile.ui.pages.record.LogDaySheet
-import com.haodong.yimalaile.ui.pages.record.PredictionDetailSheet
-import com.haodong.yimalaile.ui.pages.record.RecordDetailSheet
-import com.haodong.yimalaile.ui.pages.record.StartPeriodSheet
+import com.haodong.yimalaile.ui.pages.sheet.sheets.EndPeriodSheet
+import com.haodong.yimalaile.ui.pages.sheet.sheets.GenericDatePickerSheet
+import com.haodong.yimalaile.ui.pages.sheet.sheets.LogDaySheet
+import com.haodong.yimalaile.ui.pages.sheet.sheets.PredictionDetailSheet
+import com.haodong.yimalaile.ui.pages.sheet.sheets.RecordDetailSheet
+import com.haodong.yimalaile.ui.pages.sheet.sheets.StartPeriodSheet
 
 /**
  * Global sheet host — renders the currently active sheet from [SheetManager].
@@ -39,12 +38,6 @@ fun SheetHost(manager: SheetManager) {
             onSave = { intensity, mood, symptoms, notes ->
                 r.result.complete(LogDayResult(intensity, mood, symptoms, notes))
             },
-        )
-
-        is SheetRequest.Backfill -> BackfillSheet(
-            existingRecords = r.records,
-            onDismiss = { manager.dismiss() },
-            onSave = { start, end -> r.result.complete(start to end) },
         )
 
         is SheetRequest.RecordDetail -> RecordDetailSheet(

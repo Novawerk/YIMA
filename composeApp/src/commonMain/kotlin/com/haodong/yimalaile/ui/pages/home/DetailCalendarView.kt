@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.*
 import com.haodong.yimalaile.ui.components.DecorShape
 import com.haodong.yimalaile.ui.components.SmallSpacer
+import com.haodong.yimalaile.ui.pages.sheet.sheets.PhaseExplanationSheet
 import com.haodong.yimalaile.ui.theme.expressiveShapes
 import kotlinx.coroutines.launch
 import kotlinx.datetime.*
@@ -234,7 +235,7 @@ internal fun DetailCalendarView(
 
             // ListItem 2: Current phase (clickable → opens phase sheet)
             item {
-                val pColor = phaseColor(phase)
+                val pColor = phase.color()
                 val isOvPeak = date in ovulationPeakDates
                 val ovColor = Color(0xFF7C4DFF)
                 var showPhaseSheet by remember { mutableStateOf(false) }
@@ -249,7 +250,7 @@ internal fun DetailCalendarView(
                             } else {
                                 Box(Modifier.size(10.dp).clip(RoundedCornerShape(50)).background(pColor))
                                 SmallSpacer(6)
-                                Text(phaseDisplayName(phase), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = pColor)
+                                Text(phase.displayName(), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = pColor)
                             }
                         }
                     },
@@ -279,7 +280,7 @@ internal fun DetailCalendarView(
                         )
                         SmallSpacer(4)
                         Text(
-                            phaseDescription(phase),
+                            phase.description(),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.End,
@@ -310,7 +311,7 @@ internal fun DetailCalendarView(
                 } else null
 
                 when {
-                    isStart && containingRecord != null -> {
+                    isStart -> {
                         FilledTonalButton(
                             onClick = { scope.launch { service.deleteRecord(containingRecord.id); onRefresh() } },
                             modifier = Modifier.fillMaxWidth(),
@@ -321,7 +322,7 @@ internal fun DetailCalendarView(
                             Text(stringResource(Res.string.detail_delete_period))
                         }
                     }
-                    isMidPeriod && containingRecord != null -> {
+                    isMidPeriod -> {
                         FilledTonalButton(
                             onClick = { scope.launch { service.editRecordDates(containingRecord.id, newStart = null, newEnd = date); onRefresh() } },
                             modifier = Modifier.fillMaxWidth(),
