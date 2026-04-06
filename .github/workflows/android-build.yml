@@ -23,16 +23,22 @@ jobs:
       - name: Decode keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
 
-      - name: Build release APK
+      - name: Build release APK and AAB
         env:
           KEYSTORE_PATH: ${{ github.workspace }}/keystore.jks
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew :composeApp:assembleRelease
+        run: ./gradlew :composeApp:assembleRelease :composeApp:bundleRelease
 
       - name: Upload APK
         uses: actions/upload-artifact@v5
         with:
           name: release-apk
           path: composeApp/build/outputs/apk/release/*.apk
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v5
+        with:
+          name: release-aab
+          path: composeApp/build/outputs/bundle/release/*.aab

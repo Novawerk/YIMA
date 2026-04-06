@@ -1,0 +1,125 @@
+# Google Play Release Workflow
+#
+# PREREQUISITES (one-time manual setup):
+#
+# 1. CREATE APP LISTING
+#    - Go to https://play.google.com/console
+#    - Click "Create app" -> fill in app name, language, app/game, free/paid
+#    - Complete store listing (description, screenshots, icons)
+#    - Complete content rating questionnaire and data safety form
+#
+# 2. FIRST AAB UPLOAD (must be done manually once)
+#    - Build locally: ./gradlew :composeApp:bundleRelease
+#    - Play Console -> your app -> Testing -> Internal testing -> Create new release
+#    - Upload AAB from composeApp/build/outputs/bundle/release/
+#    - Complete the release and roll out to internal testing
+#
+# 3. SET UP API ACCESS
+#    - Play Console -> Setup -> API access -> Link a Google Cloud project
+#    - Create a service account -> grant "Editor" role in Cloud Console
+#    - Back in Play Console -> Grant the service account "Release manager" permission
+#    - Download the service account JSON key
+#    - Base64-encode it: base64 -i service-account.json | pbcopy
+#    - Add as GitHub secret: GOOGLE_PLAY_SERVICE_ACCOUNT_JSON
+#
+# USAGE:
+#   - Push tag v1.2.3       -> uploads to internal testing track
+#   - Push tag v1.2.3-prod  -> uploads to production track
+#   - Manual dispatch        -> choose track from dropdown
+
+name: Google Play Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      track:
+        description: 'Google Play track'
+        required: true
+        default: 'internal'
+        type: choice
+        options:
+          - internal
+          - alpha
+          - beta
+          - production
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "version_name=1.0.0" >> $GITHUB_OUTPUT
+            echo "version_code=1" >> $GITHUB_OUTPUT
+          else
+            TAG="${GITHUB_REF#refs/tags/v}"
+            # Strip -prod suffix if present
+            VERSION="${TAG%-prod}"
+            echo "version_name=${VERSION}" >> $GITHUB_OUTPUT
+
+            # Convert semver to integer versionCode: 1.2.3 -> 10203
+            IFS='.' read -r major minor patch <<< "${VERSION}"
+            major=${major:-0}
+            minor=${minor:-0}
+            patch=${patch:-0}
+            VERSION_CODE=$(( major * 10000 + minor * 100 + patch ))
+            echo "version_code=${VERSION_CODE}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Determine track
+        id: track
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "track=${{ inputs.track }}" >> $GITHUB_OUTPUT
+          elif [[ "${GITHUB_REF}" == *-prod ]]; then
+            echo "track=production" >> $GITHUB_OUTPUT
+          else
+            echo "track=internal" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Decode keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
+
+      - name: Build release AAB
+        env:
+          KEYSTORE_PATH: ${{ github.workspace }}/keystore.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          VERSION_CODE: ${{ steps.version.outputs.version_code }}
+          VERSION_NAME: ${{ steps.version.outputs.version_name }}
+        run: ./gradlew :composeApp:bundleRelease
+
+      - name: Decode service account key
+        run: echo "${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}" | base64 -d > service-account.json
+
+      - name: Upload to Google Play
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJson: service-account.json
+          packageName: com.haodong.yimalaile
+          releaseFiles: composeApp/build/outputs/bundle/release/*.aab
+          track: ${{ steps.track.outputs.track }}
+
+      - name: Upload AAB as artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: release-aab
+          path: composeApp/build/outputs/bundle/release/*.aab
