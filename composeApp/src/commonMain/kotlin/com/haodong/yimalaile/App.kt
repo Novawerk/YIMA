@@ -15,9 +15,9 @@ import com.haodong.yimalaile.ui.pages.disclaimer.DisclaimerScreen
 import com.haodong.yimalaile.ui.pages.home.HomeScreen
 import com.haodong.yimalaile.ui.pages.onboarding.OnboardingScreen
 import com.haodong.yimalaile.ui.pages.settings.SettingsScreen
-import com.haodong.yimalaile.ui.pages.sheet.LocalSheetManager
+import com.haodong.yimalaile.ui.pages.sheet.LocalSheetViewModel
 import com.haodong.yimalaile.ui.pages.sheet.SheetHost
-import com.haodong.yimalaile.ui.pages.sheet.SheetManager
+import com.haodong.yimalaile.ui.pages.sheet.SheetViewModel
 import com.haodong.yimalaile.ui.theme.AppTheme
 
 @Composable
@@ -25,7 +25,7 @@ fun App(component: AppComponent) {
     val service = component.menstrualService
     val settings = component.settingsRepository
     val viewModel = remember { AppViewModel(service, settings) }
-    val sheetManager = remember { SheetManager(service) }
+    val sheetViewModel = remember { SheetViewModel(service) }
     val scope = rememberCoroutineScope()
 
     val darkMode = viewModel.darkMode
@@ -36,7 +36,7 @@ fun App(component: AppComponent) {
 
     CompositionLocalProvider(
         LocalAppLocale provides language,
-        LocalSheetManager provides sheetManager,
+        LocalSheetViewModel provides sheetViewModel,
     ) {
         key(language) {
             AppTheme(darkMode = darkMode) {
@@ -67,7 +67,7 @@ fun App(component: AppComponent) {
                     composable<HomeRoute> {
                         HomeScreen(
                             service = service,
-                            sheetManager = sheetManager,
+                            sheetViewModel = sheetViewModel,
                             settings = settings,
                             onNavigateSettings = { navController.navigate(SettingsRoute) },
                         )
@@ -94,8 +94,8 @@ fun App(component: AppComponent) {
                     }
                 }
 
-                // Global sheet host — renders active sheet from SheetManager
-                SheetHost(sheetManager)
+                // Global sheet host — renders active sheet from SheetViewModel
+                SheetHost(sheetViewModel)
             }
         }
     }

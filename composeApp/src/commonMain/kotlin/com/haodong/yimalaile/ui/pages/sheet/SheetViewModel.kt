@@ -1,5 +1,7 @@
 package com.haodong.yimalaile.ui.pages.sheet
 
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.lifecycle.ViewModel
 import com.haodong.yimalaile.domain.menstrual.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -78,15 +80,15 @@ sealed class SheetRequest {
 // CompositionLocal for global access
 // ============================================================
 
-val LocalSheetManager = androidx.compose.runtime.staticCompositionLocalOf<SheetManager> {
-    error("No SheetManager provided")
+val LocalSheetViewModel = staticCompositionLocalOf<SheetViewModel> {
+    error("No SheetViewModel provided")
 }
 
 // ============================================================
-// SheetManager — owns service, exposes suspend APIs
+// SheetViewModel — owns service, exposes suspend APIs
 // ============================================================
 
-class SheetManager(private val service: MenstrualService) {
+class SheetViewModel(private val service: MenstrualService) : ViewModel() {
     fun getService() = service
 
     private val _activeSheet = MutableStateFlow<SheetRequest?>(null)
@@ -125,7 +127,6 @@ class SheetManager(private val service: MenstrualService) {
         _activeSheet.value = SheetRequest.LogDay(targetDate, deferred)
         return deferred.await().also { _activeSheet.value = null }
     }
-    
 
     suspend fun showDatePicker(
         title: String,
@@ -157,7 +158,6 @@ class SheetManager(private val service: MenstrualService) {
         val result = showLogDaySheet(targetDate) ?: return null
         val state = service.getCycleState()
         val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-        // Find the record covering today (or the most recent one)
         val record = state.currentPeriod
             ?: state.records.maxByOrNull { it.startDate }
             ?: return false
@@ -184,7 +184,6 @@ class SheetManager(private val service: MenstrualService) {
         return service.logDay(recordId, day)
     }
 
-
     /** Show record detail. Returns the action the user chose, or null if dismissed. */
     suspend fun showRecordDetail(record: MenstrualRecord, defaultCycleLength: Int): DetailAction? {
         val state = service.getCycleState()
@@ -206,7 +205,7 @@ class SheetManager(private val service: MenstrualService) {
                 val prevRecord = if (recordIndex > 0) allRecords[recordIndex - 1] else null
                 val minStart = prevRecord?.endDate?.plus(1, DateTimeUnit.DAY)
                 val maxStart = record.endDate ?: Clock.System.todayIn(TimeZone.currentSystemDefault())
-                
+
                 val newStart = showDatePicker(
                     title = "修改开始日期",
                     minDate = minStart,

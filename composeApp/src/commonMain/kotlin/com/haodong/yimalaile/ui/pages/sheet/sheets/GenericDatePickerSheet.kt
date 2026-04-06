@@ -19,6 +19,7 @@ import com.haodong.yimalaile.ui.components.SmallSpacer
 import io.github.adrcotfas.datetime.names.TextStyle
 import io.github.adrcotfas.datetime.names.getDisplayName
 import kotlinx.datetime.*
+import kotlinx.datetime.number
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
 import kotlin.time.Clock
@@ -67,7 +68,7 @@ fun GenericDatePickerSheet(
             Text(title, style = MaterialTheme.typography.titleLarge)
             SmallSpacer(4)
             Text(
-                hint ?: (selected?.let { "${it.monthNumber}/${it.dayOfMonth}" } ?: ""),
+                hint ?: (selected?.let { "${it.month.number}/${it.day}" } ?: ""),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -159,5 +160,5 @@ private fun DatePickerListItem(
 
 private fun formatDateListItem(date: LocalDate): String {
     val weekday = date.dayOfWeek.getDisplayName(TextStyle.SHORT)
-    return "${date.monthNumber}/${date.dayOfMonth} $weekday"
+    return "${date.month.number}/${date.day} $weekday"
 }

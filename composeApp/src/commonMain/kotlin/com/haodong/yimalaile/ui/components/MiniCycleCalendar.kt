@@ -86,7 +86,7 @@ fun MiniCycleCalendar(
             items(days) { date ->
                 val type = dateMap[date] ?: DayType.NONE
                 val isToday = date == today
-                val isNewMonth = date.dayOfMonth == 1
+                val isNewMonth = date.day == 1
 
                 val bgColor = when {
                     isToday && type != DayType.NONE -> TODAY_GREEN
@@ -130,7 +130,7 @@ fun MiniCycleCalendar(
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
-                            "${date.dayOfMonth}",
+                            "${date.day}",
                             fontSize = 11.sp,
                             fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
                             color = textColor,

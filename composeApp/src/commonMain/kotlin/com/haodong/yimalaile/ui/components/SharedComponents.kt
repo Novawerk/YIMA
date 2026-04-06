@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.number
 import kotlinx.datetime.until
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
@@ -161,7 +162,7 @@ fun PeriodDurationChart(
                 val days = record.startDate.until(record.endDate!!, DateTimeUnit.DAY).toInt() + 1
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "${record.startDate.monthNumber}/${record.startDate.dayOfMonth}",
+                        "${record.startDate.month.number}/${record.startDate.day}",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         modifier = Modifier.width(40.dp),

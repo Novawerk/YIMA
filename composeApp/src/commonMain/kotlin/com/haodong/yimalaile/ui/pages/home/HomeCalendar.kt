@@ -25,7 +25,7 @@ import com.haodong.yimalaile.domain.menstrual.CyclePhaseInfo
 import com.haodong.yimalaile.domain.menstrual.CycleState
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.ui.components.*
-import com.haodong.yimalaile.ui.pages.sheet.LocalSheetManager
+import com.haodong.yimalaile.ui.pages.sheet.LocalSheetViewModel
 import com.haodong.yimalaile.ui.pages.sheet.sheets.PhaseExplanationSheet
 import io.github.adrcotfas.datetime.names.TextStyle
 import io.github.adrcotfas.datetime.names.getDisplayName
@@ -172,7 +172,7 @@ private fun formatDateWithWeekday(date: LocalDate): String {
     val formatted = date.format(LocalDate.Format {
         monthNumber()
         chars("/")
-        dayOfMonth()
+        day()
     })
     val weekday = date.dayOfWeek.getDisplayName(TextStyle.FULL)
     return "$formatted $weekday"
@@ -191,7 +191,7 @@ private fun MonthBlock(
     records: List<MenstrualRecord> = emptyList(),
     defaultCycleLength: Int = 28,
 ) {
-    val sheetManager = LocalSheetManager.current
+    val sheetViewModel = LocalSheetViewModel.current
     val scope = rememberCoroutineScope()
     val firstDay = LocalDate(yearMonth.year, yearMonth.month, 1)
     val startOffset = firstDay.dayOfWeek.ordinal
@@ -269,7 +269,7 @@ private fun MonthBlock(
                                             date in r.startDate..rEnd
                                         }
                                         if (record != null) {
-                                            scope.launch { sheetManager.showAndHandleRecordDetail(record, defaultCycleLength) }
+                                            scope.launch { sheetViewModel.showAndHandleRecordDetail(record, defaultCycleLength) }
                                         }
                                     } else Modifier
                                 ),

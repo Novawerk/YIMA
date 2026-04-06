@@ -11,6 +11,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.PredictedCycle
+import kotlinx.datetime.number
 import com.haodong.yimalaile.ui.components.DecorShape
 import com.haodong.yimalaile.ui.components.SmallSpacer
 import com.haodong.yimalaile.ui.theme.expressiveShapes
@@ -93,7 +94,7 @@ fun PredictionDetailSheet(
                         )
                         SmallSpacer(4)
                         Text(
-                            "${prediction.predictedStart.monthNumber}/${prediction.predictedStart.dayOfMonth}",
+                            "${prediction.predictedStart.month.number}/${prediction.predictedStart.day}",
                             style = MaterialTheme.typography.titleMedium,
                         )
                     }
@@ -107,7 +108,7 @@ fun PredictionDetailSheet(
                             )
                             SmallSpacer(4)
                             Text(
-                                "${prediction.predictedEnd.monthNumber}/${prediction.predictedEnd.dayOfMonth}",
+                                "${prediction.predictedEnd.month.number}/${prediction.predictedEnd.day}",
                                 style = MaterialTheme.typography.titleMedium,
                             )
                         }

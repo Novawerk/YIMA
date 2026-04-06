@@ -26,6 +26,7 @@ import com.haodong.yimalaile.ui.components.DecorShape
 import com.haodong.yimalaile.ui.components.SmallSpacer
 import com.haodong.yimalaile.ui.theme.expressiveShapes
 import kotlinx.datetime.*
+import kotlinx.datetime.number
 import kotlin.time.Clock
 
 @Composable
@@ -92,9 +93,9 @@ fun PeriodDetailCalendar(
         val startMonth = startDate.month
         val endMonth = cycleEndDate.month
         val monthLabel = if (startMonth == endMonth) {
-            "${startDate.year}年 ${startDate.monthNumber}月"
+            "${startDate.year}年 ${startDate.month.number}月"
         } else {
-            "${startDate.year}年 ${startDate.monthNumber}月 - ${cycleEndDate.year}年 ${cycleEndDate.monthNumber}月"
+            "${startDate.year}年 ${startDate.month.number}月 - ${cycleEndDate.year}年 ${cycleEndDate.month.number}月"
         }
 
         Text(
@@ -115,8 +116,8 @@ fun PeriodDetailCalendar(
                     weekDates.forEach { date ->
                         DayCell(
                             date = date,
-                            dayNum = date.dayOfMonth,
-                            showMonthLabel = date.dayOfMonth == 1,
+                            dayNum = date.day,
+                            showMonthLabel = date.day == 1,
                             isToday = date == today,
                             isHighlighted = date in cycleDates,
                             isPeriod = date in periodDates,
@@ -178,7 +179,7 @@ private fun DayCell(
                     modifier = Modifier.padding(end = 4.dp)
                 ) {
                     Text(
-                        "${date.monthNumber}月",
+                        "${date.month.number}月",
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
                         color = onSurface,
@@ -244,40 +245,3 @@ private fun DayCell(
     }
 }
 
-private data class YearMonth(val year: Int, val month: Month)
-
-private fun isLeapYear(year: Int): Boolean {
-    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)
-}
-
-private fun daysInMonth(year: Int, month: Month): Int = when (month) {
-    Month.JANUARY -> 31
-    Month.FEBRUARY -> if (isLeapYear(year)) 29 else 28
-    Month.MARCH -> 31
-    Month.APRIL -> 30
-    Month.MAY -> 31
-    Month.JUNE -> 30
-    Month.JULY -> 31
-    Month.AUGUST -> 31
-    Month.SEPTEMBER -> 30
-    Month.OCTOBER -> 31
-    Month.NOVEMBER -> 30
-    Month.DECEMBER -> 31
-    else -> 30
-}
-
-private fun monthName(month: Month): String = when (month) {
-    Month.JANUARY -> "Jan"
-    Month.FEBRUARY -> "Feb"
-    Month.MARCH -> "Mar"
-    Month.APRIL -> "Apr"
-    Month.MAY -> "May"
-    Month.JUNE -> "Jun"
-    Month.JULY -> "Jul"
-    Month.AUGUST -> "Aug"
-    Month.SEPTEMBER -> "Sep"
-    Month.OCTOBER -> "Oct"
-    Month.NOVEMBER -> "Nov"
-    Month.DECEMBER -> "Dec"
-    else -> ""
-}

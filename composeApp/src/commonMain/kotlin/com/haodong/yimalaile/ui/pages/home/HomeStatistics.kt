@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.CycleState
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.ui.components.SmallSpacer
-import com.haodong.yimalaile.ui.pages.sheet.SheetManager
+import com.haodong.yimalaile.ui.pages.sheet.SheetViewModel
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.until
@@ -45,7 +45,7 @@ import kotlin.math.roundToInt
 @Composable
 internal fun HomeStatistics(
     cycleState: CycleState,
-    sheetManager: SheetManager,
+    sheetViewModel: SheetViewModel,
     onRefresh: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -129,7 +129,7 @@ internal fun HomeStatistics(
                     defaultCycleLength = defaultCycleLength,
                     onClick = {
                         scope.launch {
-                            sheetManager.showAndHandleRecordDetail(record, defaultCycleLength)
+                            sheetViewModel.showAndHandleRecordDetail(record, defaultCycleLength)
                             onRefresh()
                         }
                     },

@@ -20,7 +20,7 @@ import com.haodong.yimalaile.ui.components.DecorShape
 import com.haodong.yimalaile.ui.components.GrowSpacer
 import com.haodong.yimalaile.ui.components.SmallSpacer
 import com.haodong.yimalaile.ui.components.SuccessOverlay
-import com.haodong.yimalaile.ui.pages.sheet.SheetManager
+import com.haodong.yimalaile.ui.pages.sheet.SheetViewModel
 import com.haodong.yimalaile.ui.theme.expressiveShapes
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -31,7 +31,7 @@ import yimalaile.composeapp.generated.resources.record_save_success
 @Composable
 fun HomeScreen(
     service: MenstrualService,
-    sheetManager: SheetManager,
+    sheetViewModel: SheetViewModel,
     settings: com.haodong.yimalaile.domain.settings.SettingsRepository,
     onNavigateSettings: () -> Unit,
 ) {
@@ -45,7 +45,7 @@ fun HomeScreen(
     var successMessage by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
-        sheetManager.dataChanged.collect { viewModel.refresh() }
+        sheetViewModel.dataChanged.collect { viewModel.refresh() }
     }
 
     Box(
@@ -63,7 +63,7 @@ fun HomeScreen(
                         phaseInfo = phaseInfo,
                         service = service,
                         onRefresh = { viewModel.refresh() },
-                        sheetManager = sheetManager,
+                        sheetViewModel = sheetViewModel,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -78,7 +78,7 @@ fun HomeScreen(
                         onToggleMode = { mode -> viewModel.updateHomeMode(mode) },
                         onPeriodArrived = {
                             scope.launch {
-                                val result = sheetManager.recordPeriodStart() ?: return@launch
+                                val result = sheetViewModel.recordPeriodStart() ?: return@launch
                                 if (result is AddRecordResult.Success) {
                                     viewModel.refresh(); successMessage = successMsg
                                 }
@@ -86,7 +86,7 @@ fun HomeScreen(
                         },
                         onPeriodGone = {
                             scope.launch {
-                                val ok = sheetManager.recordPeriodEnd() ?: return@launch
+                                val ok = sheetViewModel.recordPeriodEnd() ?: return@launch
                                 if (ok) {
                                     viewModel.refresh(); successMessage = successMsg
                                 }
@@ -138,7 +138,7 @@ private fun HomeContent(
     phaseInfo: CyclePhaseInfo?,
     service: MenstrualService,
     onRefresh: () -> Unit,
-    sheetManager: SheetManager,
+    sheetViewModel: SheetViewModel,
     modifier: Modifier = Modifier,
 ) {
     AnimatedContent(
@@ -179,7 +179,7 @@ private fun HomeContent(
             HomeMode.STATS -> {
                 HomeStatistics(
                     cycleState = cycleState,
-                    sheetManager = sheetManager,
+                    sheetViewModel = sheetViewModel,
                     onRefresh = onRefresh,
                 )
             }

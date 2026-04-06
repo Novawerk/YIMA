@@ -22,6 +22,7 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
+import kotlinx.datetime.number
 import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import kotlinx.datetime.until
@@ -54,9 +55,9 @@ fun OnboardingScreen(
     // Hint text for calendar selection
     val selectionHint = when {
         periodStart != null && periodEnd != null ->
-            "${periodStart!!.monthNumber}/${periodStart!!.dayOfMonth} — ${periodEnd!!.monthNumber}/${periodEnd!!.dayOfMonth}"
+            "${periodStart!!.month.number}/${periodStart!!.day} — ${periodEnd!!.month.number}/${periodEnd!!.day}"
         periodStart != null ->
-            "${periodStart!!.monthNumber}/${periodStart!!.dayOfMonth} — ${stringResource(Res.string.onboarding_select_end)}"
+            "${periodStart!!.month.number}/${periodStart!!.day} — ${stringResource(Res.string.onboarding_select_end)}"
         else -> stringResource(Res.string.start_period_hint)
     }
 

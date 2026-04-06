@@ -20,6 +20,7 @@ import com.haodong.yimalaile.ui.components.SmallSpacer
 import io.github.adrcotfas.datetime.names.TextStyle
 import io.github.adrcotfas.datetime.names.getDisplayName
 import kotlinx.datetime.*
+import kotlinx.datetime.number
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
 import kotlin.time.Clock
@@ -95,9 +96,9 @@ fun StartPeriodSheet(
 
     val hint = when {
         selectingEnd && selectedStart != null && selectedEnd != null ->
-            "${selectedStart!!.monthNumber}/${selectedStart!!.dayOfMonth} — ${selectedEnd!!.monthNumber}/${selectedEnd!!.dayOfMonth}"
+            "${selectedStart!!.month.number}/${selectedStart!!.day} — ${selectedEnd!!.month.number}/${selectedEnd!!.day}"
         selectedStart != null ->
-            "${selectedStart!!.monthNumber}/${selectedStart!!.dayOfMonth}"
+            "${selectedStart!!.month.number}/${selectedStart!!.day}"
         else -> stringResource(Res.string.start_period_hint)
     }
 
@@ -233,5 +234,5 @@ private fun DateListItem(
 
 private fun formatDateDisplay(date: LocalDate): String {
     val weekday = date.dayOfWeek.getDisplayName(TextStyle.SHORT)
-    return "${date.monthNumber}/${date.dayOfMonth} $weekday"
+    return "${date.month.number}/${date.day} $weekday"
 }

@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.number
 import kotlinx.datetime.plus
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
@@ -78,8 +79,8 @@ fun DayPickerSheet(
                 days.forEach { date ->
                     val hasRecord = date in existingDates
                     DayChip(
-                        day = date.dayOfMonth,
-                        month = date.monthNumber,
+                        day = date.day,
+                        month = date.month.number,
                         hasRecord = hasRecord,
                         onClick = { onDaySelected(date) },
                     )

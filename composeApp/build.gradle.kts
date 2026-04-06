@@ -13,6 +13,7 @@ kotlin {
     sourceSets.all {
         languageSettings.optIn("kotlin.time.ExperimentalTime")
         languageSettings.optIn("androidx.compose.material3.ExperimentalMaterial3ExpressiveApi")
+        languageSettings.enableLanguageFeature("ExpectActualClasses")
     }
 
     androidTarget {

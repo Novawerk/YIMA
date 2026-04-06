@@ -20,6 +20,7 @@ import com.haodong.yimalaile.ui.components.SmallSpacer
 import io.github.adrcotfas.datetime.names.TextStyle
 import io.github.adrcotfas.datetime.names.getDisplayName
 import kotlinx.datetime.*
+import kotlinx.datetime.number
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Clock
 import yimalaile.composeapp.generated.resources.*
@@ -80,7 +81,7 @@ fun EndPeriodSheet(
             Text(stringResource(Res.string.end_period_question), style = MaterialTheme.typography.titleLarge)
             SmallSpacer(4)
             Text(
-                if (selected != null) "${selected!!.monthNumber}/${selected!!.dayOfMonth}"
+                if (selected != null) "${selected!!.month.number}/${selected!!.day}"
                 else stringResource(Res.string.start_period_hint),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -173,5 +174,5 @@ private fun EndDateListItem(
 
 private fun formatEndDateDisplay(date: LocalDate): String {
     val weekday = date.dayOfWeek.getDisplayName(TextStyle.SHORT)
-    return "${date.monthNumber}/${date.dayOfMonth} $weekday"
+    return "${date.month.number}/${date.day} $weekday"
 }

@@ -16,6 +16,7 @@ import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.ui.components.SmallSpacer
 import com.haodong.yimalaile.ui.pages.record.PeriodDetailCalendar
 import kotlinx.datetime.*
+import kotlinx.datetime.number
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
 import kotlin.time.Clock
@@ -100,7 +101,7 @@ fun RecordDetailSheet(
                 // Start Date
                 DetailListItem(
                     label = stringResource(Res.string.record_start_date),
-                    value = "${record.startDate.monthNumber}/${record.startDate.dayOfMonth}",
+                    value = "${record.startDate.month.number}/${record.startDate.day}",
                     onClick = onEditStart,
                     isEditable = true
                 )
@@ -108,7 +109,7 @@ fun RecordDetailSheet(
                 // End Date
                 DetailListItem(
                     label = stringResource(Res.string.record_end_date),
-                    value = if (record.endDate != null) "${record.endDate.monthNumber}/${record.endDate.dayOfMonth}" else stringResource(Res.string.history_in_progress),
+                    value = if (record.endDate != null) "${record.endDate.month.number}/${record.endDate.day}" else stringResource(Res.string.history_in_progress),
                     onClick = onEditEnd,
                     isEditable = true
                 )

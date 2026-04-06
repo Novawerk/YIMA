@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.ui.components.SmallSpacer
 import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.number
 import kotlinx.datetime.until
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
@@ -46,7 +47,7 @@ internal fun RecordCard(
     } else {
         "-"
     }
-    val dateStr = "${record.startDate.monthNumber}/${record.startDate.dayOfMonth}"
+    val dateStr = "${record.startDate.month.number}/${record.startDate.day}"
 
     Surface(
         onClick = onClick,
@@ -65,7 +66,7 @@ internal fun RecordCard(
                 // Date range
                 Column {
                     Text(
-                        if (record.startDate.year == 2026) "${record.startDate.monthNumber}/${record.startDate.dayOfMonth}" else dateStr,
+                        if (record.startDate.year == 2026) "${record.startDate.month.number}/${record.startDate.day}" else dateStr,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,

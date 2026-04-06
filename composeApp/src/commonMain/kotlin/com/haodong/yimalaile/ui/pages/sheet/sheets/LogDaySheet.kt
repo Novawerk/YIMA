@@ -36,6 +36,7 @@ import com.haodong.yimalaile.domain.menstrual.Intensity
 import com.haodong.yimalaile.domain.menstrual.Mood
 import com.haodong.yimalaile.ui.components.PrimaryCta
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.number
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
 
@@ -59,7 +60,7 @@ fun LogDaySheet(
     ) {
         Column(Modifier.padding(24.dp)) {
             val title = if (targetDate != null) {
-                stringResource(Res.string.record_date_title, targetDate.monthNumber, targetDate.dayOfMonth)
+                stringResource(Res.string.record_date_title, targetDate.month.number, targetDate.day)
             } else {
                 stringResource(Res.string.record_dialog_title)
             }
