@@ -122,12 +122,6 @@ data class CyclePhaseInfo(
             )
         }
 
-        private fun averagePeriodLength(records: List<MenstrualRecord>): Int? {
-            val lengths = records
-                .filter { !it.isDeleted && it.endDate != null }
-                .map { it.startDate.until(it.endDate!!, DateTimeUnit.DAY).toInt() + 1 }
-            return if (lengths.isEmpty()) null else lengths.sum() / lengths.size
-        }
     }
 
     /** Start day (1-based) of each phase within this cycle. */

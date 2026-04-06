@@ -6,9 +6,6 @@
     <string name="disclaimer_accept">我已理解</string>
     <string name="settings_title">设置</string>
     <string name="settings_language">语言</string>
-    <string name="settings_language_follow_system">跟随系统</string>
-    <string name="settings_language_en">English</string>
-    <string name="settings_language_zh">中文</string>
     <!-- Navigation -->
     <!-- Home Screen -->
     <string name="unit_days">天</string>
@@ -28,7 +25,6 @@
     <string name="record_save_success">记录成功</string>
     <!-- Calendar / History Screen -->
     <string name="history_in_progress">进行中</string>
-    <string name="history_backfill">补录</string>
     <string name="history_view_all">查看全部 %1$d 条记录 →</string>
     <!-- Record Today Dialog -->
     <string name="record_dialog_title">记录今天</string>
@@ -70,9 +66,6 @@
     <string name="day_picker_hint">选择要补充记录的日期</string>
     <string name="day_picker_recorded">已记录</string>
     <!-- Record Detail Sheet -->
-    <string name="detail_edit_start">修改开始</string>
-    <string name="detail_edit_end">修改结束</string>
-    <string name="detail_daily_records">每日记录</string>
     <string name="detail_delete">删除此记录</string>
     <string name="detail_delete_title">确认删除</string>
     <string name="detail_delete_body">删除后无法恢复，确定要删除这条经期记录吗？</string>
@@ -83,17 +76,9 @@
     <string name="onboarding_when_end">什么时候结束的？</string>
     <string name="onboarding_select_period_range">上次月经是什么时候？</string>
     <string name="onboarding_select_end">选择结束日期</string>
-    <string name="onboarding_still_in_period">还没结束</string>
-    <string name="onboarding_confirm_cycles">我们推算了你过去的周期</string>
-    <string name="onboarding_confirm_hint">如有偏差，点击"调整"修改</string>
-    <string name="onboarding_looks_right">没问题</string>
     <string name="onboarding_all_set">准备就绪！</string>
-    <string name="onboarding_all_set_hint">已记录3个周期，预测功能已开启。</string>
     <string name="onboarding_get_started">开始使用</string>
     <string name="onboarding_next">下一步</string>
-    <string name="onboarding_period_current">你输入的</string>
-    <string name="onboarding_period_prev">上个月经周期</string>
-    <string name="onboarding_period_prev2">上上个月经周期</string>
     <string name="onboarding_adjust">调整</string>
     <string name="onboarding_confirm">确认</string>
     <string name="onboarding_cycle_settings_title">关于你的周期</string>
@@ -108,9 +93,6 @@
     <string name="stats_avg_section_title">最近%1$d个周期的平均值</string>
     <string name="stats_period_days">经期长度</string>
     <string name="stats_cycle_days">周期长度</string>
-    <string name="stats_col_period">经期长度</string>
-    <string name="stats_col_cycle">周期长度</string>
-    <string name="stats_current_cycle">当前周期</string>
     <string name="stats_chart_title">周期（天）</string>
     <string name="stats_legend_actual">实际的天数</string>
     <string name="stats_legend_predicted">预测的天数</string>
@@ -149,12 +131,6 @@
     <string name="detail_current_phase">当前阶段</string>
     <string name="detail_tips">小提示</string>
     <string name="detail_ovulation_day">排卵日</string>
-    <string name="detail_no_period">暂无周期</string>
-    <string name="detail_in_period">经期中</string>
-    <string name="detail_no_note">暂无日记</string>
-    <string name="detail_add_note">添加日记</string>
-    <string name="detail_mood_label">心情</string>
-    <string name="detail_notes_label">记录</string>
     <string name="phase_menstrual">经期</string>
     <string name="phase_follicular">卵泡期</string>
     <string name="phase_ovulation">排卵期</string>

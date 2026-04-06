@@ -6,9 +6,6 @@
     <string name="disclaimer_accept">I understand</string>
     <string name="settings_title">Settings</string>
     <string name="settings_language">Language</string>
-    <string name="settings_language_follow_system">Follow system</string>
-    <string name="settings_language_en">English</string>
-    <string name="settings_language_zh">中文</string>
     <!-- Navigation -->
     <!-- Home Screen -->
     <string name="unit_days">days</string>
@@ -28,7 +25,6 @@
     <string name="record_save_success">Recorded successfully</string>
     <!-- Calendar / History Screen -->
     <string name="history_in_progress">In progress</string>
-    <string name="history_backfill">Backfill</string>
     <string name="history_view_all">View all %1$d records →</string>
     <!-- Record Today Dialog -->
     <string name="record_dialog_title">Log Today</string>
@@ -70,9 +66,6 @@
     <string name="day_picker_hint">Select a date to add a record</string>
     <string name="day_picker_recorded">Recorded</string>
     <!-- Record Detail Sheet -->
-    <string name="detail_edit_start">Edit start</string>
-    <string name="detail_edit_end">Edit end</string>
-    <string name="detail_daily_records">Daily Records</string>
     <string name="detail_delete">Delete this record</string>
     <string name="detail_delete_title">Confirm Delete</string>
     <string name="detail_delete_body">This cannot be undone. Are you sure you want to delete this period record?</string>
@@ -83,17 +76,9 @@
     <string name="onboarding_when_end">When did it end?</string>
     <string name="onboarding_select_period_range">When was your last period?</string>
     <string name="onboarding_select_end">select end date</string>
-    <string name="onboarding_still_in_period">Still in period</string>
-    <string name="onboarding_confirm_cycles">We estimated your past cycles</string>
-    <string name="onboarding_confirm_hint">Tap "Adjust" to correct if needed</string>
-    <string name="onboarding_looks_right">Looks right</string>
     <string name="onboarding_all_set">All set!</string>
-    <string name="onboarding_all_set_hint">3 cycles recorded. Predictions are now enabled.</string>
     <string name="onboarding_get_started">Get started</string>
     <string name="onboarding_next">Next</string>
-    <string name="onboarding_period_current">Your input</string>
-    <string name="onboarding_period_prev">Last cycle</string>
-    <string name="onboarding_period_prev2">Cycle before last</string>
     <string name="onboarding_adjust">Adjust</string>
     <string name="onboarding_confirm">Confirm</string>
     <string name="onboarding_cycle_settings_title">About your cycle</string>
@@ -108,9 +93,6 @@
     <string name="stats_avg_section_title">Average of last %1$d cycles</string>
     <string name="stats_period_days">Period days</string>
     <string name="stats_cycle_days">Cycle days</string>
-    <string name="stats_col_period">Period length</string>
-    <string name="stats_col_cycle">Cycle length</string>
-    <string name="stats_current_cycle">Current</string>
     <string name="stats_chart_title">Cycle (days)</string>
     <string name="stats_legend_actual">Actual days</string>
     <string name="stats_legend_predicted">Predicted days</string>
@@ -150,12 +132,6 @@
     <string name="detail_current_phase">Current phase</string>
     <string name="detail_tips">Tips</string>
     <string name="detail_ovulation_day">Ovulation day</string>
-    <string name="detail_no_period">No period</string>
-    <string name="detail_in_period">In period</string>
-    <string name="detail_no_note">No diary</string>
-    <string name="detail_add_note">Add diary</string>
-    <string name="detail_mood_label">Mood</string>
-    <string name="detail_notes_label">Notes</string>
     <string name="phase_menstrual">Menstrual</string>
     <string name="phase_follicular">Follicular</string>
     <string name="phase_ovulation">Ovulation</string>

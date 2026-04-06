@@ -277,14 +277,6 @@ class MenstrualService(private val repository: RecordsRepository) {
         )
     }
 
-    /**
-     * Determine the current cycle phase based on historical data.
-     * Uses user-configured [cycleLength] from settings.
-     * Returns null if not enough data (< 1 completed record).
-     */
-    fun getCurrentPhase(state: CycleState, today: LocalDate, cycleLength: Int = 28): CyclePhaseInfo? {
-        return CyclePhaseInfo.getPhaseInfo(today, state, cycleLength)
-    }
 
     // ---------- Private ----------
 
@@ -316,16 +308,6 @@ class MenstrualService(private val repository: RecordsRepository) {
         }
     }
 
-    private fun averagePeriodLength(records: List<MenstrualRecord>): Int? {
-        // 过滤掉异常记录（周期过短的记录可能伴随异常的经期长度）
-        // 这里主要通过 getAllCycleLengths 来间接判断可能更复杂，
-        // 简单起见，先过滤掉经期长度异常的情况（比如 > 10天 或 < 2天，如果需要的话）
-        // 但目前用户主要关注的是周期长度。
-        val lengths = records
-            .filter { !it.isDeleted && it.endDate != null }
-            .map { it.startDate.until(it.endDate!!, DateTimeUnit.DAY).toInt() + 1 }
-        return if (lengths.isEmpty()) null else lengths.sum() / lengths.size
-    }
 
     private fun newId() = "record_${Clock.System.now().toEpochMilliseconds()}_${(0..9999).random()}"
 }

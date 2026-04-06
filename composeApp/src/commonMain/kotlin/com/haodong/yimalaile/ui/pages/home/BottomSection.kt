@@ -22,7 +22,6 @@ import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.Res
 import yimalaile.composeapp.generated.resources.btn_record_period
 import yimalaile.composeapp.generated.resources.home_end_period
-import yimalaile.composeapp.generated.resources.history_backfill
 
 @Composable
 fun BottomSection(
