@@ -1,7 +1,6 @@
 package com.haodong.yimalaile.ui.pages.home
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -12,12 +11,9 @@ import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
@@ -26,8 +22,9 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.number
 import kotlinx.datetime.until
 import org.jetbrains.compose.resources.stringResource
-import yimalaile.composeapp.generated.resources.*
-import kotlin.math.roundToInt
+import yimalaile.composeapp.generated.resources.Res
+import yimalaile.composeapp.generated.resources.stats_chart_title
+
 @Composable
 fun BarChartSection(
     records: List<MenstrualRecord>,

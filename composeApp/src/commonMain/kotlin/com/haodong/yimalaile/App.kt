@@ -1,16 +1,15 @@
 package com.haodong.yimalaile
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.key
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.haodong.yimalaile.di.AppComponent
 import com.haodong.yimalaile.ui.locale.LocalAppLocale
-import com.haodong.yimalaile.ui.navigation.*
+import com.haodong.yimalaile.ui.navigation.DisclaimerRoute
+import com.haodong.yimalaile.ui.navigation.HomeRoute
+import com.haodong.yimalaile.ui.navigation.OnboardingRoute
+import com.haodong.yimalaile.ui.navigation.SettingsRoute
 import com.haodong.yimalaile.ui.pages.disclaimer.DisclaimerScreen
 import com.haodong.yimalaile.ui.pages.home.HomeScreen
 import com.haodong.yimalaile.ui.pages.onboarding.OnboardingScreen

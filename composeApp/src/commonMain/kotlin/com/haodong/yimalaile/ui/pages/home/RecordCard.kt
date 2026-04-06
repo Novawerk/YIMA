@@ -1,7 +1,6 @@
 package com.haodong.yimalaile.ui.pages.home
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -10,14 +9,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.ui.components.SmallSpacer
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.number
 import kotlinx.datetime.until
 import org.jetbrains.compose.resources.stringResource
-import yimalaile.composeapp.generated.resources.*
+import yimalaile.composeapp.generated.resources.Res
+import yimalaile.composeapp.generated.resources.stats_cycle_days
+import yimalaile.composeapp.generated.resources.stats_period_days
 
 /**
  * A single period record card showing date, period length, and cycle length.

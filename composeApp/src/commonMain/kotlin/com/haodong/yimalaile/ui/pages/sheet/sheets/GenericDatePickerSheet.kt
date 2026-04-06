@@ -19,7 +19,6 @@ import com.haodong.yimalaile.ui.components.SmallSpacer
 import io.github.adrcotfas.datetime.names.TextStyle
 import io.github.adrcotfas.datetime.names.getDisplayName
 import kotlinx.datetime.*
-import kotlinx.datetime.number
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*

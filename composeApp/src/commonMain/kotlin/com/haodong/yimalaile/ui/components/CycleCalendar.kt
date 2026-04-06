@@ -21,9 +21,12 @@ import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.CyclePhase
 import com.haodong.yimalaile.domain.menstrual.CyclePhaseInfo
 import com.haodong.yimalaile.domain.menstrual.CycleState
-import org.jetbrains.compose.resources.stringResource
-import yimalaile.composeapp.generated.resources.*
 import kotlinx.datetime.*
+import org.jetbrains.compose.resources.stringResource
+import yimalaile.composeapp.generated.resources.Res
+import yimalaile.composeapp.generated.resources.legend_period
+import yimalaile.composeapp.generated.resources.legend_predicted
+import yimalaile.composeapp.generated.resources.legend_today
 import kotlin.time.Clock
 
 // ============================================================

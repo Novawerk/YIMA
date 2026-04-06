@@ -1,6 +1,5 @@
 package com.haodong.yimalaile.ui.theme
 
-import com.haodong.yimalaile.domain.settings.AppDarkMode
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -12,6 +11,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.haodong.yimalaile.domain.settings.AppDarkMode
 import org.jetbrains.compose.resources.Font
 import yimalaile.composeapp.generated.resources.Res
 import yimalaile.composeapp.generated.resources.comfortaa_regular

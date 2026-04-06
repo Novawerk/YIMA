@@ -2,13 +2,13 @@ package com.haodong.yimalaile.ui.pages.sheet.sheets
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
@@ -16,7 +16,6 @@ import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.ui.components.SmallSpacer
 import com.haodong.yimalaile.ui.pages.record.PeriodDetailCalendar
 import kotlinx.datetime.*
-import kotlinx.datetime.number
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
 import kotlin.time.Clock

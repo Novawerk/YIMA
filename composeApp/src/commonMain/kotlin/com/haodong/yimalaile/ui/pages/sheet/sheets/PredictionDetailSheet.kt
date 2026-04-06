@@ -11,10 +11,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.PredictedCycle
-import kotlinx.datetime.number
 import com.haodong.yimalaile.ui.components.DecorShape
 import com.haodong.yimalaile.ui.components.SmallSpacer
 import com.haodong.yimalaile.ui.theme.expressiveShapes
+import kotlinx.datetime.number
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
 

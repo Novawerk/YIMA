@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.CyclePhaseInfo
@@ -26,7 +25,8 @@ import com.haodong.yimalaile.domain.menstrual.CycleState
 import kotlinx.coroutines.launch
 import kotlinx.datetime.*
 import org.jetbrains.compose.resources.stringResource
-import yimalaile.composeapp.generated.resources.*
+import yimalaile.composeapp.generated.resources.Res
+import yimalaile.composeapp.generated.resources.legend_today
 import kotlin.time.Clock
 
 private val TODAY_GREEN = Color(0xFF4CAF50)

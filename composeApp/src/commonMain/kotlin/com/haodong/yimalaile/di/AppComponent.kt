@@ -5,9 +5,9 @@ import androidx.datastore.preferences.core.Preferences
 import com.haodong.yimalaile.domain.menstrual.DailyNoteRepository
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.domain.menstrual.RecordsRepository
+import com.haodong.yimalaile.domain.settings.SettingsRepository
 import com.haodong.yimalaile.infrastructure.persistence.DataStoreDailyNoteRepository
 import com.haodong.yimalaile.infrastructure.persistence.DataStoreRecordsRepository
-import com.haodong.yimalaile.domain.settings.SettingsRepository
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.KmpComponentCreate
 import me.tatarka.inject.annotations.Provides
