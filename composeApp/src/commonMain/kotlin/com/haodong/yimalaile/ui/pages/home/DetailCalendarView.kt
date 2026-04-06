@@ -391,65 +391,8 @@ internal fun DetailCalendarView(
         }
     }
 
-    // Legend dialog
     if (showLegendDialog) {
-        val ovColor = Color(0xFF7C4DFF)
-        val periodColor = MaterialTheme.colorScheme.error
-        AlertDialog(
-            onDismissRequest = { showLegendDialog = false },
-            confirmButton = {
-                TextButton(onClick = { showLegendDialog = false }) {
-                    Text(stringResource(Res.string.dialog_confirm))
-                }
-            },
-            title = { Text(stringResource(Res.string.home_cycle_calendar)) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    // Period
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.width(24.dp).height(4.dp).clip(RoundedCornerShape(50)).background(periodColor))
-                        SmallSpacer(12)
-                        Text(stringResource(Res.string.legend_period), style = MaterialTheme.typography.bodyMedium)
-                    }
-                    // Predicted
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.width(24.dp).height(4.dp).clip(RoundedCornerShape(50)).background(periodColor.copy(alpha = 0.5f)))
-                        SmallSpacer(12)
-                        Text(stringResource(Res.string.legend_predicted), style = MaterialTheme.typography.bodyMedium)
-                    }
-                    // Ovulation
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.width(24.dp).height(4.dp).clip(RoundedCornerShape(50)).background(ovColor))
-                        SmallSpacer(12)
-                        Text(stringResource(Res.string.detail_ovulation), style = MaterialTheme.typography.bodyMedium)
-                    }
-                    // Ovulation peak
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.width(24.dp), contentAlignment = Alignment.Center) {
-                            DecorShape(size = 14, shape = MaterialTheme.expressiveShapes.flower, color = ovColor)
-                        }
-                        SmallSpacer(12)
-                        Text(stringResource(Res.string.detail_ovulation_day), style = MaterialTheme.typography.bodyMedium)
-                    }
-                    // Period start
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.width(24.dp), contentAlignment = Alignment.Center) {
-                            Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp), tint = periodColor)
-                        }
-                        SmallSpacer(12)
-                        Text(stringResource(Res.string.record_start_date), style = MaterialTheme.typography.bodyMedium)
-                    }
-                    // Period end
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.width(24.dp), contentAlignment = Alignment.Center) {
-                            Icon(Icons.Filled.Pause, contentDescription = null, modifier = Modifier.size(16.dp), tint = periodColor)
-                        }
-                        SmallSpacer(12)
-                        Text(stringResource(Res.string.record_end_date), style = MaterialTheme.typography.bodyMedium)
-                    }
-                }
-            },
-        )
+        CalendarLegendDialog(onDismiss = { showLegendDialog = false })
     }
 }
 

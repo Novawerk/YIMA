@@ -143,29 +143,8 @@ internal fun HomeStatistics(
         }
     }
 
-    // Legend dialog
     if (showLegendDialog) {
-        val barColor = MaterialTheme.colorScheme.primary
-        val predictedColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
-        AlertDialog(
-            onDismissRequest = { showLegendDialog = false },
-            confirmButton = {},
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(stringResource(Res.string.stats_chart_title), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.size(16.dp).clip(RoundedCornerShape(4.dp)).background(barColor))
-                        SmallSpacer(12)
-                        Text(stringResource(Res.string.stats_legend_actual), style = MaterialTheme.typography.bodyMedium)
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.size(16.dp).clip(RoundedCornerShape(4.dp)).background(predictedColor))
-                        SmallSpacer(12)
-                        Text(stringResource(Res.string.stats_legend_predicted), style = MaterialTheme.typography.bodyMedium)
-                    }
-                }
-            },
-        )
+        ChartLegendDialog(onDismiss = { showLegendDialog = false })
     }
 }
 

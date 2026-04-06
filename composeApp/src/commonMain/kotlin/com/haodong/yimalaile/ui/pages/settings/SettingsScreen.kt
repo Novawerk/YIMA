@@ -174,20 +174,9 @@ fun SettingsScreen(
     // ── Dialogs ──
 
     if (showClearConfirm) {
-        AlertDialog(
-            onDismissRequest = { showClearConfirm = false },
-            title = { Text(stringResource(Res.string.settings_clear_title)) },
-            text = { Text(stringResource(Res.string.settings_clear_body)) },
-            confirmButton = {
-                TextButton(onClick = { showClearConfirm = false; onClearData() }) {
-                    Text(stringResource(Res.string.dialog_confirm), color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showClearConfirm = false }) {
-                    Text(stringResource(Res.string.dialog_cancel))
-                }
-            },
+        ClearDataDialog(
+            onDismiss = { showClearConfirm = false },
+            onConfirm = onClearData,
         )
     }
 
