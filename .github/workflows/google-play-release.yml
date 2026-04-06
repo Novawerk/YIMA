@@ -117,6 +117,7 @@ jobs:
           packageName: com.haodong.yimalaile
           releaseFiles: composeApp/build/outputs/bundle/release/*.aab
           track: ${{ steps.track.outputs.track }}
+          status: draft
 
       - name: Upload AAB as artifact
         uses: actions/upload-artifact@v5
