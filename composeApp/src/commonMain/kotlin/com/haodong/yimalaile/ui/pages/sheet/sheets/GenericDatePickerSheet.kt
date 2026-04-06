@@ -20,6 +20,7 @@ import io.github.adrcotfas.datetime.names.TextStyle
 import io.github.adrcotfas.datetime.names.getDisplayName
 import kotlinx.datetime.*
 import kotlinx.datetime.number
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
 import kotlin.time.Clock
@@ -27,7 +28,7 @@ import kotlin.time.Clock
 /**
  * A standardized date selection sheet.
  * Supports:
- * - Title and optional hint
+ * - Localized title (StringResource) and optional hint
  * - Min/Max date constraints
  * - Default initial selection
  * - Returns a single date
@@ -35,7 +36,8 @@ import kotlin.time.Clock
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GenericDatePickerSheet(
-    title: String,
+    titleRes: StringResource,
+    hintRes: StringResource? = null,
     hint: String? = null,
     minDate: LocalDate? = null,
     maxDate: LocalDate? = null,
@@ -59,16 +61,21 @@ fun GenericDatePickerSheet(
         }
     }
 
+    val resolvedHint = hint
+        ?: hintRes?.let { stringResource(it) }
+        ?: selected?.let { "${it.month.number}/${it.day}" }
+        ?: ""
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
         Column(Modifier.padding(horizontal = 24.dp).padding(bottom = 24.dp)) {
-            Text(title, style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(titleRes), style = MaterialTheme.typography.titleLarge)
             SmallSpacer(4)
             Text(
-                hint ?: (selected?.let { "${it.month.number}/${it.day}" } ?: ""),
+                resolvedHint,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -111,9 +118,9 @@ private fun DatePickerListItem(
     val isToday = date == today
     val daysAgo = date.until(today, DateTimeUnit.DAY).toInt()
 
-    val bgColor = if (isSelected) MaterialTheme.colorScheme.primary
+    val bgColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer
     else MaterialTheme.colorScheme.surface
-    val contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary
+    val contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
     else MaterialTheme.colorScheme.onSurface
 
     Surface(
@@ -129,7 +136,7 @@ private fun DatePickerListItem(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                formatDateListItem(date),
+                formatDateDisplay(date),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = if (isToday || isSelected) FontWeight.SemiBold else FontWeight.Normal,
                 color = contentColor,
@@ -140,7 +147,7 @@ private fun DatePickerListItem(
                     isToday -> stringResource(Res.string.legend_today)
                     daysAgo == 1 -> stringResource(Res.string.date_yesterday)
                     daysAgo > 0 -> stringResource(Res.string.date_n_days_ago, daysAgo)
-                    else -> "" // Future dates?
+                    else -> ""
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = if (isSelected) contentColor.copy(alpha = 0.7f)
@@ -150,7 +157,7 @@ private fun DatePickerListItem(
                 Icon(
                     Icons.Default.Check,
                     contentDescription = null,
-                    tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp),
                 )
             }
@@ -158,7 +165,7 @@ private fun DatePickerListItem(
     }
 }
 
-private fun formatDateListItem(date: LocalDate): String {
+private fun formatDateDisplay(date: LocalDate): String {
     val weekday = date.dayOfWeek.getDisplayName(TextStyle.SHORT)
     return "${date.month.number}/${date.day} $weekday"
 }

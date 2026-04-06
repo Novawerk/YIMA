@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.*
+import org.jetbrains.compose.resources.StringResource
+import yimalaile.composeapp.generated.resources.*
 import kotlin.time.Clock
 
 // ============================================================
@@ -37,17 +39,6 @@ sealed class DetailAction {
 sealed class SheetRequest {
     abstract val deferred: CompletableDeferred<*>
 
-    data class StartPeriod(
-        val records: List<MenstrualRecord>,
-        val avgPeriodLength: Int,
-        val result: CompletableDeferred<Pair<LocalDate, LocalDate?>?>,
-    ) : SheetRequest() { override val deferred get() = result }
-
-    data class EndPeriod(
-        val records: List<MenstrualRecord>,
-        val result: CompletableDeferred<LocalDate?>,
-    ) : SheetRequest() { override val deferred get() = result }
-
     data class LogDay(
         val targetDate: LocalDate?,
         val result: CompletableDeferred<LogDayResult?>,
@@ -67,7 +58,8 @@ sealed class SheetRequest {
     ) : SheetRequest() { override val deferred get() = result }
 
     data class DatePicker(
-        val title: String,
+        val titleRes: StringResource,
+        val hintRes: StringResource? = null,
         val hint: String? = null,
         val minDate: LocalDate? = null,
         val maxDate: LocalDate? = null,
@@ -100,13 +92,26 @@ class SheetViewModel(private val service: MenstrualService) : ViewModel() {
 
     // ---- Low-level: show sheet and suspend until result ----
 
-    private suspend fun showStartPeriodSheet(): Pair<LocalDate, LocalDate?>? {
-        val state = service.getCycleState()
-        val avgPeriod = averagePeriodLength(state.records) ?: 5
-        val deferred = CompletableDeferred<Pair<LocalDate, LocalDate?>?>()
-        _activeSheet.value = SheetRequest.StartPeriod(state.records, avgPeriod, deferred)
+    private suspend fun showLogDaySheet(targetDate: LocalDate? = null): LogDayResult? {
+        val deferred = CompletableDeferred<LogDayResult?>()
+        _activeSheet.value = SheetRequest.LogDay(targetDate, deferred)
         return deferred.await().also { _activeSheet.value = null }
     }
+
+    suspend fun showDatePicker(
+        titleRes: StringResource,
+        hintRes: StringResource? = null,
+        hint: String? = null,
+        minDate: LocalDate? = null,
+        maxDate: LocalDate? = null,
+        defaultDate: LocalDate? = null,
+    ): LocalDate? {
+        val deferred = CompletableDeferred<LocalDate?>()
+        _activeSheet.value = SheetRequest.DatePicker(titleRes, hintRes, hint, minDate, maxDate, defaultDate, deferred)
+        return deferred.await().also { _activeSheet.value = null }
+    }
+
+    // ---- High-level: show sheet + execute service call ----
 
     private fun averagePeriodLength(records: List<MenstrualRecord>): Int? {
         val lengths = records
@@ -115,42 +120,75 @@ class SheetViewModel(private val service: MenstrualService) : ViewModel() {
         return if (lengths.isEmpty()) null else lengths.sum() / lengths.size
     }
 
-    private suspend fun showEndPeriodSheet(): LocalDate? {
-        val state = service.getCycleState()
-        val deferred = CompletableDeferred<LocalDate?>()
-        _activeSheet.value = SheetRequest.EndPeriod(state.records, deferred)
-        return deferred.await().also { _activeSheet.value = null }
-    }
-
-    private suspend fun showLogDaySheet(targetDate: LocalDate? = null): LogDayResult? {
-        val deferred = CompletableDeferred<LogDayResult?>()
-        _activeSheet.value = SheetRequest.LogDay(targetDate, deferred)
-        return deferred.await().also { _activeSheet.value = null }
-    }
-
-    suspend fun showDatePicker(
-        title: String,
-        hint: String? = null,
-        minDate: LocalDate? = null,
-        maxDate: LocalDate? = null,
-        defaultDate: LocalDate? = null,
-    ): LocalDate? {
-        val deferred = CompletableDeferred<LocalDate?>()
-        _activeSheet.value = SheetRequest.DatePicker(title, hint, minDate, maxDate, defaultDate, deferred)
-        return deferred.await().also { _activeSheet.value = null }
-    }
-
-    // ---- High-level: show sheet + execute service call ----
-
     /** "姨妈来了" — record period arrival */
     suspend fun recordPeriodStart(): AddRecordResult? {
-        val (start, end) = showStartPeriodSheet() ?: return null
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val state = service.getCycleState()
+        val records = state.records
+
+        // Min date: day after the last record's end date
+        val minDate = records
+            .filter { it.endDate != null }
+            .maxByOrNull { it.endDate!! }
+            ?.endDate?.plus(1, DateTimeUnit.DAY)
+
+        // Step 1: Pick start date
+        val start = showDatePicker(
+            titleRes = Res.string.start_period_question,
+            hintRes = Res.string.start_period_hint,
+            minDate = minDate,
+            maxDate = today,
+            defaultDate = today,
+        ) ?: return null
+
+        // Step 2: If start > 3 days ago, also ask for end date (backfill scenario)
+        var end: LocalDate? = null
+        if (start.until(today, DateTimeUnit.DAY).toInt() > 3) {
+            val avgPeriod = averagePeriodLength(records) ?: 5
+            val predictedEnd = start.plus(avgPeriod - 1, DateTimeUnit.DAY)
+                .let { if (it > today) today else it }
+            end = showDatePicker(
+                titleRes = Res.string.end_period_question,
+                minDate = start,
+                maxDate = today,
+                defaultDate = predictedEnd,
+            )
+            if (end == null) return null  // User dismissed the end date picker
+        }
+
         return service.recordPeriodStart(start, end).also { _dataChanged.tryEmit(Unit) }
     }
 
     /** "姨妈走了" — record period departure */
     suspend fun recordPeriodEnd(): Boolean? {
-        val date = showEndPeriodSheet() ?: return null
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val state = service.getCycleState()
+        val records = state.records
+
+        // Find the current active period's start date
+        val currentPeriodStart = records
+            .filter { !it.isDeleted && !it.endConfirmed && it.endDate != null }
+            .maxByOrNull { it.startDate }
+            ?.startDate
+
+        // Compute smart default: predicted end date based on average period length
+        val defaultDate = run {
+            val completed = records.filter { !it.isDeleted && it.endDate != null && it.endConfirmed }
+            val avgPeriod = if (completed.isNotEmpty()) {
+                completed.map { it.startDate.until(it.endDate!!, DateTimeUnit.DAY).toInt() + 1 }.average().toInt()
+            } else 5
+            val start = currentPeriodStart ?: return@run today
+            val predictedEnd = start.plus(avgPeriod - 1, DateTimeUnit.DAY)
+            if (predictedEnd <= today) predictedEnd else today
+        }
+
+        val date = showDatePicker(
+            titleRes = Res.string.end_period_question,
+            minDate = currentPeriodStart ?: today.minus(1, DateTimeUnit.MONTH),
+            maxDate = today,
+            defaultDate = defaultDate,
+        ) ?: return null
+
         return service.recordPeriodEnd(date).also { _dataChanged.tryEmit(Unit) }
     }
 
@@ -207,7 +245,7 @@ class SheetViewModel(private val service: MenstrualService) : ViewModel() {
                 val maxStart = record.endDate ?: Clock.System.todayIn(TimeZone.currentSystemDefault())
 
                 val newStart = showDatePicker(
-                    title = "修改开始日期",
+                    titleRes = Res.string.edit_start_date,
                     minDate = minStart,
                     maxDate = maxStart,
                     defaultDate = record.startDate
@@ -223,7 +261,7 @@ class SheetViewModel(private val service: MenstrualService) : ViewModel() {
                 val maxEnd = nextRecord?.startDate?.minus(1, DateTimeUnit.DAY) ?: Clock.System.todayIn(TimeZone.currentSystemDefault())
 
                 val newEnd = showDatePicker(
-                    title = "修改结束日期",
+                    titleRes = Res.string.edit_end_date,
                     minDate = minEnd,
                     maxDate = maxEnd,
                     defaultDate = record.endDate ?: Clock.System.todayIn(TimeZone.currentSystemDefault())

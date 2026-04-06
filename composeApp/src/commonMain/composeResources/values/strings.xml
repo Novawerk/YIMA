@@ -54,6 +54,8 @@
     <string name="start_period_question">When did it start?</string>
     <string name="start_period_hint">Select the start date</string>
     <string name="end_period_question">When did it end?</string>
+    <string name="edit_start_date">Edit Start Date</string>
+    <string name="edit_end_date">Edit End Date</string>
     <string name="date_yesterday">Yesterday</string>
     <string name="date_n_days_ago">%1$d days ago</string>
     <!-- Backfill -->

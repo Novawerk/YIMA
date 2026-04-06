@@ -3,12 +3,10 @@ package com.haodong.yimalaile.ui.pages.sheet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import com.haodong.yimalaile.ui.pages.sheet.sheets.EndPeriodSheet
 import com.haodong.yimalaile.ui.pages.sheet.sheets.GenericDatePickerSheet
 import com.haodong.yimalaile.ui.pages.sheet.sheets.LogDaySheet
 import com.haodong.yimalaile.ui.pages.sheet.sheets.PredictionDetailSheet
 import com.haodong.yimalaile.ui.pages.sheet.sheets.RecordDetailSheet
-import com.haodong.yimalaile.ui.pages.sheet.sheets.StartPeriodSheet
 
 /**
  * Global sheet host — renders the currently active sheet from [SheetViewModel].
@@ -19,19 +17,6 @@ fun SheetHost(viewModel: SheetViewModel) {
     val request by viewModel.activeSheet.collectAsState()
 
     when (val r = request) {
-        is SheetRequest.StartPeriod -> StartPeriodSheet(
-            existingRecords = r.records,
-            avgPeriodLength = r.avgPeriodLength,
-            onDismiss = { viewModel.dismiss() },
-            onConfirm = { start, end -> r.result.complete(start to end) },
-        )
-
-        is SheetRequest.EndPeriod -> EndPeriodSheet(
-            existingRecords = r.records,
-            onDismiss = { viewModel.dismiss() },
-            onConfirm = { date -> r.result.complete(date) },
-        )
-
         is SheetRequest.LogDay -> LogDaySheet(
             targetDate = r.targetDate,
             onDismiss = { viewModel.dismiss() },
@@ -58,7 +43,8 @@ fun SheetHost(viewModel: SheetViewModel) {
         )
 
         is SheetRequest.DatePicker -> GenericDatePickerSheet(
-            title = r.title,
+            titleRes = r.titleRes,
+            hintRes = r.hintRes,
             hint = r.hint,
             minDate = r.minDate,
             maxDate = r.maxDate,
