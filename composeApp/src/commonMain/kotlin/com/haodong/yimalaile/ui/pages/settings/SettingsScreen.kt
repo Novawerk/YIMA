@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalUriHandler
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
 
@@ -27,13 +28,20 @@ import yimalaile.composeapp.generated.resources.*
 fun SettingsScreen(
     currentDarkMode: String,
     currentLanguage: String?,
+    currentCycleLength: Int,
+    currentPeriodDuration: Int,
     onDarkModeChange: (String) -> Unit,
     onLanguageChange: (String?) -> Unit,
+    onCycleLengthChange: (Int) -> Unit,
+    onPeriodDurationChange: (Int) -> Unit,
     onBack: () -> Unit,
     onClearData: () -> Unit,
 ) {
+    val uriHandler = LocalUriHandler.current
     var showClearConfirm by remember { mutableStateOf(false) }
     var showAboutSheet by remember { mutableStateOf(false) }
+    var showPeriodDurationDialog by remember { mutableStateOf(false) }
+    var showCycleLengthDialog by remember { mutableStateOf(false) }
 
     Column(
         Modifier
@@ -82,6 +90,24 @@ fun SettingsScreen(
             ),
             selected = currentLanguage,
             onSelect = onLanguageChange,
+        )
+
+        Spacer(Modifier.height(24.dp))
+
+        // ── Period Duration — display only, tap to edit ──
+        SettingsItem(
+            label = stringResource(Res.string.settings_period_duration),
+            value = "${currentPeriodDuration} ${stringResource(Res.string.unit_days)}",
+            onClick = { showPeriodDurationDialog = true },
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        // ── Cycle Length — display only, tap to edit ──
+        SettingsItem(
+            label = stringResource(Res.string.settings_cycle_length),
+            value = "${currentCycleLength} ${stringResource(Res.string.unit_days)}",
+            onClick = { showCycleLengthDialog = true },
         )
 
         Spacer(Modifier.height(48.dp))
@@ -136,9 +162,15 @@ fun SettingsScreen(
 
         // ── Review ──
         Spacer(Modifier.weight(1f))
-        SettingsItem(label = stringResource(Res.string.settings_review), value = "→", onClick = { })
+        SettingsItem(
+            label = stringResource(Res.string.settings_review),
+            value = "→",
+            onClick = { uriHandler.openUri("https://github.com/Novawerk/yimalaile") },
+        )
         Spacer(Modifier.height(16.dp))
     }
+
+    // ── Dialogs ──
 
     if (showClearConfirm) {
         AlertDialog(
@@ -161,6 +193,101 @@ fun SettingsScreen(
     if (showAboutSheet) {
         AboutSheet(onDismiss = { showAboutSheet = false })
     }
+
+    if (showPeriodDurationDialog) {
+        SliderDialog(
+            title = stringResource(Res.string.settings_period_duration),
+            currentValue = currentPeriodDuration,
+            valueRange = 2f..10f,
+            steps = 7,
+            minLabel = "2",
+            maxLabel = "10",
+            onConfirm = { onPeriodDurationChange(it); showPeriodDurationDialog = false },
+            onDismiss = { showPeriodDurationDialog = false },
+        )
+    }
+
+    if (showCycleLengthDialog) {
+        SliderDialog(
+            title = stringResource(Res.string.settings_cycle_length),
+            currentValue = currentCycleLength,
+            valueRange = 20f..45f,
+            steps = 24,
+            minLabel = "20",
+            maxLabel = "45",
+            onConfirm = { onCycleLengthChange(it); showCycleLengthDialog = false },
+            onDismiss = { showCycleLengthDialog = false },
+        )
+    }
+}
+
+// ════════════════════════════════════════════════════════════════
+// Slider dialog for editing numeric values
+// ════════════════════════════════════════════════════════════════
+
+@Composable
+private fun SliderDialog(
+    title: String,
+    currentValue: Int,
+    valueRange: ClosedFloatingPointRange<Float>,
+    steps: Int,
+    minLabel: String,
+    maxLabel: String,
+    onConfirm: (Int) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var sliderValue by remember { mutableStateOf(currentValue.toFloat()) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        "${sliderValue.toInt()}",
+                        style = MaterialTheme.typography.displaySmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        stringResource(Res.string.unit_days),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.height(16.dp))
+                Slider(
+                    value = sliderValue,
+                    onValueChange = { sliderValue = it },
+                    valueRange = valueRange,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(minLabel, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(maxLabel, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(sliderValue.toInt()) }) {
+                Text(stringResource(Res.string.dialog_confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(Res.string.dialog_cancel))
+            }
+        },
+    )
 }
 
 // ════════════════════════════════════════════════════════════════

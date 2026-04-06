@@ -9,20 +9,18 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Favorite
-import androidx.compose.material.icons.rounded.PriorityHigh
-import androidx.compose.material.icons.rounded.Autorenew
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.outlined.HelpOutline
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -31,7 +29,6 @@ import com.haodong.yimalaile.domain.menstrual.CycleState
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.ui.components.SmallSpacer
 import com.haodong.yimalaile.ui.pages.sheet.SheetManager
-import com.haodong.yimalaile.ui.theme.expressiveShapes
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.until
@@ -50,6 +47,7 @@ internal fun HomeStatistics(
     onRefresh: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    var showLegendDialog by remember { mutableStateOf(false) }
 
     val allRecords = cycleState.records.filter { !it.isDeleted }
     val sortedAsc = allRecords.sortedBy { it.startDate }
@@ -92,12 +90,8 @@ internal fun HomeStatistics(
                 records = sortedAsc,
                 avgCycle = avgCycle,
                 predictedCycleLength = avgCycle,
+                onHelpClick = { showLegendDialog = true },
             )
-        }
-
-        // ── Legend ──
-        item {
-            LegendRow()
         }
 
         // ── Averages ──
@@ -108,23 +102,52 @@ internal fun HomeStatistics(
         }
 
         // ── History Table ──
-        item {
-            HistoryCard(
-                records = allRecords,
-                sortedAsc = sortedAsc,
-                onRecordClick = { record ->
-                    scope.launch {
-                        sheetManager.showAndHandleRecordDetail(record)
-                        onRefresh()
-                    }
-                },
-            )
+        allRecords.forEach { record ->
+            item(key = record.id) {
+                val isCurrent = record == allRecords.first() && !record.endConfirmed
+                RecordCard(
+                    record = record,
+                    sortedAsc = sortedAsc,
+                    isCurrent = isCurrent,
+                    onClick = {
+                        scope.launch {
+                            sheetManager.showAndHandleRecordDetail(record)
+                            onRefresh()
+                        }
+                    },
+                )
+            }
         }
 
         // Bottom padding so content doesn't hide behind floating toolbar
         item {
             SmallSpacer(64)
         }
+    }
+
+    // Legend dialog
+    if (showLegendDialog) {
+        val barColor = MaterialTheme.colorScheme.primary
+        val predictedColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
+        AlertDialog(
+            onDismissRequest = { showLegendDialog = false },
+            confirmButton = {},
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(stringResource(Res.string.stats_chart_title), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.size(16.dp).clip(RoundedCornerShape(4.dp)).background(barColor))
+                        SmallSpacer(12)
+                        Text(stringResource(Res.string.stats_legend_actual), style = MaterialTheme.typography.bodyMedium)
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.size(16.dp).clip(RoundedCornerShape(4.dp)).background(predictedColor))
+                        SmallSpacer(12)
+                        Text(stringResource(Res.string.stats_legend_predicted), style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            },
+        )
     }
 }
 
@@ -137,6 +160,7 @@ private fun BarChartSection(
     records: List<MenstrualRecord>,
     avgCycle: Int?,
     predictedCycleLength: Int?,
+    onHelpClick: () -> Unit,
 ) {
     data class BarData(val label: String, val days: Int, val predicted: Boolean)
 
@@ -166,7 +190,7 @@ private fun BarChartSection(
     val barColor = MaterialTheme.colorScheme.primary
     val predictedBarColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
     val warningColor = MaterialTheme.colorScheme.tertiary
-    val maxVal = allBars.maxOf { it.days }.coerceAtLeast(1)
+    val maxVal = (allBars.maxOf { it.days } * 1.25f).toInt().coerceAtLeast(1)
     val chartHeight = 120.dp
     val barWidth = 32.dp
 
@@ -182,11 +206,28 @@ private fun BarChartSection(
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(20.dp)) {
-            Text(
-                stringResource(Res.string.stats_chart_title),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    stringResource(Res.string.stats_chart_title),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
+                IconButton(
+                    onClick = onHelpClick,
+                    modifier = Modifier.size(32.dp),
+                ) {
+                    Icon(
+                        Icons.Outlined.HelpOutline,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    )
+                }
+            }
             SmallSpacer(16)
 
             // Chart area with average line overlay
@@ -217,39 +258,18 @@ private fun BarChartSection(
                                 modifier = Modifier.height(chartHeight).width(barWidth),
                                 contentAlignment = Alignment.BottomCenter,
                             ) {
-                                Surface (
+                                Surface(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(barH),
                                     shape = RoundedCornerShape(barWidth / 2),
                                     color = thisBarColor,
                                 ) {
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        modifier = Modifier.padding(top = 4.dp),
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier = Modifier.fillMaxSize(),
                                     ) {
-                                        // Icon inside bar for outliers
-                                        if (isOutlier && barH >= 52.dp) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(barWidth - 8.dp)
-                                                    .clip(MaterialTheme.expressiveShapes.sunny)
-                                                    .background(
-                                                        White.copy(alpha = 0.3f),
-                                                    ),
-                                                contentAlignment = Alignment.Center,
-                                            ) {
-                                                Icon(
-                                                    Icons.Rounded.PriorityHigh,
-                                                    contentDescription = null,
-                                                    modifier = Modifier.size(16.dp),
-                                                )
-                                            }
-                                            SmallSpacer(2)
-                                        }
-                                        // Number
                                         if (barH >= 28.dp) {
-                                            SmallSpacer(4)
                                             Text(
                                                 "${bar.days}",
                                                 style = MaterialTheme.typography.labelSmall,
@@ -347,43 +367,51 @@ private fun AveragesCard(avgPeriod: Int?, avgCycle: Int?) {
         shape = MaterialTheme.shapes.extraLarge,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Row(
-            Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
         ) {
             Text(
                 stringResource(Res.string.stats_avg_section_title, 6),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(1f),
             )
-            // Period days
-            Text(
-                stringResource(Res.string.stats_period_days),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            SmallSpacer(4)
-            Text(
-                "${avgPeriod ?: "-"}",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            SmallSpacer(16)
-            // Cycle days
-            Text(
-                stringResource(Res.string.stats_cycle_days),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            SmallSpacer(4)
-            Text(
-                "${avgCycle ?: "-"}",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
+            SmallSpacer(28)
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                // Period days
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        "${avgPeriod ?: "-"}",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    SmallSpacer(4)
+                    Text(
+                        stringResource(Res.string.stats_period_days),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                // Cycle days
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        "${avgCycle ?: "-"}",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    SmallSpacer(4)
+                    Text(
+                        stringResource(Res.string.stats_cycle_days),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         }
     }
 }
@@ -392,88 +420,3 @@ private fun AveragesCard(avgPeriod: Int?, avgCycle: Int?) {
 // History List
 // ════════════════════════════════════════════════════════════════
 
-@Composable
-private fun HistoryCard(
-    records: List<MenstrualRecord>,
-    sortedAsc: List<MenstrualRecord>,
-    onRecordClick: (MenstrualRecord) -> Unit,
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        records.forEach { record ->
-            val periodDays = record.endDate?.let {
-                record.startDate.until(it, DateTimeUnit.DAY).toInt() + 1
-            }
-            val ascIdx = sortedAsc.indexOf(record)
-            val cycleLen = if (ascIdx > 0) {
-                sortedAsc[ascIdx - 1].startDate.until(record.startDate, DateTimeUnit.DAY).toInt()
-            } else null
-            val isCurrent = record == records.first() && !record.endConfirmed
-            val dateStr = "${record.startDate.monthNumber}/${record.startDate.dayOfMonth}"
-
-            Surface(
-                onClick = { onRecordClick(record) },
-                tonalElevation = 1.dp,
-                shape = MaterialTheme.shapes.large,
-            ) {
-                Row(
-                    Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    // Date
-                    Text(
-                        "$dateStr ${record.startDate.year}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.weight(1f),
-                    )
-
-                    // Period days: icon + number
-                    if (periodDays != null) {
-                        Icon(
-                            Icons.Rounded.Favorite,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.tertiary,
-                            modifier = Modifier.size(14.dp),
-                        )
-                        SmallSpacer(3)
-                        Text(
-                            "$periodDays",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
-                        )
-                    }
-
-                    SmallSpacer(16)
-
-                    // Cycle length: icon + number, or "Current" badge
-                    if (isCurrent) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = RoundedCornerShape(50),
-                        ) {
-                            Text(
-                                stringResource(Res.string.stats_current_cycle),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                            )
-                        }
-                    } else {
-                        Icon(
-                            Icons.Rounded.Autorenew,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.size(14.dp),
-                        )
-                        SmallSpacer(3)
-                        Text(
-                            if (cycleLen != null) "$cycleLen" else "-",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
-                        )
-                    }
-                }
-            }
-        }
-    }
-}

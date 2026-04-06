@@ -2,39 +2,38 @@ package com.haodong.yimalaile.ui.pages.onboarding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.ui.draw.clip
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.haodong.yimalaile.domain.menstrual.AddRecordResult
 import com.haodong.yimalaile.domain.menstrual.CycleState
-import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
+import com.haodong.yimalaile.domain.settings.SettingsRepository
 import com.haodong.yimalaile.ui.components.CycleCalendarGrid
-import com.haodong.yimalaile.ui.components.CycleCalendarLegend
 import com.haodong.yimalaile.ui.components.PrimaryCta
-import com.haodong.yimalaile.ui.theme.expressiveShapes
 import com.haodong.yimalaile.ui.components.SmallSpacer
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
+import kotlinx.datetime.todayIn
 import kotlinx.datetime.until
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
+import kotlin.time.Clock
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OnboardingScreen(
     service: MenstrualService,
+    settings: SettingsRepository,
     onComplete: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -42,35 +41,23 @@ fun OnboardingScreen(
     var step by remember { mutableIntStateOf(0) }
     var periodStart by remember { mutableStateOf<LocalDate?>(null) }
     var periodEnd by remember { mutableStateOf<LocalDate?>(null) }
-    var stillInPeriod by remember { mutableStateOf(false) }
+    var cycleLength by remember { mutableIntStateOf(28) }
+    var periodDuration by remember { mutableIntStateOf(5) }
 
-    // Estimated past periods for step 2
-    var estimated by remember { mutableStateOf(listOf<Pair<LocalDate, LocalDate>>()) }
-    var adjustingIndex by remember { mutableIntStateOf(-1) }
-    var adjustStart by remember { mutableStateOf<LocalDate?>(null) }
-    var adjustEnd by remember { mutableStateOf<LocalDate?>(null) }
+    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
-    // Calendar state — build records from user input + estimated for display
-    val calendarRecords = remember(periodStart, periodEnd, stillInPeriod, estimated) {
-        val records = mutableListOf<MenstrualRecord>()
-        if (periodStart != null) {
-            records.add(MenstrualRecord(
-                id = "onboard_current", startDate = periodStart!!,
-                endDate = if (stillInPeriod) null else periodEnd,
-                endConfirmed = periodEnd != null && !stillInPeriod,
-                createdAtEpochMillis = 0, updatedAtEpochMillis = 0,
-            ))
-        }
-        estimated.forEachIndexed { i, (s, e) ->
-            records.add(MenstrualRecord(
-                id = "onboard_est_$i", startDate = s, endDate = e,
-                endConfirmed = true, createdAtEpochMillis = 0, updatedAtEpochMillis = 0,
-            ))
-        }
-        records.toList()
+    // Empty calendar state for the grid (no existing records)
+    val calendarState = remember {
+        CycleState(records = emptyList(), predictions = emptyList(), currentPeriod = null, inPredictedPeriod = false)
     }
-    val calendarState = remember(calendarRecords) {
-        CycleState(records = calendarRecords, predictions = emptyList(), currentPeriod = null, inPredictedPeriod = false)
+
+    // Hint text for calendar selection
+    val selectionHint = when {
+        periodStart != null && periodEnd != null ->
+            "${periodStart!!.monthNumber}/${periodStart!!.dayOfMonth} — ${periodEnd!!.monthNumber}/${periodEnd!!.dayOfMonth}"
+        periodStart != null ->
+            "${periodStart!!.monthNumber}/${periodStart!!.dayOfMonth} — ${stringResource(Res.string.onboarding_select_end)}"
+        else -> stringResource(Res.string.start_period_hint)
     }
 
     Surface(
@@ -89,7 +76,6 @@ fun OnboardingScreen(
             0 -> {
                 Spacer(Modifier.weight(0.5f))
 
-                // Logo
                 androidx.compose.foundation.Image(
                     org.jetbrains.compose.resources.painterResource(Res.drawable.logo),
                     contentDescription = null,
@@ -97,7 +83,6 @@ fun OnboardingScreen(
                 )
                 SmallSpacer(16)
 
-                // App name
                 Text(
                     stringResource(Res.string.app_name),
                     style = MaterialTheme.typography.headlineMedium,
@@ -105,7 +90,6 @@ fun OnboardingScreen(
                 )
                 SmallSpacer(32)
 
-                // Welcome text in rounded card
                 Box(
                     Modifier
                         .fillMaxWidth()
@@ -128,86 +112,172 @@ fun OnboardingScreen(
                 )
             }
 
-            // ── Step 1: When did your last period start? ──
+            // ── Step 1: Select last period range on calendar ──
             1 -> {
                 Text(
-                    stringResource(Res.string.onboarding_when_last_start),
-                    style = MaterialTheme.typography.headlineMedium,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                SmallSpacer(16)
-                CycleCalendarGrid(
-                    state = calendarState,
-                    phaseInfo = null,
-                    selectedDate = periodStart,
-                    onDateClick = { periodStart = it },
-                    modifier = Modifier.weight(1f),
-                    monthRange = -6..0,
-                )
-                SmallSpacer(16)
-                PrimaryCta(
-                    text = stringResource(Res.string.onboarding_next),
-                    onClick = { step = 2 },
-                    enabled = periodStart != null,
-                )
-            }
-
-            // ── Step 2: When did it end? ──
-            2 -> {
-                Text(
-                    stringResource(Res.string.onboarding_when_end),
+                    stringResource(Res.string.onboarding_select_period_range),
                     style = MaterialTheme.typography.headlineMedium,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 SmallSpacer(4)
-                // Show selected start date
                 Text(
-                    "${stringResource(Res.string.onboarding_when_last_start).substringBefore("？").substringBefore("?")} ${periodStart!!.monthNumber}/${periodStart!!.dayOfMonth}",
+                    selectionHint,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                SmallSpacer(8)
-                CycleCalendarLegend()
-                SmallSpacer(8)
+                SmallSpacer(12)
 
-                // Show start date on calendar by using selectedStart
                 CycleCalendarGrid(
                     state = calendarState,
                     phaseInfo = null,
                     selectedStart = periodStart,
                     selectedEnd = periodEnd,
-                    onDateClick = { if (it >= periodStart!!) periodEnd = it },
-                    isDateEnabled = { it >= periodStart!! },
+                    onDateClick = { date ->
+                        if (periodStart == null) {
+                            // First tap: set start
+                            periodStart = date
+                            periodEnd = null
+                        } else if (periodEnd == null) {
+                            // Second tap: set end (swap if before start)
+                            if (date < periodStart!!) {
+                                periodEnd = periodStart
+                                periodStart = date
+                            } else if (date == periodStart) {
+                                // Tap same date: clear
+                                periodStart = null
+                            } else {
+                                periodEnd = date
+                            }
+                        } else {
+                            // Both set: restart selection
+                            periodStart = date
+                            periodEnd = null
+                        }
+                    },
                     modifier = Modifier.weight(1f),
-                    monthRange = -6..0,
+                    monthRange = -3..1,
                 )
 
                 SmallSpacer(16)
-                // "Still in period" as action button
-                OutlinedButton(
+                PrimaryCta(
+                    text = stringResource(Res.string.onboarding_next),
                     onClick = {
-                        stillInPeriod = true
-                        periodEnd = null
-                        val start = periodStart!!
-                        val duration = 5
-                        val cycleLen = 28
-                        estimated = listOf(
-                            start.minus(cycleLen, DateTimeUnit.DAY) to
-                                    start.minus(cycleLen, DateTimeUnit.DAY).plus(duration - 1, DateTimeUnit.DAY),
-                            start.minus(cycleLen * 2, DateTimeUnit.DAY) to
-                                    start.minus(cycleLen * 2, DateTimeUnit.DAY).plus(duration - 1, DateTimeUnit.DAY),
-                        )
-                        step = 3
+                        // Use the actual duration as default for the slider
+                        if (periodStart != null && periodEnd != null) {
+                            periodDuration = periodStart!!.until(periodEnd!!, DateTimeUnit.DAY).toInt() + 1
+                        }
+                        step = 2
                     },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    enabled = periodStart != null && periodEnd != null,
+                )
+            }
+
+            // ── Step 2: Set period duration + cycle length ──
+            2 -> {
+                Text(
+                    stringResource(Res.string.onboarding_cycle_settings_title),
+                    style = MaterialTheme.typography.headlineMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                SmallSpacer(8)
+                Text(
+                    stringResource(Res.string.onboarding_cycle_settings_hint),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                Spacer(Modifier.weight(0.3f))
+
+                // Period duration slider
+                Text(
+                    stringResource(Res.string.onboarding_period_duration_label),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                SmallSpacer(8)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text(stringResource(Res.string.onboarding_still_in_period))
+                    Text(
+                        "$periodDuration",
+                        style = MaterialTheme.typography.displaySmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        stringResource(Res.string.unit_days),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
                 SmallSpacer(8)
+                Slider(
+                    value = periodDuration.toFloat(),
+                    onValueChange = { periodDuration = it.toInt() },
+                    valueRange = 2f..10f,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                )
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text("2", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("10", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+
+                SmallSpacer(40)
+
+                // Cycle length slider
+                Text(
+                    stringResource(Res.string.onboarding_cycle_length_label),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                SmallSpacer(8)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        "$cycleLength",
+                        style = MaterialTheme.typography.displaySmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        stringResource(Res.string.unit_days),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                SmallSpacer(8)
+                Slider(
+                    value = cycleLength.toFloat(),
+                    onValueChange = { cycleLength = it.toInt() },
+                    valueRange = 20f..45f,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                )
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text("20", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("45", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+
+                Spacer(Modifier.weight(1f))
+
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedButton(
                         onClick = { step = 1 },
@@ -216,198 +286,34 @@ fun OnboardingScreen(
                     PrimaryCta(
                         text = stringResource(Res.string.onboarding_next),
                         onClick = {
-                            val start = periodStart!!
-                            val duration = start.until(periodEnd!!, DateTimeUnit.DAY).toInt() + 1
-                            val cycleLen = 28
-                            estimated = listOf(
-                                start.minus(cycleLen, DateTimeUnit.DAY) to
-                                        start.minus(cycleLen, DateTimeUnit.DAY).plus(duration - 1, DateTimeUnit.DAY),
-                                start.minus(cycleLen * 2, DateTimeUnit.DAY) to
-                                        start.minus(cycleLen * 2, DateTimeUnit.DAY).plus(duration - 1, DateTimeUnit.DAY),
-                            )
-                            step = 3
-                        },
-                        enabled = periodEnd != null,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-            }
-
-            // ── Step 3: Confirm estimated past cycles ──
-            3 -> {
-                val periodLabels = listOf(
-                    stringResource(Res.string.onboarding_period_prev),
-                    stringResource(Res.string.onboarding_period_prev2),
-                )
-
-                if (adjustingIndex >= 0) {
-                    // Adjusting a specific period
-                    Text(
-                        periodLabels.getOrElse(adjustingIndex) { "" },
-                        style = MaterialTheme.typography.titleLarge,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    SmallSpacer(8)
-                    CycleCalendarGrid(
-                        state = calendarState,
-                        phaseInfo = null,
-                        selectedStart = adjustStart,
-                        selectedEnd = adjustEnd,
-                        onDateClick = { date ->
-                            if (adjustStart == null || adjustEnd != null) {
-                                adjustStart = date; adjustEnd = null
-                            } else {
-                                if (date < adjustStart!!) { adjustEnd = adjustStart; adjustStart = date }
-                                else adjustEnd = date
-                            }
-                        },
-                        modifier = Modifier.weight(1f),
-                        monthRange = -12..0,
-                    )
-                    SmallSpacer(16)
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        OutlinedButton(
-                            onClick = { adjustingIndex = -1 },
-                            modifier = Modifier.weight(1f).height(56.dp),
-                        ) { Text(stringResource(Res.string.onboarding_back)) }
-                        PrimaryCta(
-                            text = stringResource(Res.string.onboarding_confirm),
-                            onClick = {
-                                if (adjustStart != null && adjustEnd != null) {
-                                    estimated = estimated.toMutableList().also {
-                                        it[adjustingIndex] = adjustStart!! to adjustEnd!!
-                                    }
-                                }
-                                adjustingIndex = -1
-                            },
-                            enabled = adjustStart != null && adjustEnd != null,
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
-                } else {
-                    // Show estimated periods
-                    Text(
-                        stringResource(Res.string.onboarding_confirm_cycles),
-                        style = MaterialTheme.typography.headlineMedium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    SmallSpacer(8)
-                    Text(
-                        stringResource(Res.string.onboarding_confirm_hint),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    SmallSpacer(24)
-
-                    // User's manually input period — tap edit icon to go back to step 1
-                    val userDateRange = if (stillInPeriod) {
-                        "${periodStart!!.monthNumber}/${periodStart!!.dayOfMonth} — ${stringResource(Res.string.history_in_progress)}"
-                    } else {
-                        "${periodStart!!.monthNumber}/${periodStart!!.dayOfMonth} — ${periodEnd!!.monthNumber}/${periodEnd!!.dayOfMonth}"
-                    }
-                    Surface(
-                        tonalElevation = 2.dp,
-                        shape = MaterialTheme.shapes.large,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Column(Modifier.weight(1f)) {
-                                Text(
-                                    stringResource(Res.string.onboarding_period_current),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.primary,
-                                )
-                                SmallSpacer(4)
-                                Text(userDateRange, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                            }
-                            if (!stillInPeriod) {
-                                val userDays = periodStart!!.until(periodEnd!!, DateTimeUnit.DAY).toInt() + 1
-                                Text("${userDays}${stringResource(Res.string.unit_days)}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
-                            SmallSpacer(8)
-                            IconButton(onClick = { step = 1 }, modifier = Modifier.size(32.dp)) {
-                                Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
-                            }
-                        }
-                    }
-                    SmallSpacer(8)
-
-                    // Estimated past periods
-                    estimated.forEachIndexed { index, (start, end) ->
-                        val days = start.until(end, DateTimeUnit.DAY).toInt() + 1
-                        Surface(
-                            tonalElevation = 1.dp,
-                            shape = MaterialTheme.shapes.large,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Row(
-                                Modifier.padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Column(Modifier.weight(1f)) {
-                                    Text(
-                                        periodLabels.getOrElse(index) { "" },
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                    SmallSpacer(4)
-                                    Text(
-                                        "${start.monthNumber}/${start.dayOfMonth} — ${end.monthNumber}/${end.dayOfMonth}",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold,
-                                    )
-                                }
-                                Text(
-                                    "${days}${stringResource(Res.string.unit_days)}",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                                SmallSpacer(8)
-                                IconButton(
-                                    onClick = {
-                                        adjustingIndex = index
-                                        adjustStart = start
-                                        adjustEnd = end
-                                    },
-                                    modifier = Modifier.size(32.dp),
-                                ) {
-                                    Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
-                                }
-                            }
-                        }
-                        SmallSpacer(8)
-                    }
-
-                    Spacer(Modifier.weight(1f))
-
-                    PrimaryCta(
-                        text = stringResource(Res.string.onboarding_looks_right),
-                        onClick = {
                             scope.launch {
-                                // Save the first period
                                 val start = periodStart!!
-                                if (stillInPeriod) {
-                                    service.recordPeriodStart(start)
-                                } else {
-                                    service.backfillPeriod(start, periodEnd!!)
+                                val end = periodEnd!!
+
+                                // Save user's current period
+                                service.backfillPeriod(start, end)
+
+                                // Auto-generate 5 past periods
+                                for (i in 1..5) {
+                                    val pastStart = start.minus(cycleLength * i, DateTimeUnit.DAY)
+                                    val pastEnd = pastStart.plus(periodDuration - 1, DateTimeUnit.DAY)
+                                    service.backfillPeriod(pastStart, pastEnd)
                                 }
-                                // Save estimated periods
-                                estimated.forEach { (s, e) ->
-                                    service.backfillPeriod(s, e)
-                                }
-                                step = 4
+
+                                // Save settings
+                                settings.setCycleLength(cycleLength)
+                                settings.setPeriodDuration(periodDuration)
+
+                                step = 3
                             }
                         },
+                        modifier = Modifier.weight(1f),
                     )
                 }
             }
 
-            // ── Step 4: All set! ──
-            4 -> {
+            // ── Step 3: All set! ──
+            3 -> {
                 Spacer(Modifier.weight(1f))
                 Text(
                     stringResource(Res.string.onboarding_all_set),
@@ -418,7 +324,7 @@ fun OnboardingScreen(
                 )
                 SmallSpacer(12)
                 Text(
-                    stringResource(Res.string.onboarding_all_set_hint),
+                    stringResource(Res.string.onboarding_all_set_hint_simple),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,

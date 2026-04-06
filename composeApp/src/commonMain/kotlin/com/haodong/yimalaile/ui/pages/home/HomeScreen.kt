@@ -33,13 +33,12 @@ fun HomeScreen(
     settings: com.haodong.yimalaile.domain.settings.SettingsRepository,
     onNavigateSettings: () -> Unit,
 ) {
-    val viewModel = remember { HomeViewModel(service) }
+    val viewModel = remember { HomeViewModel(service, settings) }
     val uiState by viewModel.state.collectAsState()
     val scope = rememberCoroutineScope()
     val successMsg = stringResource(Res.string.record_save_success)
     var successMessage by remember { mutableStateOf<String?>(null) }
 
-    // Auto-refresh when data changes (e.g. record detail edit from calendar)
     LaunchedEffect(Unit) {
         sheetManager.dataChanged.collect { viewModel.refresh() }
     }
@@ -52,10 +51,9 @@ fun HomeScreen(
             is HomeUiState.Loading -> {}
             is HomeUiState.Ready -> {
                 val inPeriod = s.cycleState.inPeriod
-                var calendarMode by remember { mutableStateOf(true) }
-                LaunchedEffect(Unit) { calendarMode = settings.getHomeMode() == "calendar" }
+                var homeMode by remember { mutableStateOf(HomeMode.CALENDAR) }
+                LaunchedEffect(Unit) { homeMode = HomeMode.fromKey(settings.getHomeMode()) }
 
-                // Content fills entire space; toolbar floats on top
                 Box(Modifier.fillMaxSize()) {
                     Column(Modifier.fillMaxSize()) {
                         // ── App Bar ──
@@ -76,57 +74,65 @@ fun HomeScreen(
                             )
                             GrowSpacer()
                             IconButton(onClick = onNavigateSettings, modifier = Modifier.size(40.dp)) {
-                                Icon(
-                                    Icons.Outlined.Settings,
-                                    null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                Icon(Icons.Outlined.Settings, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
 
-                        // ── Main area with animated transition ──
+                        // ── Main area ──
                         AnimatedContent(
-                            targetState = calendarMode,
+                            targetState = homeMode,
                             modifier = Modifier.weight(1f),
                             transitionSpec = {
-                                val direction = if (targetState) -1 else 1
+                                val fromIdx = targetState.ordinal
+                                val toIdx = initialState.ordinal
+                                val direction = if (fromIdx > toIdx) 1 else -1
                                 (fadeIn(tween(300)) + slideIn(tween(300)) { IntOffset(direction * it.width / 6, 0) })
                                     .togetherWith(fadeOut(tween(200)) + slideOut(tween(200)) { IntOffset(-direction * it.width / 6, 0) })
                             },
                             label = "home_mode",
-                        ) { isCalendar ->
-                            if (isCalendar) {
-                                Column(
-                                    modifier = Modifier.fillMaxSize(),
-                                    verticalArrangement = Arrangement.Center,
-                                ) {
-                                    HomeCalendar(
-                                        state = s.cycleState,
+                        ) { mode ->
+                            when (mode) {
+                                HomeMode.CALENDAR -> {
+                                    Column(
+                                        modifier = Modifier.fillMaxSize(),
+                                        verticalArrangement = Arrangement.Center,
+                                    ) {
+                                        HomeCalendar(
+                                            state = s.cycleState,
+                                            phaseInfo = s.phaseInfo,
+                                            modifier = Modifier.padding(horizontal = 16.dp),
+                                        )
+                                    }
+                                }
+                                HomeMode.DETAIL -> {
+                                    DetailCalendarView(
+                                        cycleState = s.cycleState,
                                         phaseInfo = s.phaseInfo,
-                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                        service = service,
+                                        onRefresh = { viewModel.refresh() },
                                     )
                                 }
-                            } else {
-                                HomeStatistics(
-                                    cycleState = s.cycleState,
-                                    sheetManager = sheetManager,
-                                    onRefresh = { viewModel.refresh() },
-                                )
+                                HomeMode.STATS -> {
+                                    HomeStatistics(
+                                        cycleState = s.cycleState,
+                                        sheetManager = sheetManager,
+                                        onRefresh = { viewModel.refresh() },
+                                    )
+                                }
                             }
                         }
                     }
 
                     // ── Floating bottom toolbar ──
                     Box(
-                        modifier = Modifier.align(Alignment.BottomCenter)
-                            .padding(bottom = 8.dp),
+                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp),
                     ) {
                         BottomSection(
                             inPeriod = inPeriod,
-                            calendarMode = calendarMode,
+                            homeMode = homeMode,
                             onToggleMode = { mode ->
-                                calendarMode = mode
-                                scope.launch { settings.setHomeMode(if (mode) "calendar" else "stats") }
+                                homeMode = mode
+                                scope.launch { settings.setHomeMode(mode.key) }
                             },
                             onPeriodArrived = {
                                 scope.launch {
@@ -139,9 +145,7 @@ fun HomeScreen(
                             onPeriodGone = {
                                 scope.launch {
                                     val ok = sheetManager.recordPeriodEnd() ?: return@launch
-                                    if (ok) {
-                                        viewModel.refresh(); successMessage = successMsg
-                                    }
+                                    if (ok) { viewModel.refresh(); successMessage = successMsg }
                                 }
                             },
                             onBackfill = {
@@ -158,7 +162,6 @@ fun HomeScreen(
             }
         }
 
-        // ── Success overlay ──
         SuccessOverlay(
             message = successMessage,
             onDismiss = { successMessage = null },

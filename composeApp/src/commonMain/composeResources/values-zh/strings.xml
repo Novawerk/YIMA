@@ -58,6 +58,8 @@
     <string name="start_period_question">什么时候开始的？</string>
     <string name="start_period_hint">选择经期开始日期</string>
     <string name="end_period_question">什么时候结束的？</string>
+    <string name="date_yesterday">昨天</string>
+    <string name="date_n_days_ago">%1$d天前</string>
     <!-- Backfill -->
     <string name="backfill_title">补录经期</string>
     <string name="backfill_hint">选择开始和结束日期</string>
@@ -79,6 +81,8 @@
     <string name="onboarding_welcome">在开始使用前，我们需要您回答几个问题，以帮助我们更好地了解您的月经周期。请放心，您的数据只会存储于本地，并且可以在任何时间被完全删除。</string>
     <string name="onboarding_when_last_start">上次月经是什么时候开始的？</string>
     <string name="onboarding_when_end">什么时候结束的？</string>
+    <string name="onboarding_select_period_range">上次月经是什么时候？</string>
+    <string name="onboarding_select_end">选择结束日期</string>
     <string name="onboarding_still_in_period">还没结束</string>
     <string name="onboarding_confirm_cycles">我们推算了你过去的周期</string>
     <string name="onboarding_confirm_hint">如有偏差，点击"调整"修改</string>
@@ -92,15 +96,20 @@
     <string name="onboarding_period_prev2">上上个月经周期</string>
     <string name="onboarding_adjust">调整</string>
     <string name="onboarding_confirm">确认</string>
+    <string name="onboarding_cycle_settings_title">关于你的周期</string>
+    <string name="onboarding_cycle_settings_hint">设置经期持续天数和月经周期长度，之后可以在设置中修改。</string>
+    <string name="onboarding_period_duration_label">经期持续天数</string>
+    <string name="onboarding_cycle_length_label">月经周期</string>
+    <string name="onboarding_all_set_hint_simple">经期已记录，预测功能已开启。</string>
     <string name="onboarding_back">返回</string>
     <string name="onboarding_save">保存</string>
     <!-- Statistics Screen -->
     <string name="stats_empty_message">记录至少 2 次月经，即可查看统计数据</string>
     <string name="stats_avg_section_title">最近%1$d个周期的平均值</string>
-    <string name="stats_period_days">经期天数</string>
-    <string name="stats_cycle_days">周期天数</string>
-    <string name="stats_col_period">经期</string>
-    <string name="stats_col_cycle">周期</string>
+    <string name="stats_period_days">经期长度</string>
+    <string name="stats_cycle_days">周期长度</string>
+    <string name="stats_col_period">经期长度</string>
+    <string name="stats_col_cycle">周期长度</string>
     <string name="stats_current_cycle">当前周期</string>
     <string name="stats_chart_title">周期（天）</string>
     <string name="stats_legend_actual">实际的天数</string>
@@ -111,6 +120,8 @@
     <string name="settings_mode_system">跟随系统</string>
     <string name="settings_mode_light">浅色</string>
     <string name="settings_mode_dark">深色</string>
+    <string name="settings_period_duration">经期持续天数</string>
+    <string name="settings_cycle_length">月经周期</string>
     <string name="settings_clear_data">清除所有数据</string>
     <string name="settings_clear_data_value">重新开始</string>
     <string name="settings_clear_title">确认清除</string>
@@ -127,6 +138,22 @@
     <string name="calendar_month_label">%1$d月</string>
     <!-- Weekday labels -->
     <!-- Cycle phases -->
+    <string name="detail_ovulation">排卵期</string>
+    <string name="detail_delete_period">删除经期</string>
+    <string name="detail_shorten_period">经期到此结束</string>
+    <string name="detail_extend_period">延长经期</string>
+    <string name="detail_add_period">添加经期</string>
+    <string name="detail_no_selection">点击日期查看详情</string>
+    <string name="detail_cycle_status">周期状况</string>
+    <string name="detail_current_phase">当前阶段</string>
+    <string name="detail_tips">小提示</string>
+    <string name="detail_ovulation_day">排卵日</string>
+    <string name="detail_no_period">暂无周期</string>
+    <string name="detail_in_period">经期中</string>
+    <string name="detail_no_note">暂无日记</string>
+    <string name="detail_add_note">添加日记</string>
+    <string name="detail_mood_label">心情</string>
+    <string name="detail_notes_label">记录</string>
     <string name="phase_menstrual">经期</string>
     <string name="phase_follicular">卵泡期</string>
     <string name="phase_ovulation">排卵期</string>

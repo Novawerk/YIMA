@@ -100,10 +100,14 @@ class MenstrualService(private val repository: RecordsRepository) {
 
     // ---------- State ----------
 
-    suspend fun getCycleState(): CycleState {
+    /**
+     * Get the current cycle state.
+     * [cycleLength] is the user-configured cycle length from settings (default 28).
+     */
+    suspend fun getCycleState(cycleLength: Int = 28): CycleState {
         val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
         val all = repository.getAllRecords()
-        val predictions = predictNextCycles(all)
+        val predictions = predictNextCycles(all, cycleLength = cycleLength)
 
         // Auto-confirm predictions that are 3+ days past their end
         autoConfirmPastPredictions(all, predictions, today)
@@ -113,7 +117,7 @@ class MenstrualService(private val repository: RecordsRepository) {
             .sortedByDescending { it.startDate }
             .take(10)
 
-        val updatedPredictions = predictNextCycles(repository.getAllRecords())
+        val updatedPredictions = predictNextCycles(repository.getAllRecords(), cycleLength = cycleLength)
 
         // Current period: a record covering today whose end hasn't been confirmed yet
         val currentPeriod = records.find { r ->
@@ -200,18 +204,19 @@ class MenstrualService(private val repository: RecordsRepository) {
 
     // ---------- Prediction ----------
 
-    suspend fun predictNextCycles(count: Int = 3): List<PredictedCycle> =
-        predictNextCycles(repository.getAllRecords(), count)
+    suspend fun predictNextCycles(count: Int = 3, cycleLength: Int = 28): List<PredictedCycle> =
+        predictNextCycles(repository.getAllRecords(), count, cycleLength)
 
     // ---------- Phase ----------
 
     /**
      * Determine the current cycle phase based on historical data.
-     * Returns null if not enough data (< 2 completed records).
+     * Uses user-configured [cycleLength] from settings.
+     * Returns null if not enough data (< 1 completed record).
      */
-    fun getCurrentPhase(state: CycleState, today: LocalDate): CyclePhaseInfo? {
+    fun getCurrentPhase(state: CycleState, today: LocalDate, cycleLength: Int = 28): CyclePhaseInfo? {
         val allRecords = state.records
-        val avgCycle = averageCycleLength(allRecords) ?: return null
+        val avgCycle = cycleLength
         val avgPeriod = averagePeriodLength(allRecords) ?: return null
 
         val lastPeriodStart = allRecords
@@ -245,21 +250,16 @@ class MenstrualService(private val repository: RecordsRepository) {
 
     // ---------- Private ----------
 
-    private fun predictNextCycles(records: List<MenstrualRecord>, count: Int = 3): List<PredictedCycle> {
-        val avgCycleLength = averageCycleLength(records) ?: return emptyList()
+    /**
+     * Predict next cycles using the user-configured [cycleLength].
+     */
+    private fun predictNextCycles(records: List<MenstrualRecord>, count: Int = 3, cycleLength: Int = 28): List<PredictedCycle> {
         val avgPeriodLength = averagePeriodLength(records)
         val lastStart = records.maxByOrNull { it.startDate }?.startDate ?: return emptyList()
         return (1..count).map { i ->
-            val start = lastStart.plus(avgCycleLength * i, DateTimeUnit.DAY)
+            val start = lastStart.plus(cycleLength * i, DateTimeUnit.DAY)
             PredictedCycle(start, avgPeriodLength?.let { start.plus(it - 1, DateTimeUnit.DAY) })
         }
-    }
-
-    private fun averageCycleLength(records: List<MenstrualRecord>): Int? {
-        val sorted = records.filter { !it.isDeleted }.sortedBy { it.startDate }
-        if (sorted.size < 2) return null
-        val gaps = sorted.zipWithNext().map { (a, b) -> a.startDate.until(b.startDate, DateTimeUnit.DAY).toInt() }
-        return gaps.sum() / gaps.size
     }
 
     private fun averagePeriodLength(records: List<MenstrualRecord>): Int? {

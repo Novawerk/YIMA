@@ -21,12 +21,15 @@ import kotlinx.coroutines.launch
 fun App(component: AppComponent) {
     val service = component.menstrualService
     val settings = component.settingsRepository
+    val dailyNoteRepo = component.dailyNoteRepository
     val scope = rememberCoroutineScope()
     val sheetManager = remember { SheetManager(service) }
 
-    // Theme & language state
+    // Theme, language & cycle state
     var darkMode by remember { mutableStateOf("system") }
     var language by remember { mutableStateOf<String?>(null) }
+    var cycleLength by remember { mutableIntStateOf(28) }
+    var periodDuration by remember { mutableIntStateOf(5) }
 
     // Startup: load settings + determine start route
     var startRoute by remember { mutableStateOf<Any?>(null) }
@@ -34,9 +37,11 @@ fun App(component: AppComponent) {
     LaunchedEffect(Unit) {
         darkMode = settings.getDarkMode()
         language = settings.getLanguage()
+        cycleLength = settings.getCycleLength()
+        periodDuration = settings.getPeriodDuration()
 
         val disclaimerAccepted = settings.isDisclaimerAccepted()
-        val state = service.getCycleState()
+        val state = service.getCycleState(cycleLength)
         val hasData = state.records.isNotEmpty()
         startRoute = when {
             !disclaimerAccepted -> DisclaimerRoute
@@ -68,6 +73,7 @@ fun App(component: AppComponent) {
                     composable<OnboardingRoute> {
                         OnboardingScreen(
                             service = service,
+                            settings = settings,
                             onComplete = {
                                 navController.navigate(HomeRoute) {
                                     popUpTo(OnboardingRoute) { inclusive = true }
@@ -89,6 +95,8 @@ fun App(component: AppComponent) {
                         SettingsScreen(
                             currentDarkMode = darkMode,
                             currentLanguage = language,
+                            currentCycleLength = cycleLength,
+                            currentPeriodDuration = periodDuration,
                             onDarkModeChange = { newMode ->
                                 darkMode = newMode
                                 scope.launch { settings.setDarkMode(newMode) }
@@ -96,6 +104,14 @@ fun App(component: AppComponent) {
                             onLanguageChange = { newLang ->
                                 language = newLang
                                 scope.launch { settings.setLanguage(newLang) }
+                            },
+                            onCycleLengthChange = { newLen ->
+                                cycleLength = newLen
+                                scope.launch { settings.setCycleLength(newLen) }
+                            },
+                            onPeriodDurationChange = { newDur ->
+                                periodDuration = newDur
+                                scope.launch { settings.setPeriodDuration(newDur) }
                             },
                             onBack = { navController.popBackStack() },
                             onClearData = {

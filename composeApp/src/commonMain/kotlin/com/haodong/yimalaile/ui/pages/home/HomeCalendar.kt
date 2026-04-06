@@ -8,6 +8,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.zIndex
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -89,32 +91,7 @@ internal fun HomeCalendar(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                    ) {
-                        DecorShape(
-                            size = 16,
-                            shape = phaseShape(phaseInfo.phase),
-                            color = phaseColor(phaseInfo.phase),
-                        )
-                        SmallSpacer(8)
-                        Text(
-                            phaseDisplayName(phaseInfo.phase),
-                            style = MaterialTheme.typography.bodyMediumEmphasized,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    SmallSpacer(4)
-                    Text(
-                        when {
-                            inPeriod -> stringResource(Res.string.home_day_n, dayCount ?: 0)
-                            phaseInfo.daysUntilNextPeriod <= 0 -> stringResource(Res.string.legend_today)
-                            else -> "${phaseInfo.daysUntilNextPeriod} ${stringResource(Res.string.unit_days)}"
-                        },
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Black,
-                    )
+
                     Text(
                         when {
                             inPeriod -> stringResource(Res.string.home_in_period)
@@ -124,12 +101,24 @@ internal fun HomeCalendar(
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    SmallSpacer(2)
+                    Text(
+                        when {
+                            inPeriod -> stringResource(Res.string.home_day_n, dayCount ?: 0)
+                            phaseInfo.daysUntilNextPeriod <= 0 -> stringResource(Res.string.legend_today)
+                            else -> "${phaseInfo.daysUntilNextPeriod} ${stringResource(Res.string.unit_days)}"
+                        },
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Black,
+                    )
+
+
                 }
             }
             SmallSpacer(16)
         }
         GrowSpacer()
-        Column(Modifier.fillMaxWidth(0.6f)) {
+        Column(Modifier.fillMaxWidth(0.55f)) {
             // This month
             MonthBlock(months[0], today, dateMap, periodColor, periodLight, nextPredictedDates, state.records)
 
@@ -253,15 +242,15 @@ private fun MonthBlock(
                         val isPredictedPeriod = type == DayType.PREDICTED_PERIOD
                         val isNextPredicted = date in nextPredictedDates
                         val bgColor = when {
+                            isToday -> MaterialTheme.colorScheme.primary
                             isPeriod -> periodColor
                             isPredictedPeriod || isNextPredicted -> periodLight
-                            isToday -> MaterialTheme.colorScheme.primary
                             else -> MaterialTheme.colorScheme.surfaceVariant
                         }
                         val textColor = when {
+                            isToday -> Color.White
                             isPeriod -> Color.White
                             isPredictedPeriod || isNextPredicted -> Color.White
-                            isToday -> Color.White
                             isFuture -> onSurface.copy(alpha = 0.15f)
                             else -> onSurface.copy(alpha = 0.45f)
                         }
@@ -272,6 +261,12 @@ private fun MonthBlock(
                             modifier = Modifier
                                 .weight(1f)
                                 .aspectRatio(1f)
+                                .then(
+                                    if (isToday) Modifier.zIndex(1f).graphicsLayer {
+                                        scaleX = 1.25f
+                                        scaleY = 1.25f
+                                    } else Modifier
+                                )
                                 .then(
                                     if (clickable) Modifier.clip(cellShape).clickable {
                                         val record = records.find { r ->
@@ -288,9 +283,14 @@ private fun MonthBlock(
                         ) {
                             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                                 if (showNumber) {
+                                    val todayOverlap = isToday && (isPeriod || isPredictedPeriod || isNextPredicted)
                                     Text(
                                         "$dayNum",
-                                        fontSize = if (isToday) 13.sp else 11.sp,
+                                        fontSize = when {
+                                            todayOverlap -> 15.sp
+                                            isToday -> 13.sp
+                                            else -> 11.sp
+                                        },
                                         fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
                                         color = textColor,
                                     )

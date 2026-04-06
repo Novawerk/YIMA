@@ -12,6 +12,8 @@ private val DISCLAIMER_ACCEPTED = booleanPreferencesKey("disclaimer_accepted")
 private val DARK_MODE = stringPreferencesKey("dark_mode")
 private val LANGUAGE = stringPreferencesKey("language")
 private val HOME_MODE = stringPreferencesKey("home_mode")
+private val CYCLE_LENGTH = stringPreferencesKey("cycle_length")
+private val PERIOD_DURATION = stringPreferencesKey("period_duration")
 
 @Inject
 open class SettingsRepository(private val dataStore: DataStore<Preferences>) {
@@ -45,5 +47,19 @@ open class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun setHomeMode(value: String) {
         dataStore.edit { prefs -> prefs[HOME_MODE] = value }
+    }
+
+    suspend fun getCycleLength(): Int =
+        dataStore.data.first()[CYCLE_LENGTH]?.toIntOrNull() ?: 28
+
+    suspend fun setCycleLength(value: Int) {
+        dataStore.edit { prefs -> prefs[CYCLE_LENGTH] = value.toString() }
+    }
+
+    suspend fun getPeriodDuration(): Int =
+        dataStore.data.first()[PERIOD_DURATION]?.toIntOrNull() ?: 5
+
+    suspend fun setPeriodDuration(value: Int) {
+        dataStore.edit { prefs -> prefs[PERIOD_DURATION] = value.toString() }
     }
 }

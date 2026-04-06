@@ -2,8 +2,10 @@ package com.haodong.yimalaile.di
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import com.haodong.yimalaile.domain.menstrual.DailyNoteRepository
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.domain.menstrual.RecordsRepository
+import com.haodong.yimalaile.infrastructure.persistence.DataStoreDailyNoteRepository
 import com.haodong.yimalaile.infrastructure.persistence.DataStoreRecordsRepository
 import com.haodong.yimalaile.domain.settings.SettingsRepository
 import me.tatarka.inject.annotations.Component
@@ -16,10 +18,13 @@ abstract class AppComponent(
 ) {
     abstract val menstrualService: MenstrualService
     abstract val settingsRepository: SettingsRepository
+    abstract val dailyNoteRepository: DailyNoteRepository
 
-    // Bind the interface to its @Inject-annotated implementation
     @Provides
     fun DataStoreRecordsRepository.bind(): RecordsRepository = this
+
+    @Provides
+    fun DataStoreDailyNoteRepository.bind(): DailyNoteRepository = this
 
     companion object
 }

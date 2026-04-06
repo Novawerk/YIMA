@@ -58,6 +58,8 @@
     <string name="start_period_question">When did it start?</string>
     <string name="start_period_hint">Select the start date</string>
     <string name="end_period_question">When did it end?</string>
+    <string name="date_yesterday">Yesterday</string>
+    <string name="date_n_days_ago">%1$d days ago</string>
     <!-- Backfill -->
     <string name="backfill_title">Backfill Period</string>
     <string name="backfill_hint">Select start and end dates</string>
@@ -79,6 +81,8 @@
     <string name="onboarding_welcome">Before we begin, we need a few details about your cycle to provide accurate predictions. Your data is stored locally and can be deleted at any time.</string>
     <string name="onboarding_when_last_start">When did your last period start?</string>
     <string name="onboarding_when_end">When did it end?</string>
+    <string name="onboarding_select_period_range">When was your last period?</string>
+    <string name="onboarding_select_end">select end date</string>
     <string name="onboarding_still_in_period">Still in period</string>
     <string name="onboarding_confirm_cycles">We estimated your past cycles</string>
     <string name="onboarding_confirm_hint">Tap "Adjust" to correct if needed</string>
@@ -92,6 +96,11 @@
     <string name="onboarding_period_prev2">Cycle before last</string>
     <string name="onboarding_adjust">Adjust</string>
     <string name="onboarding_confirm">Confirm</string>
+    <string name="onboarding_cycle_settings_title">About your cycle</string>
+    <string name="onboarding_cycle_settings_hint">Set your typical period duration and cycle length. You can adjust these later in settings.</string>
+    <string name="onboarding_period_duration_label">Period duration</string>
+    <string name="onboarding_cycle_length_label">Cycle length</string>
+    <string name="onboarding_all_set_hint_simple">Your period has been recorded. Predictions are now enabled.</string>
     <string name="onboarding_back">Back</string>
     <string name="onboarding_save">Save</string>
     <!-- Statistics Screen -->
@@ -99,8 +108,8 @@
     <string name="stats_avg_section_title">Average of last %1$d cycles</string>
     <string name="stats_period_days">Period days</string>
     <string name="stats_cycle_days">Cycle days</string>
-    <string name="stats_col_period">Period</string>
-    <string name="stats_col_cycle">Cycle</string>
+    <string name="stats_col_period">Period length</string>
+    <string name="stats_col_cycle">Cycle length</string>
     <string name="stats_current_cycle">Current</string>
     <string name="stats_chart_title">Cycle (days)</string>
     <string name="stats_legend_actual">Actual days</string>
@@ -111,6 +120,8 @@
     <string name="settings_mode_system">System</string>
     <string name="settings_mode_light">Light</string>
     <string name="settings_mode_dark">Dark</string>
+    <string name="settings_period_duration">Period Duration</string>
+    <string name="settings_cycle_length">Cycle Length</string>
     <string name="settings_clear_data">Clear all data</string>
     <string name="settings_clear_data_value">Start over</string>
     <string name="settings_clear_title">Confirm Clear</string>
@@ -128,6 +139,22 @@
     <string name="calendar_month_label">%1$d</string>
     <!-- Weekday labels -->
     <!-- Cycle phases -->
+    <string name="detail_ovulation">Ovulation</string>
+    <string name="detail_delete_period">Delete period</string>
+    <string name="detail_shorten_period">End period here</string>
+    <string name="detail_extend_period">Extend period</string>
+    <string name="detail_add_period">Add period</string>
+    <string name="detail_no_selection">Tap a date to view details</string>
+    <string name="detail_cycle_status">Cycle status</string>
+    <string name="detail_current_phase">Current phase</string>
+    <string name="detail_tips">Tips</string>
+    <string name="detail_ovulation_day">Ovulation day</string>
+    <string name="detail_no_period">No period</string>
+    <string name="detail_in_period">In period</string>
+    <string name="detail_no_note">No diary</string>
+    <string name="detail_add_note">Add diary</string>
+    <string name="detail_mood_label">Mood</string>
+    <string name="detail_notes_label">Notes</string>
     <string name="phase_menstrual">Menstrual</string>
     <string name="phase_follicular">Follicular</string>
     <string name="phase_ovulation">Ovulation</string>
