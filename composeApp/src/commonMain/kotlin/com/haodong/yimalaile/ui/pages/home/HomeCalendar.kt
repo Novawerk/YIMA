@@ -44,18 +44,11 @@ internal fun HomeCalendar(
     phaseInfo: CyclePhaseInfo?,
     modifier: Modifier = Modifier,
 ) {
+    val defaultCycleLength = phaseInfo?.cycleLength ?: 28
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
     val dateMap = buildDateMap(state, phaseInfo, today)
     val inPeriod = state.inPeriod
-    val periodStart = state.currentPeriod?.startDate
-        ?: if (state.inPredictedPeriod) state.predictions.firstOrNull { pred ->
-            val avgP = phaseInfo?.periodLength ?: 5
-            val pEnd = pred.predictedEnd ?: pred.predictedStart.plus(avgP - 1, DateTimeUnit.DAY)
-            today in pred.predictedStart..pEnd
-        }?.predictedStart else null
-    val dayCount = periodStart?.let {
-        it.until(today, DateTimeUnit.DAY).toInt() + 1
-    }
+    val dayCount = phaseInfo?.dayInCycle
 
     val periodColor = MaterialTheme.colorScheme.error
     val periodLight = MaterialTheme.colorScheme.error.copy(alpha = 0.45f)
@@ -120,7 +113,7 @@ internal fun HomeCalendar(
         GrowSpacer()
         Column(Modifier.fillMaxWidth(0.55f)) {
             // This month
-            MonthBlock(months[0], today, dateMap, periodColor, periodLight, nextPredictedDates, state.records)
+            MonthBlock(months[0], today, dateMap, periodColor, periodLight, nextPredictedDates, state.records, defaultCycleLength)
 
             // Info between months — plain text
             SmallSpacer(32)
@@ -195,6 +188,7 @@ private fun MonthBlock(
     periodLight: Color,
     nextPredictedDates: Set<LocalDate>,
     records: List<MenstrualRecord> = emptyList(),
+    defaultCycleLength: Int = 28,
 ) {
     val sheetManager = LocalSheetManager.current
     val scope = rememberCoroutineScope()
@@ -274,7 +268,7 @@ private fun MonthBlock(
                                             date in r.startDate..rEnd
                                         }
                                         if (record != null) {
-                                            scope.launch { sheetManager.showAndHandleRecordDetail(record) }
+                                            scope.launch { sheetManager.showAndHandleRecordDetail(record, defaultCycleLength) }
                                         }
                                     } else Modifier
                                 ),

@@ -1,119 +1,142 @@
 package com.haodong.yimalaile.ui.pages.record
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.haodong.yimalaile.domain.menstrual.DailyRecord
-import com.haodong.yimalaile.domain.menstrual.Intensity
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
+import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.domain.menstrual.Mood
 import com.haodong.yimalaile.ui.components.SmallSpacer
-import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.plus
-import kotlinx.datetime.until
+import kotlinx.datetime.*
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
 import kotlin.time.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
 
 /**
- * Full-screen record detail — shows all days in the period with existing/missing records.
- * Missing days have a "+" button to add a daily record for that date.
+ * Full-screen record detail — shows record info as cards and a read-only calendar.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecordDetailSheet(
     record: MenstrualRecord,
+    allRecords: List<MenstrualRecord>,
+    defaultCycleLength: Int,
+    service: MenstrualService,
     onDismiss: () -> Unit,
     onEditStart: () -> Unit,
     onEditEnd: () -> Unit,
-    onLogDay: () -> Unit,
     onDelete: () -> Unit,
-    onLogSpecificDay: ((LocalDate) -> Unit)? = null,
 ) {
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-    val endDate = record.endDate ?: today // legacy records without endDate
-    val days = record.startDate.until(endDate, DateTimeUnit.DAY).toInt() + 1
-    var showDeleteConfirm by remember { mutableStateOf(false) }
-    val allDays = buildList {
-        var d = record.startDate
-        while (d <= endDate) { add(d); d = d.plus(1, DateTimeUnit.DAY) }
+    
+    val cycleContext = remember(record, allRecords) {
+        service.getMenstrualCycle(record, allRecords, defaultCycleLength = defaultCycleLength)
     }
-    val dailyMap = record.dailyRecords.associateBy { it.date }
+
+    val endDate = record.endDate ?: today
+    val periodDays = record.startDate.until(endDate, DateTimeUnit.DAY).toInt() + 1
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+
+    val cycleDays = cycleContext.cycleLength
+    val cycleEndDate = cycleContext.cycleEndDate
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        shape = MaterialTheme.shapes.extraLarge,
+        containerColor = MaterialTheme.colorScheme.background,
     ) {
-        Column(Modifier.fillMaxWidth()) {
-            // ── App Bar ──
-            val dateRange = "${record.startDate.monthNumber}/${record.startDate.dayOfMonth}" +
-                    if (record.endDate != null) " — ${record.endDate.monthNumber}/${record.endDate.dayOfMonth}" else ""
-            val subtitle = "${record.startDate.year} · $days${stringResource(Res.string.unit_days)}"
-
-            Row(
-                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(Modifier.weight(1f)) {
-                    Text(dateRange, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
-
-            // ── Day-by-day list ──
-            SmallSpacer(8)
-            Text(
-                stringResource(Res.string.detail_daily_records),
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 16.dp),
+        Column(
+            Modifier.fillMaxWidth().padding(bottom = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // ── Calendar ──
+            PeriodDetailCalendar(
+                record = record,
+                cycleEndDate = cycleEndDate,
+                ovulationDates = cycleContext.ovulationDates,
+                ovulationPeakDate = cycleContext.ovulationPeakDate,
+                modifier = Modifier.padding(top = 16.dp)
             )
-            SmallSpacer(8)
 
-            LazyColumn(
-                Modifier.fillMaxWidth().weight(1f),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+            SmallSpacer(16)
+
+            // ── Info Cards ──
+            Column(
+                Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(allDays, key = { it.toString() }) { date ->
-                    val existing = dailyMap[date]
-                    if (existing != null) {
-                        DailyRecordCard(existing)
-                    } else {
-                        EmptyDayCard(
-                            date = date,
-                            onClick = { onLogSpecificDay?.invoke(date) ?: onLogDay() },
-                        )
+                if (cycleContext.isAnomaly) {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer
+                        ),
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                        shape = MaterialTheme.shapes.extraLarge
+                    ) {
+                        Column(Modifier.padding(16.dp)) {
+                            Text(
+                                stringResource(Res.string.anomaly_short_cycle_title),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                            SmallSpacer(4)
+                            Text(
+                                stringResource(Res.string.anomaly_short_cycle_body),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
                     }
                 }
+
+                // Start Date
+                DetailListItem(
+                    label = stringResource(Res.string.record_start_date),
+                    value = "${record.startDate.monthNumber}/${record.startDate.dayOfMonth}",
+                    onClick = onEditStart,
+                    isEditable = true
+                )
+
+                // End Date
+                DetailListItem(
+                    label = stringResource(Res.string.record_end_date),
+                    value = if (record.endDate != null) "${record.endDate.monthNumber}/${record.endDate.dayOfMonth}" else stringResource(Res.string.history_in_progress),
+                    onClick = onEditEnd,
+                    isEditable = true
+                )
+
+                // Period Length
+                DetailListItem(
+                    label = stringResource(Res.string.stats_period_days),
+                    value = "$periodDays ${stringResource(Res.string.unit_days)}",
+                )
+
+                // Cycle Length
+                DetailListItem(
+                    label = stringResource(Res.string.stats_cycle_days),
+                    value = "$cycleDays ${stringResource(Res.string.unit_days)}",
+                )
             }
 
-            // ── All actions together at bottom ──
-            SmallSpacer(8)
-            Row(
-                Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            SmallSpacer(24)
+
+            // ── Delete Button ──
+            TextButton(
+                onClick = { showDeleteConfirm = true },
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
             ) {
-                ActionChip(stringResource(Res.string.detail_edit_start), onClick = onEditStart, modifier = Modifier.weight(1f))
-                ActionChip(stringResource(Res.string.detail_edit_end), onClick = onEditEnd, modifier = Modifier.weight(1f))
-                ActionChip(stringResource(Res.string.detail_delete), onClick = { showDeleteConfirm = true }, modifier = Modifier.weight(1f), destructive = true)
+                Text(stringResource(Res.string.detail_delete))
             }
-            SmallSpacer(16)
         }
     }
 
@@ -135,117 +158,44 @@ fun RecordDetailSheet(
 }
 
 @Composable
-private fun ActionChip(label: String, onClick: () -> Unit, modifier: Modifier = Modifier, destructive: Boolean = false) {
-    Surface(
-        onClick = onClick,
-        modifier = modifier,
-        shape = MaterialTheme.shapes.medium,
-        tonalElevation = 2.dp,
-    ) {
-        Box(Modifier.padding(vertical = 12.dp), contentAlignment = Alignment.Center) {
+private fun DetailListItem(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    isEditable: Boolean = false,
+    onClick: (() -> Unit)? = null
+) {
+    ListItem(
+        headlineContent = {
             Text(
                 label,
-                style = MaterialTheme.typography.labelMedium,
-                color = if (destructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-        }
-    }
-}
-
-@Composable
-private fun DailyRecordCard(day: DailyRecord) {
-    Surface(
-        tonalElevation = 1.dp,
-        shape = MaterialTheme.shapes.medium,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Row(
-            Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            Text(
-                "${day.date.monthNumber}/${day.date.dayOfMonth}",
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.width(40.dp),
-            )
-            if (day.mood != null) {
-                Text(moodLabel(day.mood), fontSize = 16.sp)
-            }
-            if (day.intensity != null) {
-                Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    shape = MaterialTheme.shapes.small,
-                ) {
-                    Text(
-                        when (day.intensity) {
-                            Intensity.LIGHT -> stringResource(Res.string.intensity_light)
-                            Intensity.MEDIUM -> stringResource(Res.string.intensity_medium)
-                            Intensity.HEAVY -> stringResource(Res.string.intensity_heavy)
-                        },
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+        },
+        trailingContent = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    value,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (isEditable) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                )
+                if (isEditable) {
+                    SmallSpacer(4)
+                    Icon(
+                        Icons.Default.ChevronRight,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
                     )
                 }
             }
-            if (day.symptoms.isNotEmpty()) {
-                Text(
-                    day.symptoms.joinToString(" · "),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    modifier = Modifier.weight(1f),
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun EmptyDayCard(date: LocalDate, onClick: () -> Unit) {
-    val borderColor = MaterialTheme.colorScheme.outlineVariant
-    val cornerRadius = 16.dp
-    Surface(
-        onClick = onClick,
-        shape = MaterialTheme.shapes.medium,
-        modifier = Modifier.fillMaxWidth().drawBehind {
-            val stroke = 1.5.dp.toPx()
-            val dash = 6.dp.toPx()
-            val gap = 4.dp.toPx()
-            drawRoundRect(
-                color = borderColor,
-                cornerRadius = androidx.compose.ui.geometry.CornerRadius(cornerRadius.toPx()),
-                style = androidx.compose.ui.graphics.drawscope.Stroke(
-                    width = stroke,
-                    pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(dash, gap)),
-                ),
-            )
         },
-    ) {
-        Row(
-            Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                "${date.monthNumber}/${date.dayOfMonth}",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.width(40.dp),
-            )
-            Spacer(Modifier.weight(1f))
-            Icon(
-                Icons.Default.Add,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp),
-                tint = MaterialTheme.colorScheme.primary,
-            )
-        }
-    }
-}
-
-private fun moodLabel(m: Mood) = when (m) {
-    Mood.HAPPY -> "😊"; Mood.NEUTRAL -> "😐"
-    Mood.SAD -> "😔"; Mood.VERY_SAD -> "😢"
+        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.extraLarge)
+            .let { if (onClick != null) it.clickable(onClick = onClick) else it }
+    )
 }

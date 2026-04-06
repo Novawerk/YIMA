@@ -5,6 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.haodong.yimalaile.ui.pages.record.BackfillSheet
 import com.haodong.yimalaile.ui.pages.record.EndPeriodSheet
+import com.haodong.yimalaile.ui.pages.record.GenericDatePickerSheet
 import com.haodong.yimalaile.ui.pages.record.LogDaySheet
 import com.haodong.yimalaile.ui.pages.record.PredictionDetailSheet
 import com.haodong.yimalaile.ui.pages.record.RecordDetailSheet
@@ -48,11 +49,12 @@ fun SheetHost(manager: SheetManager) {
 
         is SheetRequest.RecordDetail -> RecordDetailSheet(
             record = r.record,
+            allRecords = r.allRecords,
+            defaultCycleLength = r.defaultCycleLength,
+            service = manager.getService(),
             onDismiss = { manager.dismiss() },
             onEditStart = { r.result.complete(DetailAction.EditStart) },
             onEditEnd = { r.result.complete(DetailAction.EditEnd) },
-            onLogDay = { r.result.complete(DetailAction.LogDay) },
-            onLogSpecificDay = { date -> r.result.complete(DetailAction.LogSpecificDay(date)) },
             onDelete = { r.result.complete(DetailAction.Delete) },
         )
 
@@ -60,6 +62,16 @@ fun SheetHost(manager: SheetManager) {
             prediction = r.prediction,
             avgPeriodLength = r.avgPeriodLength,
             onDismiss = { manager.dismiss() },
+        )
+
+        is SheetRequest.DatePicker -> GenericDatePickerSheet(
+            title = r.title,
+            hint = r.hint,
+            minDate = r.minDate,
+            maxDate = r.maxDate,
+            defaultDate = r.defaultDate,
+            onDismiss = { manager.dismiss() },
+            onConfirm = { date -> r.result.complete(date) },
         )
 
         null -> {}

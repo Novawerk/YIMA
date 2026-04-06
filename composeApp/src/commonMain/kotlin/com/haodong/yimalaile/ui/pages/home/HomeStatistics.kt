@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.HelpOutline
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -54,10 +55,14 @@ internal fun HomeStatistics(
 
     // Compute stats — always based on last 6 cycles
     val completedRecords = sortedAsc.filter { it.endDate != null && it.endConfirmed }
-    val cycleGaps = sortedAsc.zipWithNext().map { (a, b) ->
-        a.startDate.until(b.startDate, DateTimeUnit.DAY).toInt()
+    
+    // 过滤掉周期小于 14 天的异常记录进行统计
+    val validCycleGaps = sortedAsc.zipWithNext().mapNotNull { (a, b) ->
+        val gap = a.startDate.until(b.startDate, DateTimeUnit.DAY).toInt()
+        if (gap >= 14) gap else null
     }
-    val last6Gaps = cycleGaps.takeLast(6)
+    
+    val last6Gaps = validCycleGaps.takeLast(6)
     val last6Completed = completedRecords.takeLast(6)
     val avgPeriod = if (last6Completed.isNotEmpty()) {
         last6Completed.map { it.startDate.until(it.endDate!!, DateTimeUnit.DAY).toInt() + 1 }.average().roundToInt()
@@ -101,17 +106,29 @@ internal fun HomeStatistics(
             }
         }
 
+        // ── History Title ──
+        item {
+            Text(
+                stringResource(Res.string.stats_history_title),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp, start = 8.dp),
+            )
+        }
+
         // ── History Table ──
-        allRecords.forEach { record ->
+        val defaultCycleLength = avgCycle ?: 28
+        sortedAsc.reversed().forEach { record ->
             item(key = record.id) {
-                val isCurrent = record == allRecords.first() && !record.endConfirmed
+                val isCurrent = record == sortedAsc.last() && !record.endConfirmed
                 RecordCard(
                     record = record,
                     sortedAsc = sortedAsc,
                     isCurrent = isCurrent,
+                    defaultCycleLength = defaultCycleLength,
                     onClick = {
                         scope.launch {
-                            sheetManager.showAndHandleRecordDetail(record)
+                            sheetManager.showAndHandleRecordDetail(record, defaultCycleLength)
                             onRefresh()
                         }
                     },
@@ -162,14 +179,16 @@ private fun BarChartSection(
     predictedCycleLength: Int?,
     onHelpClick: () -> Unit,
 ) {
-    data class BarData(val label: String, val days: Int, val predicted: Boolean)
+    data class BarData(val label: String, val days: Int, val predicted: Boolean, val isAnomaly: Boolean = false)
 
     val actualBars = records.zipWithNext().map { (cur, next) ->
         val cycleLen = cur.startDate.until(next.startDate, DateTimeUnit.DAY).toInt()
+        val isAnomaly = cycleLen < 14
         BarData(
             label = "${cur.startDate.monthNumber}/${cur.startDate.dayOfMonth}",
             days = cycleLen,
             predicted = false,
+            isAnomaly = isAnomaly
         )
     }
 
@@ -240,9 +259,9 @@ private fun BarChartSection(
                     itemsIndexed(allBars) { _, bar ->
                         val fraction = bar.days.toFloat() / maxVal
                         val barH = chartHeight * fraction
-                        // Outlier: deviates >30% from average
-                        val isOutlier = avgCycle != null && avgCycle > 0 && !bar.predicted &&
-                                kotlin.math.abs(bar.days - avgCycle) > avgCycle * 0.3f
+                        // Outlier: deviates >30% from average, or is anomaly
+                        val isOutlier = (avgCycle != null && avgCycle > 0 && !bar.predicted &&
+                                kotlin.math.abs(bar.days - avgCycle) > avgCycle * 0.3f) || bar.isAnomaly
                         val thisBarColor = when {
                             bar.predicted -> predictedBarColor
                             isOutlier -> warningColor

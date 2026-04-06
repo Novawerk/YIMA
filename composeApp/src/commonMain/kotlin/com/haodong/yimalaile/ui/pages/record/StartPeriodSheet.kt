@@ -41,7 +41,7 @@ fun StartPeriodSheet(
     onConfirm: (start: LocalDate, end: LocalDate?) -> Unit,
 ) {
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-    var selectedStart by remember { mutableStateOf<LocalDate?>(null) }
+    var selectedStart by remember { mutableStateOf<LocalDate?>(today) }
     var selectedEnd by remember { mutableStateOf<LocalDate?>(null) }
     var selectingEnd by remember { mutableStateOf(false) }
 

@@ -16,6 +16,8 @@ import kotlin.time.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import kotlinx.datetime.until
 
@@ -68,6 +70,8 @@ sealed class SheetRequest {
 
     data class RecordDetail(
         val record: MenstrualRecord,
+        val allRecords: List<MenstrualRecord>,
+        val defaultCycleLength: Int,
         val result: CompletableDeferred<DetailAction?>,
     ) : SheetRequest() { override val deferred get() = result }
 
@@ -75,6 +79,15 @@ sealed class SheetRequest {
         val prediction: PredictedCycle,
         val avgPeriodLength: Int,
         val result: CompletableDeferred<Unit?>,
+    ) : SheetRequest() { override val deferred get() = result }
+
+    data class DatePicker(
+        val title: String,
+        val hint: String? = null,
+        val minDate: LocalDate? = null,
+        val maxDate: LocalDate? = null,
+        val defaultDate: LocalDate? = null,
+        val result: CompletableDeferred<LocalDate?>,
     ) : SheetRequest() { override val deferred get() = result }
 }
 
@@ -91,6 +104,7 @@ val LocalSheetManager = androidx.compose.runtime.staticCompositionLocalOf<SheetM
 // ============================================================
 
 class SheetManager(private val service: MenstrualService) {
+    fun getService() = service
 
     private val _activeSheet = MutableStateFlow<SheetRequest?>(null)
     val activeSheet: StateFlow<SheetRequest?> = _activeSheet
@@ -103,14 +117,17 @@ class SheetManager(private val service: MenstrualService) {
 
     private suspend fun showStartPeriodSheet(): Pair<LocalDate, LocalDate?>? {
         val state = service.getCycleState()
-        val avgPeriod = state.records
-            .filter { it.endDate != null }
-            .map { it.startDate.until(it.endDate!!, DateTimeUnit.DAY).toInt() + 1 }
-            .takeIf { it.isNotEmpty() }
-            ?.let { it.sum() / it.size } ?: 5
+        val avgPeriod = averagePeriodLength(state.records) ?: 5
         val deferred = CompletableDeferred<Pair<LocalDate, LocalDate?>?>()
         _activeSheet.value = SheetRequest.StartPeriod(state.records, avgPeriod, deferred)
         return deferred.await().also { _activeSheet.value = null }
+    }
+
+    private fun averagePeriodLength(records: List<MenstrualRecord>): Int? {
+        val lengths = records
+            .filter { !it.isDeleted && it.endDate != null }
+            .map { it.startDate.until(it.endDate!!, DateTimeUnit.DAY).toInt() + 1 }
+        return if (lengths.isEmpty()) null else lengths.sum() / lengths.size
     }
 
     private suspend fun showEndPeriodSheet(): LocalDate? {
@@ -130,6 +147,18 @@ class SheetManager(private val service: MenstrualService) {
         val state = service.getCycleState()
         val deferred = CompletableDeferred<Pair<LocalDate, LocalDate>?>()
         _activeSheet.value = SheetRequest.Backfill(state.records, deferred)
+        return deferred.await().also { _activeSheet.value = null }
+    }
+
+    suspend fun showDatePicker(
+        title: String,
+        hint: String? = null,
+        minDate: LocalDate? = null,
+        maxDate: LocalDate? = null,
+        defaultDate: LocalDate? = null,
+    ): LocalDate? {
+        val deferred = CompletableDeferred<LocalDate?>()
+        _activeSheet.value = SheetRequest.DatePicker(title, hint, minDate, maxDate, defaultDate, deferred)
         return deferred.await().also { _activeSheet.value = null }
     }
 
@@ -184,9 +213,10 @@ class SheetManager(private val service: MenstrualService) {
     }
 
     /** Show record detail. Returns the action the user chose, or null if dismissed. */
-    suspend fun showRecordDetail(record: MenstrualRecord): DetailAction? {
+    suspend fun showRecordDetail(record: MenstrualRecord, defaultCycleLength: Int): DetailAction? {
+        val state = service.getCycleState()
         val deferred = CompletableDeferred<DetailAction?>()
-        _activeSheet.value = SheetRequest.RecordDetail(record, deferred)
+        _activeSheet.value = SheetRequest.RecordDetail(record, state.records, defaultCycleLength, deferred)
         return deferred.await().also { _activeSheet.value = null }
     }
 
@@ -194,11 +224,42 @@ class SheetManager(private val service: MenstrualService) {
      * Show record detail and handle all actions internally.
      * Callers don't need to handle DetailAction — just call and forget.
      */
-    suspend fun showAndHandleRecordDetail(record: MenstrualRecord) {
-        val action = showRecordDetail(record) ?: return
+    suspend fun showAndHandleRecordDetail(record: MenstrualRecord, defaultCycleLength: Int) {
+        val allRecords = service.getCycleState().records.filter { !it.isDeleted }.sortedBy { it.startDate }
+        val action = showRecordDetail(record, defaultCycleLength) ?: return
         when (action) {
-            is DetailAction.EditStart -> recordPeriodStart()
-            is DetailAction.EditEnd -> recordPeriodEnd()
+            is DetailAction.EditStart -> {
+                val recordIndex = allRecords.indexOfFirst { it.id == record.id }
+                val prevRecord = if (recordIndex > 0) allRecords[recordIndex - 1] else null
+                val minStart = prevRecord?.endDate?.plus(1, DateTimeUnit.DAY)
+                val maxStart = record.endDate ?: Clock.System.todayIn(TimeZone.currentSystemDefault())
+                
+                val newStart = showDatePicker(
+                    title = "修改开始日期",
+                    minDate = minStart,
+                    maxDate = maxStart,
+                    defaultDate = record.startDate
+                )
+                if (newStart != null) {
+                    service.editRecordDates(record.id, newStart = newStart, newEnd = null)
+                }
+            }
+            is DetailAction.EditEnd -> {
+                val recordIndex = allRecords.indexOfFirst { it.id == record.id }
+                val nextRecord = if (recordIndex != -1 && recordIndex < allRecords.size - 1) allRecords[recordIndex + 1] else null
+                val minEnd = record.startDate
+                val maxEnd = nextRecord?.startDate?.minus(1, DateTimeUnit.DAY) ?: Clock.System.todayIn(TimeZone.currentSystemDefault())
+
+                val newEnd = showDatePicker(
+                    title = "修改结束日期",
+                    minDate = minEnd,
+                    maxDate = maxEnd,
+                    defaultDate = record.endDate ?: Clock.System.todayIn(TimeZone.currentSystemDefault())
+                )
+                if (newEnd != null) {
+                    service.editRecordDates(record.id, newStart = null, newEnd = newEnd)
+                }
+            }
             is DetailAction.LogDay -> logDay()
             is DetailAction.LogSpecificDay -> logDayForRecord(record.id, action.date)
             is DetailAction.Delete -> service.deleteRecord(record.id)

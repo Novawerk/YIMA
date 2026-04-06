@@ -10,8 +10,10 @@ import kotlin.time.Clock
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
+import kotlinx.datetime.until
 
 class HomeViewModel(
     private val service: MenstrualService,
@@ -28,7 +30,8 @@ class HomeViewModel(
             val cycleLength = settings.getCycleLength()
             val cycleState = service.getCycleState(cycleLength)
             val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-            val phaseInfo = service.getCurrentPhase(cycleState, today, cycleLength)
+            
+            val phaseInfo = CyclePhaseInfo.getPhaseInfo(today, cycleState, cycleLength)
             _state.value = HomeUiState.Ready(cycleState, phaseInfo)
         }
     }

@@ -50,8 +50,8 @@
     <string name="symptom_fatigue">Fatigue</string>
     <string name="record_notes_hint">Write about your day...</string>
     <string name="record_save_btn">Save Record</string>
-    <string name="record_start_date">Start Date</string>
-    <string name="record_end_date">End Date</string>
+    <string name="record_start_date">Period Start Date</string>
+    <string name="record_end_date">Period End Date</string>
     <string name="dialog_confirm">OK</string>
     <string name="dialog_cancel">Cancel</string>
     <!-- Start / End Period Sheets -->
@@ -114,6 +114,7 @@
     <string name="stats_chart_title">Cycle (days)</string>
     <string name="stats_legend_actual">Actual days</string>
     <string name="stats_legend_predicted">Predicted days</string>
+    <string name="stats_history_title">Cycle History</string>
     <!-- Settings Screen -->
     <string name="app_version">Version 1.0.0</string>
     <string name="settings_display_mode">Display Mode</string>
@@ -169,4 +170,6 @@
     <string name="phase_luteal_desc">Post-ovulation. PMS symptoms may appear.</string>
     <string name="phase_now">Now</string>
     <string name="phase_in_days">in %1$d days</string>
+    <string name="anomaly_short_cycle_title">Cycle Anomaly: Very Short</string>
+    <string name="anomaly_short_cycle_body">This cycle is less than 14 days, which may be ovulatory bleeding or hormonal fluctuations. Consult a doctor if concerned. This data is excluded from average calculations.</string>
 </resources>

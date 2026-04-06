@@ -50,8 +50,8 @@
     <string name="symptom_fatigue">疲倦</string>
     <string name="record_notes_hint">写下今天的小心情...</string>
     <string name="record_save_btn">保存记录</string>
-    <string name="record_start_date">开始日期</string>
-    <string name="record_end_date">结束日期</string>
+    <string name="record_start_date">经期开始日期</string>
+    <string name="record_end_date">经期结束日期</string>
     <string name="dialog_confirm">确定</string>
     <string name="dialog_cancel">取消</string>
     <!-- Start / End Period Sheets -->
@@ -114,6 +114,7 @@
     <string name="stats_chart_title">周期（天）</string>
     <string name="stats_legend_actual">实际的天数</string>
     <string name="stats_legend_predicted">预测的天数</string>
+    <string name="stats_history_title">周期历史</string>
     <!-- Settings Screen -->
     <string name="app_version">版本 1.0.0</string>
     <string name="settings_display_mode">显示模式</string>
@@ -168,4 +169,6 @@
     <string name="phase_luteal_desc">排卵后阶段，可能出现经前综合征。</string>
     <string name="phase_now">当前</string>
     <string name="phase_in_days">%1$d天后</string>
+    <string name="anomaly_short_cycle_title">周期异常过短</string>
+    <string name="anomaly_short_cycle_body">两次月经间隔不到14天。这可能是排卵期少量出血或内分泌波动，建议咨询医生。此数据不会计入平均周期计算。</string>
 </resources>

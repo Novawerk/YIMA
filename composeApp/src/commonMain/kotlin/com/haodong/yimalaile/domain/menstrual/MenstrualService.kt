@@ -9,6 +9,15 @@ import kotlinx.datetime.todayIn
 import kotlinx.datetime.until
 import me.tatarka.inject.annotations.Inject
 
+data class MenstrualCycle(
+    val record: MenstrualRecord,
+    val cycleLength: Int?,
+    val cycleEndDate: LocalDate,
+    val ovulationDates: Set<LocalDate>,
+    val ovulationPeakDate: LocalDate,
+    val isAnomaly: Boolean = false // 是否为异常短周期（< 14天）
+)
+
 @Inject
 class MenstrualService(private val repository: RecordsRepository) {
 
@@ -207,7 +216,66 @@ class MenstrualService(private val repository: RecordsRepository) {
     suspend fun predictNextCycles(count: Int = 3, cycleLength: Int = 28): List<PredictedCycle> =
         predictNextCycles(repository.getAllRecords(), count, cycleLength)
 
-    // ---------- Phase ----------
+    // ---------- Cycle Analysis ----------
+
+    /**
+     * Get detailed cycle information for a specific record.
+     * Logic:
+     * 1. Cycle Length: If next record exists, use (next.start - this.start). Otherwise use [defaultCycleLength].
+     * 2. Cycle End: The day before next record starts.
+     * 3. Ovulation: Scientific calculation based on the *actual or estimated cycle length*.
+     *    Standard fertile window is usually in the middle of the cycle.
+     *    According to user request, we use the "count-back method" (CycleLength - 14).
+     *    Luteal phase is relatively constant (around 14 days).
+     */
+    fun getMenstrualCycle(
+        record: MenstrualRecord,
+        allRecords: List<MenstrualRecord>,
+        predictions: List<PredictedCycle> = emptyList(),
+        defaultCycleLength: Int = 28
+    ): MenstrualCycle {
+        val sorted = allRecords.filter { !it.isDeleted }.sortedBy { it.startDate }
+        val index = sorted.indexOfFirst { it.id == record.id }
+        
+        val cycleLength = if (index != -1 && index < sorted.size - 1) {
+            sorted[index].startDate.until(sorted[index + 1].startDate, DateTimeUnit.DAY).toInt()
+        } else null
+        
+        // 标记是否为异常短周期
+        val isAnomaly = cycleLength != null && cycleLength < 14
+
+        val effectiveLength = cycleLength ?: defaultCycleLength
+        val cycleEndDate = if (index != -1 && index < sorted.size - 1) {
+            sorted[index + 1].startDate.plus(-1, DateTimeUnit.DAY)
+        } else {
+            val nextStart = predictions.firstOrNull()?.predictedStart 
+                ?: record.startDate.plus(effectiveLength, DateTimeUnit.DAY)
+            nextStart.plus(-1, DateTimeUnit.DAY)
+        }
+
+        // 医学标准计算法：排卵日通常在下次月经开始前的第14天左右。
+        // 黄体期（排卵到下次月经）相对固定，约为14天。
+        // 而卵泡期（月经开始到排卵）变动较大，周期的长短主要取决于卵泡期。
+        val peakDayOffset = (effectiveLength - 14).coerceAtLeast(0)
+        val peakDate = record.startDate.plus(peakDayOffset, DateTimeUnit.DAY)
+        
+        val ovulationDates = buildSet {
+            // 如果是异常短周期，排卵计算可能不适用，但这里仍按公式给出一个参考，UI层会提示异常
+            // 排卵期窗口通常为6天（高峰日前4天到后1天）
+            for (offset in -4..1) {
+                add(peakDate.plus(offset, DateTimeUnit.DAY))
+            }
+        }
+
+        return MenstrualCycle(
+            record = record,
+            cycleLength = cycleLength ?: defaultCycleLength,
+            cycleEndDate = cycleEndDate,
+            ovulationDates = ovulationDates,
+            ovulationPeakDate = peakDate,
+            isAnomaly = isAnomaly
+        )
+    }
 
     /**
      * Determine the current cycle phase based on historical data.
@@ -215,37 +283,7 @@ class MenstrualService(private val repository: RecordsRepository) {
      * Returns null if not enough data (< 1 completed record).
      */
     fun getCurrentPhase(state: CycleState, today: LocalDate, cycleLength: Int = 28): CyclePhaseInfo? {
-        val allRecords = state.records
-        val avgCycle = cycleLength
-        val avgPeriod = averagePeriodLength(allRecords) ?: return null
-
-        val lastPeriodStart = allRecords
-            .filter { !it.isDeleted }
-            .maxByOrNull { it.startDate }
-            ?.startDate ?: return null
-
-        val dayInCycle = lastPeriodStart.until(today, DateTimeUnit.DAY).toInt() + 1
-        val progress = (dayInCycle.toFloat() / avgCycle).coerceIn(0f, 1f)
-        val daysUntilNext = (avgCycle - dayInCycle).coerceAtLeast(0)
-        val nextStart = state.predictions.firstOrNull()?.predictedStart
-
-        val phase = when {
-            state.inPeriod -> CyclePhase.MENSTRUAL
-            dayInCycle <= avgPeriod -> CyclePhase.MENSTRUAL
-            dayInCycle <= (avgCycle * 0.46).toInt() -> CyclePhase.FOLLICULAR
-            dayInCycle <= (avgCycle * 0.57).toInt() -> CyclePhase.OVULATION
-            else -> CyclePhase.LUTEAL
-        }
-
-        return CyclePhaseInfo(
-            phase = phase,
-            dayInCycle = dayInCycle,
-            cycleLength = avgCycle,
-            periodLength = avgPeriod,
-            progress = progress,
-            daysUntilNextPeriod = daysUntilNext,
-            nextPeriodStart = nextStart,
-        )
+        return CyclePhaseInfo.getPhaseInfo(today, state, cycleLength)
     }
 
     // ---------- Private ----------
@@ -254,15 +292,35 @@ class MenstrualService(private val repository: RecordsRepository) {
      * Predict next cycles using the user-configured [cycleLength].
      */
     private fun predictNextCycles(records: List<MenstrualRecord>, count: Int = 3, cycleLength: Int = 28): List<PredictedCycle> {
+        // 计算历史平均周期长度，排除掉周期小于 14 天的记录
+        val sorted = records.filter { !it.isDeleted }.sortedBy { it.startDate }
+        val cycleLengths = mutableListOf<Int>()
+        for (i in 0 until sorted.size - 1) {
+            val length = sorted[i].startDate.until(sorted[i + 1].startDate, DateTimeUnit.DAY).toInt()
+            if (length >= 14) {
+                cycleLengths.add(length)
+            }
+        }
+        
+        val effectiveCycleLength = if (cycleLengths.isNotEmpty()) {
+            cycleLengths.sum() / cycleLengths.size
+        } else {
+            cycleLength
+        }
+
         val avgPeriodLength = averagePeriodLength(records)
         val lastStart = records.maxByOrNull { it.startDate }?.startDate ?: return emptyList()
         return (1..count).map { i ->
-            val start = lastStart.plus(cycleLength * i, DateTimeUnit.DAY)
+            val start = lastStart.plus(effectiveCycleLength * i, DateTimeUnit.DAY)
             PredictedCycle(start, avgPeriodLength?.let { start.plus(it - 1, DateTimeUnit.DAY) })
         }
     }
 
     private fun averagePeriodLength(records: List<MenstrualRecord>): Int? {
+        // 过滤掉异常记录（周期过短的记录可能伴随异常的经期长度）
+        // 这里主要通过 getAllCycleLengths 来间接判断可能更复杂，
+        // 简单起见，先过滤掉经期长度异常的情况（比如 > 10天 或 < 2天，如果需要的话）
+        // 但目前用户主要关注的是周期长度。
         val lengths = records
             .filter { !it.isDeleted && it.endDate != null }
             .map { it.startDate.until(it.endDate!!, DateTimeUnit.DAY).toInt() + 1 }

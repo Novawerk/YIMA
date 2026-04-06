@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.haodong.yimalaile.domain.menstrual.CyclePhase
 import com.haodong.yimalaile.domain.menstrual.CyclePhaseInfo
 import com.haodong.yimalaile.domain.menstrual.CycleState
 import org.jetbrains.compose.resources.stringResource
@@ -61,6 +62,25 @@ fun buildDateMap(
         var d = pred.predictedStart
         while (d <= pEnd) { if (d !in map) map[d] = DayType.PREDICTED_PERIOD; d = d.plus(1, DateTimeUnit.DAY) }
     }
+
+    // Add ovulation phase based on unified logic
+    // We iterate through recent cycles to mark ovulation
+    val dates = map.keys.toList()
+    if (dates.isNotEmpty()) {
+        val minDate = dates.minOrNull()!!
+        val maxDate = dates.maxOrNull()!!
+        var d = minDate
+        while (d <= maxDate) {
+            if (map[d] == null || map[d] == DayType.NONE) {
+                val phaseInfoForDate = CyclePhaseInfo.getPhaseInfo(d, state, avgCycle)
+                if (phaseInfoForDate?.phase == CyclePhase.OVULATION) {
+                    map[d] = DayType.OVULATION
+                }
+            }
+            d = d.plus(1, DateTimeUnit.DAY)
+        }
+    }
+
     return map
 }
 

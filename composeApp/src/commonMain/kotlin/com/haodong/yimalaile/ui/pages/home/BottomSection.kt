@@ -31,7 +31,6 @@ fun BottomSection(
     onToggleMode: (HomeMode) -> Unit,
     onPeriodArrived: () -> Unit,
     onPeriodGone: () -> Unit,
-    onBackfill: () -> Unit,
 ) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
         Surface(
@@ -82,37 +81,25 @@ fun BottomSection(
                     )
                 }
                 SmallSpacer(8)
-                if (homeMode == HomeMode.STATS) {
+                if (inPeriod) {
                     Button(
-                        onClick = onBackfill,
+                        onClick = onPeriodGone,
                         shape = RoundedCornerShape(50),
                         modifier = Modifier.height(40.dp),
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Icon(Icons.Outlined.CheckCircle, contentDescription = null, modifier = Modifier.size(16.dp))
                         SmallSpacer(4)
-                        Text(stringResource(Res.string.history_backfill), style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(Res.string.home_end_period), style = MaterialTheme.typography.labelMedium)
                     }
                 } else {
-                    if (inPeriod) {
-                        Button(
-                            onClick = onPeriodGone,
-                            shape = RoundedCornerShape(50),
-                            modifier = Modifier.height(40.dp),
-                        ) {
-                            Icon(Icons.Outlined.CheckCircle, contentDescription = null, modifier = Modifier.size(16.dp))
-                            SmallSpacer(4)
-                            Text(stringResource(Res.string.home_end_period), style = MaterialTheme.typography.labelMedium)
-                        }
-                    } else {
-                        Button(
-                            onClick = onPeriodArrived,
-                            shape = RoundedCornerShape(50),
-                            modifier = Modifier.height(40.dp),
-                        ) {
-                            Icon(Icons.Outlined.WaterDrop, contentDescription = null, modifier = Modifier.size(16.dp))
-                            SmallSpacer(4)
-                            Text(stringResource(Res.string.btn_record_period), style = MaterialTheme.typography.labelMedium)
-                        }
+                    Button(
+                        onClick = onPeriodArrived,
+                        shape = RoundedCornerShape(50),
+                        modifier = Modifier.height(40.dp),
+                    ) {
+                        Icon(Icons.Outlined.WaterDrop, contentDescription = null, modifier = Modifier.size(16.dp))
+                        SmallSpacer(4)
+                        Text(stringResource(Res.string.btn_record_period), style = MaterialTheme.typography.labelMedium)
                     }
                 }
             }

@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.ui.components.SmallSpacer
 import kotlinx.datetime.DateTimeUnit
@@ -26,6 +27,7 @@ internal fun RecordCard(
     record: MenstrualRecord,
     sortedAsc: List<MenstrualRecord>,
     isCurrent: Boolean,
+    defaultCycleLength: Int = 28,
     onClick: () -> Unit,
 ) {
     val periodDays = record.endDate?.let {
@@ -35,67 +37,81 @@ internal fun RecordCard(
     val cycleLen = if (ascIdx > 0) {
         sortedAsc[ascIdx - 1].startDate.until(record.startDate, DateTimeUnit.DAY).toInt()
     } else null
+    
+    // 如果是最新的一条记录，周期长度显示为默认长度
+    val displayCycleLen = if (ascIdx == sortedAsc.size - 1) {
+        defaultCycleLength.toString()
+    } else if (cycleLen != null) {
+        cycleLen.toString()
+    } else {
+        "-"
+    }
     val dateStr = "${record.startDate.monthNumber}/${record.startDate.dayOfMonth}"
 
     Surface(
         onClick = onClick,
         tonalElevation = 1.dp,
-        shape = MaterialTheme.shapes.large,
+        shape = MaterialTheme.shapes.extraLarge,
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        Row(
-            Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            Modifier.padding(horizontal = 24.dp, vertical = 20.dp),
         ) {
-            // Date
-            Text(
-                "$dateStr ${record.startDate.year}",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.weight(1f),
-            )
-
-            // Period days: label + number
-            if (periodDays != null) {
-                Text(
-                    stringResource(Res.string.stats_col_period),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                SmallSpacer(4)
-                Text(
-                    "$periodDays",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-
-            SmallSpacer(16)
-
-            // Cycle length: label + number, or "Current" badge
-            if (isCurrent) {
-                Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    shape = RoundedCornerShape(50),
-                ) {
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                // Date range
+                Column {
                     Text(
-                        stringResource(Res.string.stats_current_cycle),
+                        if (record.startDate.year == 2026) "${record.startDate.monthNumber}/${record.startDate.dayOfMonth}" else dateStr,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Text(
+                        "${record.startDate.year}",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-            } else {
-                Text(
-                    stringResource(Res.string.stats_col_cycle),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                SmallSpacer(4)
-                Text(
-                    if (cycleLen != null) "$cycleLen" else "-",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
-                )
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Period days
+                    if (periodDays != null) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                "$periodDays",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                            Text(
+                                stringResource(Res.string.stats_period_days),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+
+                    SmallSpacer(24)
+
+                    // Cycle days
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            displayCycleLen,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Text(
+                            stringResource(Res.string.stats_cycle_days),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
             }
         }
     }

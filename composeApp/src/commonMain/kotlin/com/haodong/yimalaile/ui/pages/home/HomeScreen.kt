@@ -148,14 +148,6 @@ fun HomeScreen(
                                     if (ok) { viewModel.refresh(); successMessage = successMsg }
                                 }
                             },
-                            onBackfill = {
-                                scope.launch {
-                                    val result = sheetManager.backfillPeriod() ?: return@launch
-                                    if (result is AddRecordResult.Success) {
-                                        viewModel.refresh(); successMessage = successMsg
-                                    }
-                                }
-                            },
                         )
                     }
                 }
