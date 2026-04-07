@@ -8,7 +8,7 @@ on:
       - '*.md'
 
 jobs:
-  update-screenshots:
+  android-screenshots:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -31,7 +31,7 @@ jobs:
       - name: Organize screenshots into docs
         run: |
           SRC=composeApp/build/outputs/roborazzi
-          DST=docs/screenshots
+          DST=docs/screenshots/android
           PREFIX="com.haodong.yimalaile.ScreenshotTest"
           for f in "$SRC"/*.png; do
             name=$(basename "$f" .png | sed "s/${PREFIX}\.//")
@@ -41,6 +41,89 @@ jobs:
             mkdir -p "$DST/$lang/$theme"
             cp "$f" "$DST/$lang/$theme/${screen}.png"
           done
+
+      - name: Upload Android screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-screenshots
+          path: docs/screenshots/android/
+
+  ios-screenshots:
+    runs-on: macos-15
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build KMP framework
+        run: ./gradlew :composeApp:compileKotlinIosSimulatorArm64
+
+      - name: Run iOS UI tests
+        run: |
+          xcodebuild test \
+            -project iosApp/iosApp.xcodeproj \
+            -scheme iosApp \
+            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -only-testing iosAppUITests \
+            -resultBundlePath TestResults.xcresult \
+            || true
+
+      - name: Extract screenshots from test results
+        run: |
+          DST=docs/screenshots/ios
+          mkdir -p "$DST"
+          # Extract attachments from xcresult bundle
+          xcrun xcresulttool get --path TestResults.xcresult --format json > results.json 2>/dev/null || true
+          # Find and copy screenshot attachments
+          find TestResults.xcresult -name "*.png" | while read f; do
+            basename_f=$(basename "$f")
+            # Parse lang/theme from filename like home_calendar_en_light.png
+            name="${basename_f%.png}"
+            lang=$(echo "$name" | rev | cut -d_ -f2 | rev)
+            theme=$(echo "$name" | rev | cut -d_ -f1 | rev)
+            screen=$(echo "$name" | rev | cut -d_ -f3- | rev)
+            if [ -n "$lang" ] && [ -n "$theme" ] && [ -n "$screen" ]; then
+              mkdir -p "$DST/$lang/$theme"
+              cp "$f" "$DST/$lang/$theme/${screen}.png"
+            fi
+          done
+
+      - name: Upload iOS screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-screenshots
+          path: docs/screenshots/ios/
+
+  commit-screenshots:
+    needs: [android-screenshots, ios-screenshots]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Android screenshots
+        uses: actions/download-artifact@v4
+        with:
+          name: android-screenshots
+          path: docs/screenshots/android/
+
+      - name: Download iOS screenshots
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-screenshots
+          path: docs/screenshots/ios/
 
       - name: Commit updated screenshots
         uses: stefanzweifel/git-auto-commit-action@v5

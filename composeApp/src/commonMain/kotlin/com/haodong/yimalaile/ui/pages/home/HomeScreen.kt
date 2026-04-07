@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.domain.menstrual.AddRecordResult
@@ -128,7 +129,7 @@ private fun HomeAppBar(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         GrowSpacer()
-        IconButton(onClick = onNavigateSettings, modifier = Modifier.size(40.dp)) {
+        IconButton(onClick = onNavigateSettings, modifier = Modifier.size(40.dp).testTag("nav_settings")) {
             Icon(Icons.Outlined.Settings, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }

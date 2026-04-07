@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.ui.components.SmallSpacer
 import org.jetbrains.compose.resources.stringResource
@@ -38,6 +39,7 @@ fun BottomSection(
                 // Tab 1: Home overview
                 IconButton(
                     onClick = { onToggleMode(HomeMode.CALENDAR) },
+                    modifier = Modifier.testTag("nav_calendar"),
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = if (homeMode == HomeMode.CALENDAR) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
                         contentColor = if (homeMode == HomeMode.CALENDAR) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -51,6 +53,7 @@ fun BottomSection(
                 // Tab 2: Detail calendar
                 IconButton(
                     onClick = { onToggleMode(HomeMode.DETAIL) },
+                    modifier = Modifier.testTag("nav_detail"),
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = if (homeMode == HomeMode.DETAIL) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
                         contentColor = if (homeMode == HomeMode.DETAIL) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -64,6 +67,7 @@ fun BottomSection(
                 // Tab 3: Stats
                 IconButton(
                     onClick = { onToggleMode(HomeMode.STATS) },
+                    modifier = Modifier.testTag("nav_stats"),
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = if (homeMode == HomeMode.STATS) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
                         contentColor = if (homeMode == HomeMode.STATS) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
