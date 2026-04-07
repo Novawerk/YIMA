@@ -36,35 +36,38 @@ class FakeRecordsRepository(
  * intensities, moods, and daily notes.
  */
 fun createBeautifulTestData(): List<MenstrualRecord> {
-    val now = 1_712_400_000_000L // ~April 2024
+    val now = 1_712_400_000_000L
 
-    // Record 1: ~6 months ago
-    val r1Start = LocalDate(2025, 10, 3)
+    // Varied cycle lengths: 26, 31, 28, 33, 27, 30 days
+    // Varied period durations: 4, 6, 5, 7, 4, 5, 6 days
+
+    // Record 1: cycle=26d, period=4d
+    val r1Start = LocalDate(2025, 10, 5)
     val r1End = LocalDate(2025, 10, 8)
 
-    // Record 2: ~5 months ago
-    val r2Start = LocalDate(2025, 11, 1)
+    // Record 2: cycle=31d, period=6d
+    val r2Start = LocalDate(2025, 10, 31)
     val r2End = LocalDate(2025, 11, 5)
 
-    // Record 3: ~4 months ago
-    val r3Start = LocalDate(2025, 11, 29)
-    val r3End = LocalDate(2025, 12, 4)
+    // Record 3: cycle=28d, period=5d
+    val r3Start = LocalDate(2025, 11, 28)
+    val r3End = LocalDate(2025, 12, 2)
 
-    // Record 4: ~3 months ago
-    val r4Start = LocalDate(2025, 12, 28)
-    val r4End = LocalDate(2026, 1, 2)
+    // Record 4: cycle=33d, period=7d (longer cycle + heavier period)
+    val r4Start = LocalDate(2025, 12, 31)
+    val r4End = LocalDate(2026, 1, 6)
 
-    // Record 5: ~2 months ago
-    val r5Start = LocalDate(2026, 1, 26)
-    val r5End = LocalDate(2026, 1, 31)
+    // Record 5: cycle=27d, period=4d (short & light)
+    val r5Start = LocalDate(2026, 1, 27)
+    val r5End = LocalDate(2026, 1, 30)
 
-    // Record 6: ~1 month ago
-    val r6Start = LocalDate(2026, 2, 24)
-    val r6End = LocalDate(2026, 3, 1)
+    // Record 6: cycle=30d, period=5d
+    val r6Start = LocalDate(2026, 2, 26)
+    val r6End = LocalDate(2026, 3, 2)
 
-    // Record 7: most recent completed
-    val r7Start = LocalDate(2026, 3, 25)
-    val r7End = LocalDate(2026, 3, 30)
+    // Record 7: most recent, period=6d
+    val r7Start = LocalDate(2026, 3, 27)
+    val r7End = LocalDate(2026, 4, 1)
 
     return listOf(
         createRecord("r1", r1Start, r1End, now, periodPattern = 0),
