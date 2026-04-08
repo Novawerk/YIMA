@@ -65,12 +65,51 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Select Xcode and list available simulators
+        run: |
+          # Use the latest stable Xcode on the runner
+          sudo xcode-select -p
+          echo "--- Available iPhone simulators ---"
+          xcrun simctl list devices available iPhone
+          echo "--- iOS runtimes ---"
+          xcrun simctl list runtimes iOS
+
+      - name: Boot simulator
+        run: |
+          # Pick the first available iPhone device (prefer iPhone 16 Pro)
+          DEVICE_ID=$(xcrun simctl list devices available iPhone -j \
+            | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          preferred = ['iPhone 16 Pro', 'iPhone 16', 'iPhone 15 Pro', 'iPhone 15']
+          all_devices = []
+          for runtime, devices in data.get('devices', {}).items():
+              if 'iOS' not in runtime:
+                  continue
+              for d in devices:
+                  if d.get('isAvailable'):
+                      all_devices.append((d['name'], d['udid'], runtime))
+          # Try preferred devices first
+          for pref in preferred:
+              for name, udid, rt in all_devices:
+                  if name == pref:
+                      print(udid)
+                      sys.exit(0)
+          # Fallback to first available iPhone
+          if all_devices:
+              print(all_devices[0][1])
+              sys.exit(0)
+          sys.exit(1)
+          ")
+          echo "Selected simulator: $DEVICE_ID"
+          echo "DEVICE_ID=$DEVICE_ID" >> "$GITHUB_ENV"
+          xcrun simctl boot "$DEVICE_ID" || true
+
       - name: Build KMP framework
         run: ./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
 
       - name: Prepare framework for Xcode
         run: |
-          # Determine SDK name for simulator
           SDK_NAME=$(xcrun --sdk iphonesimulator --show-sdk-version)
           DEST="composeApp/build/xcode-frameworks/Debug/iphonesimulator${SDK_NAME}"
           mkdir -p "$DEST"
@@ -82,11 +121,10 @@ jobs:
           xcodebuild test \
             -project iosApp/iosApp.xcodeproj \
             -scheme iosApp \
-            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -destination "platform=iOS Simulator,id=$DEVICE_ID" \
             -only-testing iosAppUITests \
             -resultBundlePath TestResults.xcresult \
-            OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED=YES \
-            || true
+            OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED=YES
 
       - name: Extract screenshots from test results
         run: |
@@ -96,14 +134,22 @@ jobs:
           xcrun xcresulttool export attachments \
             --path TestResults.xcresult \
             --output-path "$EXPORT_DIR"
+
+          # Verify manifest exists
+          if [ ! -f "$EXPORT_DIR/manifest.json" ]; then
+            echo "::error::No manifest.json found — screenshot extraction failed"
+            exit 1
+          fi
+
           # Parse manifest.json to organize screenshots by lang/theme
           python3 -c "
-          import json, os, shutil, re
+          import json, os, shutil, re, sys
 
           dst = '$DST'
           export_dir = '$EXPORT_DIR'
           manifest = json.load(open(os.path.join(export_dir, 'manifest.json')))
 
+          count = 0
           for test_entry in manifest:
               for att in test_entry.get('attachments', []):
                   suggested = att.get('suggestedHumanReadableName', '')
@@ -124,6 +170,12 @@ jobs:
                   if os.path.exists(src):
                       shutil.copy2(src, os.path.join(out_dir, screen + '.png'))
                       print(f'Exported: {lang}/{theme}/{screen}.png')
+                      count += 1
+
+          if count == 0:
+              print('::error::No screenshots were extracted from test results')
+              sys.exit(1)
+          print(f'Total: {count} screenshots exported')
           "
 
       - name: Upload iOS screenshots
