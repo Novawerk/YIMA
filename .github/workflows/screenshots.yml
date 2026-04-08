@@ -66,9 +66,18 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build KMP framework
-        run: ./gradlew :composeApp:compileKotlinIosSimulatorArm64
+        run: ./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
+
+      - name: Prepare framework for Xcode
+        run: |
+          # Determine SDK name for simulator
+          SDK_NAME=$(xcrun --sdk iphonesimulator --show-sdk-version)
+          DEST="composeApp/build/xcode-frameworks/Debug/iphonesimulator${SDK_NAME}"
+          mkdir -p "$DEST"
+          cp -R composeApp/build/bin/iosSimulatorArm64/debugFramework/ComposeApp.framework "$DEST/"
 
       - name: Run iOS UI tests
+        timeout-minutes: 15
         run: |
           xcodebuild test \
             -project iosApp/iosApp.xcodeproj \
@@ -76,27 +85,46 @@ jobs:
             -destination 'platform=iOS Simulator,name=iPhone 16' \
             -only-testing iosAppUITests \
             -resultBundlePath TestResults.xcresult \
+            OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED=YES \
             || true
 
       - name: Extract screenshots from test results
         run: |
           DST=docs/screenshots/ios
-          mkdir -p "$DST"
-          # Extract attachments from xcresult bundle
-          xcrun xcresulttool get --path TestResults.xcresult --format json > results.json 2>/dev/null || true
-          # Find and copy screenshot attachments
-          find TestResults.xcresult -name "*.png" | while read f; do
-            basename_f=$(basename "$f")
-            # Parse lang/theme from filename like home_calendar_en_light.png
-            name="${basename_f%.png}"
-            lang=$(echo "$name" | rev | cut -d_ -f2 | rev)
-            theme=$(echo "$name" | rev | cut -d_ -f1 | rev)
-            screen=$(echo "$name" | rev | cut -d_ -f3- | rev)
-            if [ -n "$lang" ] && [ -n "$theme" ] && [ -n "$screen" ]; then
-              mkdir -p "$DST/$lang/$theme"
-              cp "$f" "$DST/$lang/$theme/${screen}.png"
-            fi
-          done
+          EXPORT_DIR=$(mktemp -d)
+          # Export all test attachments with manifest
+          xcrun xcresulttool export attachments \
+            --path TestResults.xcresult \
+            --output-path "$EXPORT_DIR"
+          # Parse manifest.json to organize screenshots by lang/theme
+          python3 -c "
+          import json, os, shutil, re
+
+          dst = '$DST'
+          export_dir = '$EXPORT_DIR'
+          manifest = json.load(open(os.path.join(export_dir, 'manifest.json')))
+
+          for test_entry in manifest:
+              for att in test_entry.get('attachments', []):
+                  suggested = att.get('suggestedHumanReadableName', '')
+                  filename = att.get('exportedFileName', '')
+                  if not suggested or not filename:
+                      continue
+                  # suggested is like 'home_calendar_en_light_0_UUID.png'
+                  # Strip trailing _0_UUID.png to get the original attachment name
+                  name = re.sub(r'_\d+_[0-9A-Fa-f-]+\.png$', '', suggested)
+                  # name is now like 'home_calendar_en_light'
+                  parts = name.rsplit('_', 2)
+                  if len(parts) < 3:
+                      continue
+                  screen, lang, theme = parts[0], parts[1], parts[2]
+                  out_dir = os.path.join(dst, lang, theme)
+                  os.makedirs(out_dir, exist_ok=True)
+                  src = os.path.join(export_dir, filename)
+                  if os.path.exists(src):
+                      shutil.copy2(src, os.path.join(out_dir, screen + '.png'))
+                      print(f'Exported: {lang}/{theme}/{screen}.png')
+          "
 
       - name: Upload iOS screenshots
         uses: actions/upload-artifact@v4
