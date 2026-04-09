@@ -103,32 +103,32 @@ jobs:
           esac
 
           NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
-          VERSION_CODE=$((MAJOR * 10000 + MINOR * 100 + PATCH))
+
+          # Read current version code from toml (auto-incremented by bump-version CI)
+          VERSION_CODE=$(grep '^app-versionCode' gradle/libs.versions.toml | sed 's/.*= *"\(.*\)"/\1/')
 
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
           echo "tag=v$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "Bumping $BUMP: $PREV_TAG → v$NEW_VERSION (code: $VERSION_CODE)"
 
-      - name: Bump version in libs.versions.toml
+      - name: Bump version name in libs.versions.toml
         run: |
           TOML="gradle/libs.versions.toml"
           VERSION="${{ steps.version.outputs.version }}"
-          VERSION_CODE="${{ steps.version.outputs.version_code }}"
 
-          sed -i "s/^app-versionCode = \".*\"/app-versionCode = \"$VERSION_CODE\"/" "$TOML"
+          # Only update version name — version code is managed by bump-version CI
           sed -i "s/^app-versionName = \".*\"/app-versionName = \"$VERSION\"/" "$TOML"
 
           echo "Updated $TOML:"
           grep "^app-" "$TOML"
 
-      - name: Sync version to iOS Config.xcconfig
+      - name: Sync version name to iOS Config.xcconfig
         run: |
           XCCONFIG="iosApp/Configuration/Config.xcconfig"
           VERSION="${{ steps.version.outputs.version }}"
-          VERSION_CODE="${{ steps.version.outputs.version_code }}"
 
-          sed -i "s/CURRENT_PROJECT_VERSION=.*/CURRENT_PROJECT_VERSION=$VERSION_CODE/" "$XCCONFIG"
+          # Only update marketing version — project version is synced by bump-version CI
           sed -i "s/MARKETING_VERSION=.*/MARKETING_VERSION=$VERSION/" "$XCCONFIG"
 
           echo "Updated $XCCONFIG:"
@@ -139,8 +139,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add gradle/libs.versions.toml iosApp/Configuration/Config.xcconfig
-          git commit -m "chore: bump version to ${{ steps.version.outputs.version }}"
-          git push origin release
+          git diff --cached --quiet && echo "No changes to commit" || {
+            git commit -m "chore: bump version to ${{ steps.version.outputs.version }}"
+            git push origin release
+          }
 
       - name: Create and push tag
         run: |
@@ -209,21 +211,19 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          VERSION_CODE="${{ steps.version.outputs.version_code }}"
           BRANCH="backport/version-${VERSION}"
 
           git checkout -b "$BRANCH" origin/main
 
-          # Apply version changes directly instead of cherry-pick (avoids conflicts)
+          # Only sync version name — version code is auto-managed by bump-version CI
           TOML="gradle/libs.versions.toml"
-          sed -i "s/^app-versionCode = \".*\"/app-versionCode = \"$VERSION_CODE\"/" "$TOML"
           sed -i "s/^app-versionName = \".*\"/app-versionName = \"$VERSION\"/" "$TOML"
 
           XCCONFIG="iosApp/Configuration/Config.xcconfig"
-          sed -i "s/CURRENT_PROJECT_VERSION=.*/CURRENT_PROJECT_VERSION=$VERSION_CODE/" "$XCCONFIG"
           sed -i "s/MARKETING_VERSION=.*/MARKETING_VERSION=$VERSION/" "$XCCONFIG"
 
           git add "$TOML" "$XCCONFIG"
+          git diff --cached --quiet && { echo "No changes needed"; exit 0; }
           git commit -m "chore: sync version ${VERSION} to main"
           git push origin "$BRANCH"
 
