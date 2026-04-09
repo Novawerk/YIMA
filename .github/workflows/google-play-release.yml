@@ -22,9 +22,14 @@
 #    - Base64-encode it: base64 -i service-account.json | pbcopy
 #    - Add as GitHub secret: GOOGLE_PLAY_SERVICE_ACCOUNT_JSON
 #
+# VERSIONING:
+#   - versionCode auto-bumps on every push to main (bump-version.yml)
+#   - versionName is updated manually in gradle/libs.versions.toml for releases
+#   - Both Android and iOS read from the same source of truth
+#
 # USAGE:
-#   - Push tag v1.2.3       -> uploads to internal testing track
-#   - Push tag v1.2.3-prod  -> uploads to production track
+#   - Push tag v*            -> uploads to internal testing track
+#   - Push tag v*-prod       -> uploads to production track
 #   - Manual dispatch        -> choose track from dropdown
 
 name: Google Play Release
@@ -62,26 +67,16 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Extract version from tag
+      - name: Read version from catalog
         id: version
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "version_name=1.0.0" >> $GITHUB_OUTPUT
-            echo "version_code=1" >> $GITHUB_OUTPUT
-          else
-            TAG="${GITHUB_REF#refs/tags/v}"
-            # Strip -prod suffix if present
-            VERSION="${TAG%-prod}"
-            echo "version_name=${VERSION}" >> $GITHUB_OUTPUT
-
-            # Convert semver to integer versionCode: 1.2.3 -> 10203
-            IFS='.' read -r major minor patch <<< "${VERSION}"
-            major=${major:-0}
-            minor=${minor:-0}
-            patch=${patch:-0}
-            VERSION_CODE=$(( major * 10000 + minor * 100 + patch ))
-            echo "version_code=${VERSION_CODE}" >> $GITHUB_OUTPUT
-          fi
+          # Single source of truth: gradle/libs.versions.toml
+          TOML="gradle/libs.versions.toml"
+          VERSION_NAME=$(grep '^app-versionName' "$TOML" | sed 's/.*= *"\(.*\)"/\1/')
+          VERSION_CODE=$(grep '^app-versionCode' "$TOML" | sed 's/.*= *"\(.*\)"/\1/')
+          echo "version_name=${VERSION_NAME}" >> $GITHUB_OUTPUT
+          echo "version_code=${VERSION_CODE}" >> $GITHUB_OUTPUT
+          echo "Release: $VERSION_NAME ($VERSION_CODE)"
 
       - name: Determine track
         id: track
