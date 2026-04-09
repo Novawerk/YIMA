@@ -273,7 +273,7 @@ jobs:
           serviceAccountJson: service-account.json
           packageName: com.haodong.yimalaile
           releaseFiles: composeApp/build/outputs/bundle/release/*.aab
-          track: production
+          track: internal
           status: draft
 
       - name: Upload AAB as artifact
