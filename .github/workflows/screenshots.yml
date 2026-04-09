@@ -10,6 +10,8 @@ on:
     paths-ignore:
       - 'docs/**'
       - '*.md'
+  release:
+    types: [published]
 
 jobs:
   android-screenshots:
@@ -53,6 +55,7 @@ jobs:
           path: screenshots/android/
 
   ios-screenshots:
+    if: github.event_name == 'release'
     runs-on: macos-15
 
     steps:
@@ -171,7 +174,7 @@ jobs:
   # Post a preview comment on PRs
   post-comment:
     if: github.event_name == 'pull_request'
-    needs: [android-screenshots, ios-screenshots]
+    needs: [android-screenshots]
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -182,12 +185,6 @@ jobs:
         with:
           name: android-screenshots
           path: screenshots/android/
-
-      - name: Download iOS screenshots
-        uses: actions/download-artifact@v4
-        with:
-          name: ios-screenshots
-          path: screenshots/ios/
 
       - name: Post screenshot preview comment
         uses: actions/github-script@v7
@@ -277,7 +274,7 @@ jobs:
   # On main: publish screenshots to an orphan branch for stable access
   publish-to-branch:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [android-screenshots, ios-screenshots]
+    needs: [android-screenshots]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -292,12 +289,6 @@ jobs:
         with:
           name: android-screenshots
           path: screenshots/android/
-
-      - name: Download iOS screenshots
-        uses: actions/download-artifact@v4
-        with:
-          name: ios-screenshots
-          path: screenshots/ios/
 
       - name: Publish to screenshots branch
         run: |
@@ -317,7 +308,9 @@ jobs:
 
           # Copy new screenshots to root
           cp -R screenshots/android/ android/
-          cp -R screenshots/ios/ ios/
+          if [ -d screenshots/ios ]; then
+            cp -R screenshots/ios/ ios/
+          fi
 
           # Generate a README with preview links
           cat > README.md << 'READMEEOF'
