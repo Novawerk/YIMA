@@ -80,8 +80,10 @@ android {
         applicationId = "com.haodong.yimalaile"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 1
-        versionName = System.getenv("VERSION_NAME") ?: "1.0"
+        versionCode = System.getenv("VERSION_CODE")?.toIntOrNull()
+            ?: libs.versions.app.versionCode.get().toInt()
+        versionName = System.getenv("VERSION_NAME")
+            ?: libs.versions.app.versionName.get()
     }
     signingConfigs {
         create("release") {
@@ -113,6 +115,20 @@ android {
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+}
+
+tasks.register("syncVersionToIos") {
+    description = "Syncs app version from version catalog to iOS Config.xcconfig"
+    val versionCode = libs.versions.app.versionCode.get()
+    val versionName = libs.versions.app.versionName.get()
+    val xcconfigFile = rootProject.file("iosApp/Configuration/Config.xcconfig")
+    doLast {
+        val content = xcconfigFile.readText()
+            .replace(Regex("CURRENT_PROJECT_VERSION=.*"), "CURRENT_PROJECT_VERSION=$versionCode")
+            .replace(Regex("MARKETING_VERSION=.*"), "MARKETING_VERSION=$versionName")
+        xcconfigFile.writeText(content)
+        println("Synced iOS version: $versionName ($versionCode)")
     }
 }
 

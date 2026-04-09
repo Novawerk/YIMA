@@ -1,0 +1,47 @@
+name: Bump Version Code
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    # Skip version bump commits and release commits
+    if: >-
+      !contains(github.event.head_commit.message, '[skip ci]')
+      && !startsWith(github.event.head_commit.message, 'Release ')
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Bump version code
+        run: |
+          TOML="gradle/libs.versions.toml"
+          CURRENT=$(grep '^app-versionCode' "$TOML" | sed 's/.*= *"\(.*\)"/\1/')
+          NEW=$((CURRENT + 1))
+          sed -i "s/^app-versionCode = \"$CURRENT\"/app-versionCode = \"$NEW\"/" "$TOML"
+          echo "Bumped versionCode: $CURRENT -> $NEW"
+
+      - name: Sync iOS version
+        run: |
+          TOML="gradle/libs.versions.toml"
+          VERSION_CODE=$(grep '^app-versionCode' "$TOML" | sed 's/.*= *"\(.*\)"/\1/')
+          VERSION_NAME=$(grep '^app-versionName' "$TOML" | sed 's/.*= *"\(.*\)"/\1/')
+          XCCONFIG="iosApp/Configuration/Config.xcconfig"
+          sed -i "s/CURRENT_PROJECT_VERSION=.*/CURRENT_PROJECT_VERSION=$VERSION_CODE/" "$XCCONFIG"
+          sed -i "s/MARKETING_VERSION=.*/MARKETING_VERSION=$VERSION_NAME/" "$XCCONFIG"
+          echo "Synced iOS: $VERSION_NAME ($VERSION_CODE)"
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add gradle/libs.versions.toml iosApp/Configuration/Config.xcconfig
+          git commit -m "Bump version code [skip ci]"
+          git push
