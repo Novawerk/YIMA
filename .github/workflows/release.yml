@@ -18,10 +18,23 @@ on:
   pull_request:
     types: [closed]
     branches: [release]
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump type'
+        required: true
+        default: 'minor'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 jobs:
   release:
-    if: github.event.pull_request.merged == true
+    if: >-
+      github.event_name == 'workflow_dispatch'
+      || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -39,9 +52,14 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Determine version bump from PR labels
+      - name: Determine version bump
         id: bump
         run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "bump=${{ inputs.bump }}" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
           LABELS='${{ toJSON(github.event.pull_request.labels.*.name) }}'
           PATCH=$(echo "$LABELS" | jq -r 'map(select(. == "version:patch")) | length')
           MINOR=$(echo "$LABELS" | jq -r 'map(select(. == "version:minor")) | length')
