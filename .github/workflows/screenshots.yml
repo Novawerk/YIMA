@@ -298,11 +298,11 @@ jobs:
           # Create or switch to orphan branch
           if git ls-remote --exit-code origin screenshots >/dev/null 2>&1; then
             git fetch origin screenshots
-            git checkout screenshots
+            git switch screenshots
             # Clean old screenshots
             git rm -rf android ios 2>/dev/null || true
           else
-            git checkout --orphan screenshots
+            git switch --orphan screenshots
             git rm -rf . 2>/dev/null || true
           fi
 
