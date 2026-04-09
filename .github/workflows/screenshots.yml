@@ -28,7 +28,9 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Record screenshots
-        run: ./gradlew :composeApp:recordRoborazziDebug
+        run: |
+          # Retry once on failure (Robolectric may fail to download SDK jars on first try)
+          ./gradlew :composeApp:recordRoborazziDebug || ./gradlew :composeApp:recordRoborazziDebug
 
       - name: Organize screenshots
         run: |
@@ -101,8 +103,11 @@ jobs:
           echo "DEVICE_ID=$DEVICE_ID" >> "$GITHUB_ENV"
           xcrun simctl boot "$DEVICE_ID" || true
 
+      - name: Pre-build KMP framework
+        run: ./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
+
       - name: Run iOS UI tests
-        timeout-minutes: 20
+        timeout-minutes: 30
         run: |
           xcodebuild test \
             -project iosApp/iosApp.xcodeproj \
