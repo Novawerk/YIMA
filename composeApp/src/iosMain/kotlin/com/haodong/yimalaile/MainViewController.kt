@@ -18,9 +18,11 @@ import com.haodong.yimalaile.fakes.createScreenshotTestData
 import com.haodong.yimalaile.ui.locale.LocalAppLocale
 import com.haodong.yimalaile.ui.navigation.DisclaimerRoute
 import com.haodong.yimalaile.ui.navigation.HomeRoute
+import com.haodong.yimalaile.ui.navigation.OnboardingRoute
 import com.haodong.yimalaile.ui.navigation.SettingsRoute
 import com.haodong.yimalaile.ui.pages.disclaimer.DisclaimerScreen
 import com.haodong.yimalaile.ui.pages.home.HomeScreen
+import com.haodong.yimalaile.ui.pages.onboarding.OnboardingScreen
 import com.haodong.yimalaile.ui.pages.settings.SettingsScreen
 import com.haodong.yimalaile.ui.pages.sheet.LocalSheetViewModel
 import com.haodong.yimalaile.ui.pages.sheet.SheetHost
@@ -99,6 +101,58 @@ fun ScreenshotMainViewController() = ComposeUIViewController {
                     }
                 }
                 SheetHost(sheetViewModel)
+            }
+        }
+    }
+}
+
+/**
+ * Entry point for iOS screenshot tests — starts on the Disclaimer screen.
+ */
+fun ScreenshotDisclaimerViewController() = ComposeUIViewController {
+    val dataStore = PreferenceDataStoreFactory.createWithPath(
+        produceFile = { dataStorePath("screenshot_disclaimer.preferences_pb").toPath() }
+    )
+    val settings = SettingsRepository(dataStore)
+    val fakeRepo = FakeRecordsRepository()
+    val service = MenstrualService(fakeRepo)
+
+    val viewModel = remember { AppViewModel(service, settings) }
+    val darkMode = viewModel.darkMode
+    val language = viewModel.language
+
+    CompositionLocalProvider(LocalAppLocale provides language) {
+        key(language) {
+            AppTheme(darkMode = darkMode) {
+                DisclaimerScreen(onAccept = {})
+            }
+        }
+    }
+}
+
+/**
+ * Entry point for iOS screenshot tests — starts on the Onboarding screen.
+ */
+fun ScreenshotOnboardingViewController() = ComposeUIViewController {
+    val dataStore = PreferenceDataStoreFactory.createWithPath(
+        produceFile = { dataStorePath("screenshot_onboarding.preferences_pb").toPath() }
+    )
+    val settings = SettingsRepository(dataStore)
+    val fakeRepo = FakeRecordsRepository()
+    val service = MenstrualService(fakeRepo)
+
+    val viewModel = remember { AppViewModel(service, settings) }
+    val darkMode = viewModel.darkMode
+    val language = viewModel.language
+
+    CompositionLocalProvider(LocalAppLocale provides language) {
+        key(language) {
+            AppTheme(darkMode = darkMode) {
+                OnboardingScreen(
+                    service = service,
+                    settings = settings,
+                    onComplete = {},
+                )
             }
         }
     }

@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.domain.menstrual.CycleState
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.domain.settings.SettingsRepository
+import androidx.compose.ui.platform.testTag
 import com.haodong.yimalaile.ui.components.CycleCalendarGrid
 import com.haodong.yimalaile.ui.components.PrimaryCta
 import com.haodong.yimalaile.ui.components.SmallSpacer
@@ -103,6 +104,7 @@ fun OnboardingScreen(
                 PrimaryCta(
                     text = stringResource(Res.string.onboarding_next),
                     onClick = { step = 1 },
+                    modifier = Modifier.testTag("onboarding_next"),
                 )
             }
 

@@ -7,6 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
@@ -53,7 +54,7 @@ internal fun RecordCard(
         onClick = onClick,
         tonalElevation = 1.dp,
         shape = MaterialTheme.shapes.extraLarge,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().testTag("record_card_${record.id}"),
     ) {
         Column(
             Modifier.padding(horizontal = 24.dp, vertical = 20.dp),
