@@ -204,15 +204,27 @@ jobs:
             --notes-file release_notes.md
 
       - name: Backport version bump to main
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          BUMP_COMMIT=$(git rev-parse HEAD)
+          VERSION_CODE="${{ steps.version.outputs.version_code }}"
           BRANCH="backport/version-${VERSION}"
 
           git checkout -b "$BRANCH" origin/main
-          git cherry-pick "$BUMP_COMMIT"
+
+          # Apply version changes directly instead of cherry-pick (avoids conflicts)
+          TOML="gradle/libs.versions.toml"
+          sed -i "s/^app-versionCode = \".*\"/app-versionCode = \"$VERSION_CODE\"/" "$TOML"
+          sed -i "s/^app-versionName = \".*\"/app-versionName = \"$VERSION\"/" "$TOML"
+
+          XCCONFIG="iosApp/Configuration/Config.xcconfig"
+          sed -i "s/CURRENT_PROJECT_VERSION=.*/CURRENT_PROJECT_VERSION=$VERSION_CODE/" "$XCCONFIG"
+          sed -i "s/MARKETING_VERSION=.*/MARKETING_VERSION=$VERSION/" "$XCCONFIG"
+
+          git add "$TOML" "$XCCONFIG"
+          git commit -m "chore: sync version ${VERSION} to main"
           git push origin "$BRANCH"
 
           gh pr create \
