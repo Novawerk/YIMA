@@ -214,7 +214,11 @@ jobs:
             const androidScreenshots = collectScreenshots('screenshots/android');
             const iosScreenshots = collectScreenshots('screenshots/ios');
 
-            const screens = ['home_calendar', 'home_detail', 'home_stats', 'settings', 'disclaimer'];
+            const screens = [
+              'disclaimer', 'onboarding_welcome', 'onboarding_calendar',
+              'home_calendar', 'home_detail', 'home_stats', 'settings',
+              'record_detail', 'log_day', 'prediction_detail',
+            ];
             const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
 
             let body = `## 📱 Screenshot Preview\n\n`;

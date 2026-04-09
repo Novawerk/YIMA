@@ -23,10 +23,14 @@ import com.haodong.yimalaile.fakes.createBeautifulTestData
 import com.haodong.yimalaile.ui.locale.LocalAppLocale
 import com.haodong.yimalaile.ui.pages.disclaimer.DisclaimerScreen
 import com.haodong.yimalaile.ui.pages.home.HomeScreen
+import com.haodong.yimalaile.ui.pages.onboarding.OnboardingScreen
 import com.haodong.yimalaile.ui.pages.settings.SettingsScreen
 import com.haodong.yimalaile.ui.pages.sheet.LocalSheetViewModel
 import com.haodong.yimalaile.ui.pages.sheet.SheetHost
 import com.haodong.yimalaile.ui.pages.sheet.SheetViewModel
+import com.haodong.yimalaile.ui.pages.sheet.sheets.LogDaySheet
+import com.haodong.yimalaile.ui.pages.sheet.sheets.PredictionDetailSheet
+import com.haodong.yimalaile.ui.pages.sheet.sheets.RecordDetailSheet
 import com.haodong.yimalaile.ui.theme.AppTheme
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.*
@@ -69,6 +73,22 @@ class ScreenshotTest {
     fun disclaimer_zh_dark() = screenshotTest("zh", AppDarkMode.DARK) {
         DisclaimerScreen(onAccept = {})
     }
+
+    // ═══════════════════════════════════════════════════
+    // Onboarding — Welcome (Step 0)
+    // ═══════════════════════════════════════════════════
+
+    @Test
+    fun onboarding_welcome_en_light() = onboardingTest("en", AppDarkMode.LIGHT)
+
+    @Test
+    fun onboarding_welcome_en_dark() = onboardingTest("en", AppDarkMode.DARK)
+
+    @Test
+    fun onboarding_welcome_zh_light() = onboardingTest("zh", AppDarkMode.LIGHT)
+
+    @Test
+    fun onboarding_welcome_zh_dark() = onboardingTest("zh", AppDarkMode.DARK)
 
     // ═══════════════════════════════════════════════════
     // Settings Screen
@@ -187,6 +207,114 @@ class ScreenshotTest {
     fun home_detail_zh_dark() = homeScreenTest("zh", AppDarkMode.DARK, "detail")
 
     // ═══════════════════════════════════════════════════
+    // Log Day Sheet
+    // ═══════════════════════════════════════════════════
+
+    @Test
+    fun log_day_en_light() = screenshotTest("en", AppDarkMode.LIGHT) {
+        LogDaySheet(
+            targetDate = LocalDate(2026, 3, 28),
+            onDismiss = {},
+            onSave = { _, _, _, _ -> },
+        )
+    }
+
+    @Test
+    fun log_day_en_dark() = screenshotTest("en", AppDarkMode.DARK) {
+        LogDaySheet(
+            targetDate = LocalDate(2026, 3, 28),
+            onDismiss = {},
+            onSave = { _, _, _, _ -> },
+        )
+    }
+
+    @Test
+    fun log_day_zh_light() = screenshotTest("zh", AppDarkMode.LIGHT) {
+        LogDaySheet(
+            targetDate = LocalDate(2026, 3, 28),
+            onDismiss = {},
+            onSave = { _, _, _, _ -> },
+        )
+    }
+
+    @Test
+    fun log_day_zh_dark() = screenshotTest("zh", AppDarkMode.DARK) {
+        LogDaySheet(
+            targetDate = LocalDate(2026, 3, 28),
+            onDismiss = {},
+            onSave = { _, _, _, _ -> },
+        )
+    }
+
+    // ═══════════════════════════════════════════════════
+    // Prediction Detail Sheet
+    // ═══════════════════════════════════════════════════
+
+    @Test
+    fun prediction_detail_en_light() = screenshotTest("en", AppDarkMode.LIGHT) {
+        PredictionDetailSheet(
+            prediction = PredictedCycle(
+                predictedStart = LocalDate(2026, 4, 26),
+                predictedEnd = LocalDate(2026, 5, 1),
+            ),
+            avgPeriodLength = 5,
+            onDismiss = {},
+        )
+    }
+
+    @Test
+    fun prediction_detail_en_dark() = screenshotTest("en", AppDarkMode.DARK) {
+        PredictionDetailSheet(
+            prediction = PredictedCycle(
+                predictedStart = LocalDate(2026, 4, 26),
+                predictedEnd = LocalDate(2026, 5, 1),
+            ),
+            avgPeriodLength = 5,
+            onDismiss = {},
+        )
+    }
+
+    @Test
+    fun prediction_detail_zh_light() = screenshotTest("zh", AppDarkMode.LIGHT) {
+        PredictionDetailSheet(
+            prediction = PredictedCycle(
+                predictedStart = LocalDate(2026, 4, 26),
+                predictedEnd = LocalDate(2026, 5, 1),
+            ),
+            avgPeriodLength = 5,
+            onDismiss = {},
+        )
+    }
+
+    @Test
+    fun prediction_detail_zh_dark() = screenshotTest("zh", AppDarkMode.DARK) {
+        PredictionDetailSheet(
+            prediction = PredictedCycle(
+                predictedStart = LocalDate(2026, 4, 26),
+                predictedEnd = LocalDate(2026, 5, 1),
+            ),
+            avgPeriodLength = 5,
+            onDismiss = {},
+        )
+    }
+
+    // ═══════════════════════════════════════════════════
+    // Record Detail Sheet
+    // ═══════════════════════════════════════════════════
+
+    @Test
+    fun record_detail_en_light() = recordDetailTest("en", AppDarkMode.LIGHT)
+
+    @Test
+    fun record_detail_en_dark() = recordDetailTest("en", AppDarkMode.DARK)
+
+    @Test
+    fun record_detail_zh_light() = recordDetailTest("zh", AppDarkMode.LIGHT)
+
+    @Test
+    fun record_detail_zh_dark() = recordDetailTest("zh", AppDarkMode.DARK)
+
+    // ═══════════════════════════════════════════════════
     // Helpers
     // ═══════════════════════════════════════════════════
 
@@ -242,5 +370,58 @@ class ScreenshotTest {
         }
         composeTestRule.waitForIdle()
         composeTestRule.onRoot().captureRoboImage()
+    }
+
+    private fun onboardingTest(
+        locale: String,
+        darkMode: AppDarkMode,
+    ) {
+        val fakeRepo = FakeRecordsRepository()
+        val service = MenstrualService(fakeRepo)
+
+        val context = ApplicationProvider.getApplicationContext<Application>()
+        val dataStore = PreferenceDataStoreFactory.create {
+            File(context.filesDir, "test_onboarding_${System.nanoTime()}.preferences_pb")
+        }
+        val settings = SettingsRepository(dataStore)
+
+        composeTestRule.setContent {
+            CompositionLocalProvider(LocalAppLocale provides locale) {
+                AppTheme(darkMode = darkMode) {
+                    OnboardingScreen(
+                        service = service,
+                        settings = settings,
+                        onComplete = {},
+                    )
+                }
+            }
+        }
+        composeTestRule.waitForIdle()
+        composeTestRule.onRoot().captureRoboImage()
+    }
+
+    private fun recordDetailTest(
+        locale: String,
+        darkMode: AppDarkMode,
+    ) {
+        val testData = createBeautifulTestData()
+        val fakeRepo = FakeRecordsRepository(testData.toMutableList())
+        val service = MenstrualService(fakeRepo)
+
+        // Pick a record with known start/end for the detail sheet
+        val record = testData.first { it.id == "r6" } // Feb 26 - Mar 2, 2026
+
+        screenshotTest(locale, darkMode) {
+            RecordDetailSheet(
+                record = record,
+                allRecords = testData,
+                defaultCycleLength = 29,
+                service = service,
+                onDismiss = {},
+                onEditStart = {},
+                onEditEnd = {},
+                onDelete = {},
+            )
+        }
     }
 }
