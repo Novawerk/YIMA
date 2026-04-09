@@ -1,0 +1,253 @@
+# Release Workflow
+#
+# Triggered when a PR from main is merged into the release branch.
+# Requires exactly one PR label: version:patch, version:minor, or version:major.
+#
+# What it does:
+#   1. Determines version bump from PR label
+#   2. Computes next semver + version code
+#   3. Bumps version in gradle/libs.versions.toml + syncs to Config.xcconfig
+#   4. Commits version bump to release branch
+#   5. Creates git tag + GitHub Release with categorized notes
+#   6. Builds and uploads AAB to Google Play production
+#   7. Opens backport PR to sync version bump to main
+
+name: Release
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [release]
+
+jobs:
+  release:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      version_code: ${{ steps.version.outputs.version_code }}
+      tag: ${{ steps.version.outputs.tag }}
+      prev_tag: ${{ steps.version.outputs.prev_tag }}
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: release
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine version bump from PR labels
+        id: bump
+        run: |
+          LABELS='${{ toJSON(github.event.pull_request.labels.*.name) }}'
+          PATCH=$(echo "$LABELS" | jq -r 'map(select(. == "version:patch")) | length')
+          MINOR=$(echo "$LABELS" | jq -r 'map(select(. == "version:minor")) | length')
+          MAJOR=$(echo "$LABELS" | jq -r 'map(select(. == "version:major")) | length')
+
+          COUNT=$((PATCH + MINOR + MAJOR))
+          if [ "$COUNT" -eq 0 ]; then
+            echo "::error::No version label found. Add exactly one of: version:patch, version:minor, version:major"
+            exit 1
+          fi
+          if [ "$COUNT" -gt 1 ]; then
+            echo "::error::Multiple version labels found. Use exactly one of: version:patch, version:minor, version:major"
+            exit 1
+          fi
+
+          if [ "$MAJOR" -eq 1 ]; then
+            echo "bump=major" >> $GITHUB_OUTPUT
+          elif [ "$MINOR" -eq 1 ]; then
+            echo "bump=minor" >> $GITHUB_OUTPUT
+          else
+            echo "bump=patch" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Compute next version
+        id: version
+        run: |
+          PREV_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
+          if [ -z "$PREV_TAG" ]; then
+            PREV_TAG="v0.0.0"
+          fi
+          echo "prev_tag=$PREV_TAG" >> $GITHUB_OUTPUT
+
+          VERSION="${PREV_TAG#v}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+
+          BUMP="${{ steps.bump.outputs.bump }}"
+          case "$BUMP" in
+            major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH + 1)) ;;
+          esac
+
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          VERSION_CODE=$((MAJOR * 10000 + MINOR * 100 + PATCH))
+
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
+          echo "tag=v$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "Bumping $BUMP: $PREV_TAG → v$NEW_VERSION (code: $VERSION_CODE)"
+
+      - name: Bump version in libs.versions.toml
+        run: |
+          TOML="gradle/libs.versions.toml"
+          VERSION="${{ steps.version.outputs.version }}"
+          VERSION_CODE="${{ steps.version.outputs.version_code }}"
+
+          sed -i "s/^app-versionCode = \".*\"/app-versionCode = \"$VERSION_CODE\"/" "$TOML"
+          sed -i "s/^app-versionName = \".*\"/app-versionName = \"$VERSION\"/" "$TOML"
+
+          echo "Updated $TOML:"
+          grep "^app-" "$TOML"
+
+      - name: Sync version to iOS Config.xcconfig
+        run: |
+          XCCONFIG="iosApp/Configuration/Config.xcconfig"
+          VERSION="${{ steps.version.outputs.version }}"
+          VERSION_CODE="${{ steps.version.outputs.version_code }}"
+
+          sed -i "s/CURRENT_PROJECT_VERSION=.*/CURRENT_PROJECT_VERSION=$VERSION_CODE/" "$XCCONFIG"
+          sed -i "s/MARKETING_VERSION=.*/MARKETING_VERSION=$VERSION/" "$XCCONFIG"
+
+          echo "Updated $XCCONFIG:"
+          cat "$XCCONFIG"
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add gradle/libs.versions.toml iosApp/Configuration/Config.xcconfig
+          git commit -m "chore: bump version to ${{ steps.version.outputs.version }}"
+          git push origin release
+
+      - name: Create and push tag
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          git tag "$TAG"
+          git push origin "$TAG"
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          PREV_TAG="${{ steps.version.outputs.prev_tag }}"
+          TAG="${{ steps.version.outputs.tag }}"
+
+          # Get commits between previous tag and current (before version bump)
+          COMMITS=$(git log "${PREV_TAG}..HEAD~1" --oneline --no-merges 2>/dev/null || echo "")
+
+          FEATURES=""
+          FIXES=""
+          CI_TESTING=""
+          DOCS=""
+          OTHER=""
+
+          while IFS= read -r line; do
+            [ -z "$line" ] && continue
+            MSG=$(echo "$line" | sed 's/^[a-f0-9]* //')
+            LOWER=$(echo "$MSG" | tr '[:upper:]' '[:lower:]')
+
+            if echo "$LOWER" | grep -qE '(^feat|add |implement|introduce)'; then
+              FEATURES="${FEATURES}- ${MSG}\n"
+            elif echo "$LOWER" | grep -qE '(^fix|patch |resolve|correct)'; then
+              FIXES="${FIXES}- ${MSG}\n"
+            elif echo "$LOWER" | grep -qE '(ci|test|screenshot|workflow|build|roborazzi)'; then
+              CI_TESTING="${CI_TESTING}- ${MSG}\n"
+            elif echo "$LOWER" | grep -qE '(doc|readme|comment)'; then
+              DOCS="${DOCS}- ${MSG}\n"
+            else
+              OTHER="${OTHER}- ${MSG}\n"
+            fi
+          done <<< "$COMMITS"
+
+          # Build release body
+          BODY="## What's Changed\n"
+          [ -n "$FEATURES" ] && BODY="${BODY}\n### Features\n${FEATURES}"
+          [ -n "$FIXES" ] && BODY="${BODY}\n### Fixes\n${FIXES}"
+          [ -n "$CI_TESTING" ] && BODY="${BODY}\n### CI/Testing\n${CI_TESTING}"
+          [ -n "$DOCS" ] && BODY="${BODY}\n### Docs\n${DOCS}"
+          [ -n "$OTHER" ] && BODY="${BODY}\n### Other\n${OTHER}"
+          BODY="${BODY}\n**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${TAG}"
+
+          # Write to file to preserve formatting
+          echo -e "$BODY" > release_notes.md
+          cat release_notes.md
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" \
+            --target release \
+            --title "${{ steps.version.outputs.tag }}" \
+            --notes-file release_notes.md
+
+      - name: Backport version bump to main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          BUMP_COMMIT=$(git rev-parse HEAD)
+          BRANCH="backport/version-${VERSION}"
+
+          git checkout -b "$BRANCH" origin/main
+          git cherry-pick "$BUMP_COMMIT"
+          git push origin "$BRANCH"
+
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "chore: sync version ${VERSION} to main" \
+            --body "Auto-generated PR to sync version bump from release branch."
+
+  publish-play-store:
+    needs: release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: release
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Decode keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
+
+      - name: Build release AAB
+        env:
+          KEYSTORE_PATH: ${{ github.workspace }}/keystore.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          VERSION_CODE: ${{ needs.release.outputs.version_code }}
+          VERSION_NAME: ${{ needs.release.outputs.version }}
+        run: ./gradlew :composeApp:bundleRelease
+
+      - name: Decode service account key
+        run: echo "${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}" | base64 -d > service-account.json
+
+      - name: Upload to Google Play
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJson: service-account.json
+          packageName: com.haodong.yimalaile
+          releaseFiles: composeApp/build/outputs/bundle/release/*.aab
+          track: production
+          status: draft
+
+      - name: Upload AAB as artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: release-aab
+          path: composeApp/build/outputs/bundle/release/*.aab
