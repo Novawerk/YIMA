@@ -1,8 +1,12 @@
-name: Update Screenshots
+name: Screenshot Preview
 
 on:
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
   push:
-    branches: ['**']
+    branches: [main]
     paths-ignore:
       - 'docs/**'
       - '*.md'
@@ -10,8 +14,6 @@ on:
 jobs:
   android-screenshots:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
       - uses: actions/checkout@v4
@@ -28,10 +30,10 @@ jobs:
       - name: Record screenshots
         run: ./gradlew :composeApp:recordRoborazziDebug
 
-      - name: Organize screenshots into docs
+      - name: Organize screenshots
         run: |
           SRC=composeApp/build/outputs/roborazzi
-          DST=docs/screenshots/android
+          DST=screenshots/android
           PREFIX="com.haodong.yimalaile.ScreenshotTest"
           for f in "$SRC"/*.png; do
             name=$(basename "$f" .png | sed "s/${PREFIX}\.//")
@@ -46,12 +48,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: android-screenshots
-          path: docs/screenshots/android/
+          path: screenshots/android/
 
   ios-screenshots:
     runs-on: macos-15
-    permissions:
-      contents: write
 
     steps:
       - uses: actions/checkout@v4
@@ -67,7 +67,6 @@ jobs:
 
       - name: Select Xcode and list available simulators
         run: |
-          # Use the latest stable Xcode on the runner
           sudo xcode-select -p
           echo "--- Available iPhone simulators ---"
           xcrun simctl list devices available iPhone
@@ -76,7 +75,6 @@ jobs:
 
       - name: Boot simulator
         run: |
-          # Pick the first available iPhone device (prefer iPhone 16 Pro)
           DEVICE_ID=$(xcrun simctl list devices available iPhone -j \
             | python3 -c "
           import json, sys
@@ -89,13 +87,11 @@ jobs:
               for d in devices:
                   if d.get('isAvailable'):
                       all_devices.append((d['name'], d['udid'], runtime))
-          # Try preferred devices first
           for pref in preferred:
               for name, udid, rt in all_devices:
                   if name == pref:
                       print(udid)
                       sys.exit(0)
-          # Fallback to first available iPhone
           if all_devices:
               print(all_devices[0][1])
               sys.exit(0)
@@ -117,20 +113,17 @@ jobs:
 
       - name: Extract screenshots from test results
         run: |
-          DST=docs/screenshots/ios
+          DST=screenshots/ios
           EXPORT_DIR=$(mktemp -d)
-          # Export all test attachments with manifest
           xcrun xcresulttool export attachments \
             --path TestResults.xcresult \
             --output-path "$EXPORT_DIR"
 
-          # Verify manifest exists
           if [ ! -f "$EXPORT_DIR/manifest.json" ]; then
             echo "::error::No manifest.json found — screenshot extraction failed"
             exit 1
           fi
 
-          # Parse manifest.json to organize screenshots by lang/theme
           python3 -c "
           import json, os, shutil, re, sys
 
@@ -145,10 +138,7 @@ jobs:
                   filename = att.get('exportedFileName', '')
                   if not suggested or not filename:
                       continue
-                  # suggested is like 'home_calendar_en_light_0_UUID.png'
-                  # Strip trailing _0_UUID.png to get the original attachment name
                   name = re.sub(r'_\d+_[0-9A-Fa-f-]+\.png$', '', suggested)
-                  # name is now like 'home_calendar_en_light'
                   parts = name.rsplit('_', 2)
                   if len(parts) < 3:
                       continue
@@ -171,9 +161,113 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ios-screenshots
-          path: docs/screenshots/ios/
+          path: screenshots/ios/
 
-  commit-screenshots:
+  # Post a preview comment on PRs
+  post-comment:
+    if: github.event_name == 'pull_request'
+    needs: [android-screenshots, ios-screenshots]
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Download Android screenshots
+        uses: actions/download-artifact@v4
+        with:
+          name: android-screenshots
+          path: screenshots/android/
+
+      - name: Download iOS screenshots
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-screenshots
+          path: screenshots/ios/
+
+      - name: Post screenshot preview comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            function collectScreenshots(baseDir) {
+              const result = {};
+              if (!fs.existsSync(baseDir)) return result;
+              for (const lang of fs.readdirSync(baseDir)) {
+                const langDir = path.join(baseDir, lang);
+                if (!fs.statSync(langDir).isDirectory()) continue;
+                for (const theme of fs.readdirSync(langDir)) {
+                  const themeDir = path.join(langDir, theme);
+                  if (!fs.statSync(themeDir).isDirectory()) continue;
+                  for (const file of fs.readdirSync(themeDir)) {
+                    if (!file.endsWith('.png')) continue;
+                    const key = `${lang}/${theme}`;
+                    if (!result[key]) result[key] = [];
+                    result[key].push(file.replace('.png', ''));
+                  }
+                }
+              }
+              return result;
+            }
+
+            const androidScreenshots = collectScreenshots('screenshots/android');
+            const iosScreenshots = collectScreenshots('screenshots/ios');
+
+            const screens = ['home_calendar', 'home_detail', 'home_stats', 'settings', 'disclaimer'];
+            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+
+            let body = `## 📱 Screenshot Preview\n\n`;
+            body += `> Commit ${context.sha.substring(0, 7)} · [View workflow run](${runUrl})\n\n`;
+
+            for (const combo of ['en/light', 'en/dark', 'zh/light', 'zh/dark']) {
+              const [lang, theme] = combo.split('/');
+              const label = `${lang.toUpperCase()} · ${theme.charAt(0).toUpperCase() + theme.slice(1)}`;
+
+              const aShots = androidScreenshots[combo] || [];
+              const iShots = iosScreenshots[combo] || [];
+              if (aShots.length === 0 && iShots.length === 0) continue;
+
+              body += `<details>\n<summary><b>${label}</b></summary>\n\n`;
+              body += `| Screen | Android | iOS |\n`;
+              body += `|--------|:-------:|:---:|\n`;
+
+              for (const screen of screens) {
+                const hasA = aShots.includes(screen);
+                const hasI = iShots.includes(screen);
+                if (!hasA && !hasI) continue;
+                body += `| ${screen.replace(/_/g, ' ')} | ${hasA ? '✅' : '—'} | ${hasI ? '✅' : '—'} |\n`;
+              }
+
+              body += `\n</details>\n\n`;
+            }
+
+            body += `\n📦 **[Download full-resolution screenshots](${runUrl}#artifacts)** (android-screenshots + ios-screenshots)\n`;
+
+            // Upsert comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const marker = '## 📱 Screenshot Preview';
+            const existing = comments.find(c => c.body && c.body.startsWith(marker));
+
+            const params = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            };
+
+            if (existing) {
+              await github.rest.issues.updateComment({ ...params, comment_id: existing.id });
+            } else {
+              await github.rest.issues.createComment({ ...params, issue_number: context.issue.number });
+            }
+
+  # On main: publish screenshots to an orphan branch for stable access
+  publish-to-branch:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [android-screenshots, ios-screenshots]
     runs-on: ubuntu-latest
     permissions:
@@ -181,21 +275,66 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Download Android screenshots
         uses: actions/download-artifact@v4
         with:
           name: android-screenshots
-          path: docs/screenshots/android/
+          path: screenshots/android/
 
       - name: Download iOS screenshots
         uses: actions/download-artifact@v4
         with:
           name: ios-screenshots
-          path: docs/screenshots/ios/
+          path: screenshots/ios/
 
-      - name: Commit updated screenshots
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Update screenshots [skip ci]"
-          file_pattern: "docs/screenshots/**/*.png"
+      - name: Publish to screenshots branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Create or switch to orphan branch
+          if git ls-remote --exit-code origin screenshots >/dev/null 2>&1; then
+            git fetch origin screenshots
+            git checkout screenshots
+            # Clean old screenshots
+            git rm -rf android ios 2>/dev/null || true
+          else
+            git checkout --orphan screenshots
+            git rm -rf . 2>/dev/null || true
+          fi
+
+          # Copy new screenshots to root
+          cp -R screenshots/android/ android/
+          cp -R screenshots/ios/ ios/
+
+          # Generate a README with preview links
+          cat > README.md << 'READMEEOF'
+          # App Screenshots
+
+          Auto-generated screenshots from CI. Updated on every push to `main`.
+
+          ## Structure
+
+          ```
+          android/
+          ├── en/ (light/ dark/)
+          └── zh/ (light/ dark/)
+          ios/
+          ├── en/ (light/ dark/)
+          └── zh/ (light/ dark/)
+          ```
+
+          ## Quick Links
+
+          | | EN Light | EN Dark | ZH Light | ZH Dark |
+          |---|---|---|---|---|
+          | **Android** | [📂](android/en/light/) | [📂](android/en/dark/) | [📂](android/zh/light/) | [📂](android/zh/dark/) |
+          | **iOS** | [📂](ios/en/light/) | [📂](ios/en/dark/) | [📂](ios/zh/light/) | [📂](ios/zh/dark/) |
+          READMEEOF
+
+          git add -A
+          git commit -m "Update screenshots from ${GITHUB_SHA:0:7}" || echo "No changes to commit"
+          git push origin screenshots --force
