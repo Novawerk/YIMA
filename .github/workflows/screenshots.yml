@@ -105,26 +105,15 @@ jobs:
           echo "DEVICE_ID=$DEVICE_ID" >> "$GITHUB_ENV"
           xcrun simctl boot "$DEVICE_ID" || true
 
-      - name: Build KMP framework
-        run: ./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
-
-      - name: Prepare framework for Xcode
-        run: |
-          SDK_NAME=$(xcrun --sdk iphonesimulator --show-sdk-version)
-          DEST="composeApp/build/xcode-frameworks/Debug/iphonesimulator${SDK_NAME}"
-          mkdir -p "$DEST"
-          cp -R composeApp/build/bin/iosSimulatorArm64/debugFramework/ComposeApp.framework "$DEST/"
-
       - name: Run iOS UI tests
-        timeout-minutes: 15
+        timeout-minutes: 20
         run: |
           xcodebuild test \
             -project iosApp/iosApp.xcodeproj \
             -scheme iosApp \
             -destination "platform=iOS Simulator,id=$DEVICE_ID" \
             -only-testing iosAppUITests \
-            -resultBundlePath TestResults.xcresult \
-            OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED=YES
+            -resultBundlePath TestResults.xcresult
 
       - name: Extract screenshots from test results
         run: |

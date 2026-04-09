@@ -50,35 +50,35 @@ final class ScreenshotUITests: XCTestCase {
         XCUIDevice.shared.appearance = appearance
         app.launch()
 
-        // Wait for the app to fully render
-        sleep(3)
+        // Wait for Compose to fully render (CI can be slow)
+        // Verify the app actually launched by checking for a known UI element
+        let calendarTab = app.buttons["nav_calendar"]
+        let launched = calendarTab.waitForExistence(timeout: 30)
+        XCTAssertTrue(launched, "App failed to launch — nav_calendar button not found")
 
         // 1. Home Calendar (default view on launch)
         saveScreenshot(name: "home_calendar_\(suffix)")
 
         // 2. Home Detail — tap detail tab
         let detailTab = app.buttons["nav_detail"]
-        if detailTab.waitForExistence(timeout: 5) {
-            detailTab.tap()
-            sleep(1)
-            saveScreenshot(name: "home_detail_\(suffix)")
-        }
+        XCTAssertTrue(detailTab.waitForExistence(timeout: 10), "nav_detail not found")
+        detailTab.tap()
+        sleep(2)
+        saveScreenshot(name: "home_detail_\(suffix)")
 
         // 3. Home Stats — tap stats tab
         let statsTab = app.buttons["nav_stats"]
-        if statsTab.waitForExistence(timeout: 5) {
-            statsTab.tap()
-            sleep(1)
-            saveScreenshot(name: "home_stats_\(suffix)")
-        }
+        XCTAssertTrue(statsTab.waitForExistence(timeout: 10), "nav_stats not found")
+        statsTab.tap()
+        sleep(2)
+        saveScreenshot(name: "home_stats_\(suffix)")
 
         // 4. Settings — tap settings icon
         let settingsButton = app.buttons["nav_settings"]
-        if settingsButton.waitForExistence(timeout: 5) {
-            settingsButton.tap()
-            sleep(1)
-            saveScreenshot(name: "settings_\(suffix)")
-        }
+        XCTAssertTrue(settingsButton.waitForExistence(timeout: 10), "nav_settings not found")
+        settingsButton.tap()
+        sleep(2)
+        saveScreenshot(name: "settings_\(suffix)")
     }
 
     private func saveScreenshot(name: String) {
