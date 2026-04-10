@@ -213,7 +213,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\ncd \"$SRCROOT/..\"\n./gradlew :composeApp:embedAndSignAppleFrameworkForXcode\n";
+			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\ncd \"$SRCROOT/..\"\n# On Xcode Cloud, ci_post_clone.sh installs openjdk@17 via Homebrew but it's\n# keg-only so java is NOT on the default PATH, and env vars set in\n# ci_post_clone.sh don't leak into this build phase's shell. Derive JAVA_HOME\n# from `brew --prefix` if available; otherwise fall back to whatever JAVA_HOME\n# the inherited environment provides (local Android Studio / Xcode dev).\nif command -v brew >/dev/null 2>&1 && brew --prefix openjdk@17 >/dev/null 2>&1; then\n  export JAVA_HOME=\"$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home\"\n  export PATH=\"$JAVA_HOME/bin:$PATH\"\nfi\n./gradlew :composeApp:embedAndSignAppleFrameworkForXcode\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
