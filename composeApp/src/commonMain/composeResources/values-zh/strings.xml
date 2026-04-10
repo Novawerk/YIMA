@@ -144,4 +144,27 @@
     <string name="phase_in_days">%1$d天后</string>
     <string name="anomaly_short_cycle_title">周期异常过短</string>
     <string name="anomaly_short_cycle_body">两次月经间隔不到14天。这可能是排卵期少量出血或内分泌波动，建议咨询医生。此数据不会计入平均周期计算。</string>
+    <!-- Notifications -->
+    <string name="settings_notifications">通知</string>
+    <string name="settings_notifications_value">提醒设置</string>
+    <string name="notifications_title">通知</string>
+    <string name="notifications_description">提醒仅会安排在本机，不会上传到任何服务器。</string>
+    <string name="notifications_period_title">经期前提醒</string>
+    <string name="notifications_ovulation_title">排卵期前提醒</string>
+    <string name="notifications_daily_title">每日报告</string>
+    <string name="notifications_off">关闭</string>
+    <string name="notifications_day_before">提前 1 天</string>
+    <string name="notifications_days_before">提前 %1$d 天</string>
+    <string name="notifications_at_time">每天 %1$d:%2$s</string>
+    <string name="notifications_adjust">调整</string>
+    <string name="notifications_daily_time">每日报告时间</string>
+    <string name="notifications_permission_required">需要通知权限</string>
+    <string name="notifications_permission_hint">点击以允许发送提醒通知。</string>
+    <!-- Notification payload copy -->
+    <string name="notif_period_title">姨妈快来了</string>
+    <string name="notif_period_body">预计还有 %1$d 天开始下次月经，记得提前准备哦。</string>
+    <string name="notif_ovulation_title">排卵期即将到来</string>
+    <string name="notif_ovulation_body">大约 %1$d 天后进入排卵窗口期。</string>
+    <string name="notif_daily_title">每日周期提醒</string>
+    <string name="notif_daily_body">打开应用查看今天的周期阶段，记录一下你的感受吧。</string>
 </resources>
