@@ -24,7 +24,17 @@ echo "JAVA_HOME=$JAVA_HOME"
 java -version
 
 echo ">>> Building Compose KMP framework..."
-cd "$CI_WORKSPACE"
+
+# Derive the repo root from the script's own location instead of relying on
+# $CI_WORKSPACE. In Xcode Cloud 14.3+, $CI_WORKSPACE points to the Xcode
+# workspace directory (iosApp/), not the repo root — use $CI_PRIMARY_REPOSITORY_PATH
+# or walk up from this script. The script lives at iosApp/ci_scripts/, so the
+# repo root is two levels up.
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+echo "Repo root: $REPO_ROOT"
+
+cd "$REPO_ROOT"
 ./gradlew :composeApp:embedAndSignAppleFrameworkForXcode \
     -PXCODE_CONFIGURATION="$CONFIGURATION" \
     -PXCODE_PLATFORM_NAME="$PLATFORM_NAME" \
