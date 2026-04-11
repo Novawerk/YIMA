@@ -66,7 +66,7 @@ iosApp/                              # Native Xcode project
 1. Cannot start a new period while one is active (no end date)
 2. Period date ranges cannot overlap
 3. Backfill not blocked by active period (records past data)
-4. Predictions require ≥ 2 complete records
+4. Predictions require ≥ 1 existing record; onboarding seeds 5 past cycles so the app is immediately useful
 5. Ending a period auto-trims daily records outside the range
 6. Data export/import/clear under user control
 7. No medical claims; disclaimer on first launch
