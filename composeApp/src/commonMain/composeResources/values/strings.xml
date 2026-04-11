@@ -95,7 +95,7 @@
     <string name="stats_legend_predicted">Predicted days</string>
     <string name="stats_history_title">Cycle History</string>
     <!-- Settings Screen -->
-    <string name="app_version">Version 1.0.0</string>
+    <string name="app_version">Version %1$s</string>
     <string name="settings_display_mode">Display Mode</string>
     <string name="settings_mode_system">System</string>
     <string name="settings_mode_light">Light</string>
