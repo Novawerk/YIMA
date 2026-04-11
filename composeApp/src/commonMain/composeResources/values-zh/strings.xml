@@ -95,7 +95,7 @@
     <string name="stats_legend_predicted">预测的天数</string>
     <string name="stats_history_title">周期历史</string>
     <!-- Settings Screen -->
-    <string name="app_version">版本 1.0.0</string>
+    <string name="app_version">版本 %1$s</string>
     <string name="settings_display_mode">显示模式</string>
     <string name="settings_mode_system">跟随系统</string>
     <string name="settings_mode_light">浅色</string>

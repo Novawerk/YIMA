@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.haodong.yimalaile.BuildKonfig
 import com.haodong.yimalaile.domain.settings.AppDarkMode
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
@@ -137,7 +138,7 @@ fun SettingsScreen(
                     )
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            stringResource(Res.string.app_version),
+                            stringResource(Res.string.app_version, BuildKonfig.VERSION_NAME),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
