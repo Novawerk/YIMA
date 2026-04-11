@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.haodong.yimalaile.domain.export.ExportResult
+import com.haodong.yimalaile.domain.export.ReportExportService
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.domain.notifications.NotificationPrefs
 import com.haodong.yimalaile.domain.notifications.NotificationService
@@ -28,6 +30,7 @@ class AppViewModel(
     private val service: MenstrualService,
     private val settings: SettingsRepository,
     private val notificationService: NotificationService? = null,
+    private val reportExportService: ReportExportService? = null,
 ) : ViewModel() {
 
     var darkMode by mutableStateOf(AppDarkMode.SYSTEM)
@@ -49,6 +52,9 @@ class AppViewModel(
         private set
 
     var notificationPermissionGranted by mutableStateOf(false)
+        private set
+
+    var exportStatus by mutableStateOf<ExportStatus>(ExportStatus.Idle)
         private set
 
     init {
@@ -144,6 +150,30 @@ class AppViewModel(
         }
     }
 
+    /**
+     * Render the full history to a long PNG image and save it to the
+     * device's Pictures folder. [language] picks the report body
+     * language ("en" or "zh") independently of the current UI locale.
+     */
+    fun exportReport(language: String) {
+        val exporter = reportExportService ?: run {
+            exportStatus = ExportStatus.Failure("Export service not available")
+            return
+        }
+        viewModelScope.launch {
+            exportStatus = ExportStatus.InProgress
+            val records = service.getAllRecords()
+            exportStatus = when (val result = exporter.exportCycleReport(records, language)) {
+                is ExportResult.Success -> ExportStatus.Success(result.displayLocation)
+                is ExportResult.Failure -> ExportStatus.Failure(result.message)
+            }
+        }
+    }
+
+    fun resetExportStatus() {
+        exportStatus = ExportStatus.Idle
+    }
+
     fun requestNotificationPermission() {
         viewModelScope.launch {
             val granted = notificationService?.requestPermission() ?: false
@@ -170,4 +200,11 @@ class AppViewModel(
         )
         svc.reschedule(prefs = prefs, cycleLength = cycleLength, copy = copy)
     }
+}
+
+sealed class ExportStatus {
+    data object Idle : ExportStatus()
+    data object InProgress : ExportStatus()
+    data class Success(val location: String) : ExportStatus()
+    data class Failure(val message: String) : ExportStatus()
 }

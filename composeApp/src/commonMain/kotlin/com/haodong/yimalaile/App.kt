@@ -26,9 +26,10 @@ fun App(component: AppComponent) {
     val service = component.menstrualService
     val settings = component.settingsRepository
     val notificationService = component.notificationService
+    val reportExportService = component.reportExportService
 
     val viewModel = remember {
-        AppViewModel(service, settings, notificationService)
+        AppViewModel(service, settings, notificationService, reportExportService)
     }
     val sheetViewModel = remember { SheetViewModel(service) }
 
@@ -96,6 +97,9 @@ fun App(component: AppComponent) {
                                 }
                             },
                             onNavigateNotifications = { navController.navigate(NotificationSettingsRoute) },
+                            exportStatus = viewModel.exportStatus,
+                            onExport = { lang -> viewModel.exportReport(lang) },
+                            onResetExportStatus = { viewModel.resetExportStatus() },
                         )
                     }
 

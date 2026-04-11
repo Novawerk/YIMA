@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.haodong.yimalaile.di.AppComponent
 import com.haodong.yimalaile.di.create
+import com.haodong.yimalaile.domain.export.IosReportExportService
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.domain.settings.SettingsRepository
 import com.haodong.yimalaile.notifications.IosNotificationScheduler
@@ -39,7 +40,8 @@ fun MainViewController() = ComposeUIViewController {
         produceFile = { dataStorePath(DATA_STORE_FILE_NAME).toPath() }
     )
     val scheduler = IosNotificationScheduler()
-    val component = AppComponent.create(dataStore, scheduler)
+    val reportExportService = IosReportExportService()
+    val component = AppComponent.create(dataStore, scheduler, reportExportService)
     App(component)
 }
 
