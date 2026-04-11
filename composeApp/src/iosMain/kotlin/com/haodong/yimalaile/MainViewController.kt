@@ -13,6 +13,7 @@ import com.haodong.yimalaile.di.AppComponent
 import com.haodong.yimalaile.di.create
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.domain.settings.SettingsRepository
+import com.haodong.yimalaile.notifications.IosNotificationScheduler
 import com.haodong.yimalaile.fakes.FakeRecordsRepository
 import com.haodong.yimalaile.fakes.createScreenshotTestData
 import com.haodong.yimalaile.ui.locale.LocalAppLocale
@@ -37,7 +38,8 @@ fun MainViewController() = ComposeUIViewController {
     val dataStore = PreferenceDataStoreFactory.createWithPath(
         produceFile = { dataStorePath(DATA_STORE_FILE_NAME).toPath() }
     )
-    val component = AppComponent.create(dataStore)
+    val scheduler = IosNotificationScheduler()
+    val component = AppComponent.create(dataStore, scheduler)
     App(component)
 }
 

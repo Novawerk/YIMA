@@ -32,6 +32,7 @@ fun SettingsScreen(
     onPeriodDurationChange: (Int) -> Unit,
     onBack: () -> Unit,
     onClearData: () -> Unit,
+    onNavigateNotifications: () -> Unit = {},
 ) {
     val uriHandler = LocalUriHandler.current
     var showClearConfirm by remember { mutableStateOf(false) }
@@ -104,6 +105,15 @@ fun SettingsScreen(
             label = stringResource(Res.string.settings_cycle_length),
             value = "${currentCycleLength} ${stringResource(Res.string.unit_days)}",
             onClick = { showCycleLengthDialog = true },
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        // ── Notifications ──
+        SettingsItem(
+            label = stringResource(Res.string.settings_notifications),
+            value = stringResource(Res.string.settings_notifications_value),
+            onClick = onNavigateNotifications,
         )
 
         Spacer(Modifier.height(48.dp))

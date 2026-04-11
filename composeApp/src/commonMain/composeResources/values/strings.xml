@@ -145,4 +145,27 @@
     <string name="phase_in_days">in %1$d days</string>
     <string name="anomaly_short_cycle_title">Cycle Anomaly: Very Short</string>
     <string name="anomaly_short_cycle_body">This cycle is less than 14 days, which may be ovulatory bleeding or hormonal fluctuations. Consult a doctor if concerned. This data is excluded from average calculations.</string>
+    <!-- Notifications -->
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_notifications_value">Reminders</string>
+    <string name="notifications_title">Notifications</string>
+    <string name="notifications_description">Reminders are scheduled locally on this device. Nothing is sent to a server.</string>
+    <string name="notifications_period_title">Period reminder</string>
+    <string name="notifications_ovulation_title">Ovulation reminder</string>
+    <string name="notifications_daily_title">Daily report</string>
+    <string name="notifications_off">Off</string>
+    <string name="notifications_day_before">1 day before</string>
+    <string name="notifications_days_before">%1$d days before</string>
+    <string name="notifications_at_time">At %1$d:%2$s</string>
+    <string name="notifications_adjust">Adjust</string>
+    <string name="notifications_daily_time">Daily report time</string>
+    <string name="notifications_permission_required">Notification permission required</string>
+    <string name="notifications_permission_hint">Tap to grant permission so reminders can be delivered.</string>
+    <!-- Notification payload copy -->
+    <string name="notif_period_title">Period is approaching</string>
+    <string name="notif_period_body">Your next period is expected in about %1$d days. Time to get ready.</string>
+    <string name="notif_ovulation_title">Ovulation window soon</string>
+    <string name="notif_ovulation_body">You are entering your fertile window in about %1$d days.</string>
+    <string name="notif_daily_title">Daily cycle report</string>
+    <string name="notif_daily_body">Open the app to see today\'s phase and log how you feel.</string>
 </resources>

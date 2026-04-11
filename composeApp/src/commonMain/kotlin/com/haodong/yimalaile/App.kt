@@ -8,11 +8,13 @@ import com.haodong.yimalaile.di.AppComponent
 import com.haodong.yimalaile.ui.locale.LocalAppLocale
 import com.haodong.yimalaile.ui.navigation.DisclaimerRoute
 import com.haodong.yimalaile.ui.navigation.HomeRoute
+import com.haodong.yimalaile.ui.navigation.NotificationSettingsRoute
 import com.haodong.yimalaile.ui.navigation.OnboardingRoute
 import com.haodong.yimalaile.ui.navigation.SettingsRoute
 import com.haodong.yimalaile.ui.pages.disclaimer.DisclaimerScreen
 import com.haodong.yimalaile.ui.pages.home.HomeScreen
 import com.haodong.yimalaile.ui.pages.onboarding.OnboardingScreen
+import com.haodong.yimalaile.ui.pages.settings.NotificationSettingsScreen
 import com.haodong.yimalaile.ui.pages.settings.SettingsScreen
 import com.haodong.yimalaile.ui.pages.sheet.LocalSheetViewModel
 import com.haodong.yimalaile.ui.pages.sheet.SheetHost
@@ -23,9 +25,12 @@ import com.haodong.yimalaile.ui.theme.AppTheme
 fun App(component: AppComponent) {
     val service = component.menstrualService
     val settings = component.settingsRepository
-    val viewModel = remember { AppViewModel(service, settings) }
+    val notificationService = component.notificationService
+
+    val viewModel = remember {
+        AppViewModel(service, settings, notificationService)
+    }
     val sheetViewModel = remember { SheetViewModel(service) }
-    val scope = rememberCoroutineScope()
 
     val darkMode = viewModel.darkMode
     val language = viewModel.language
@@ -56,6 +61,7 @@ fun App(component: AppComponent) {
                             service = service,
                             settings = settings,
                             onComplete = {
+                                viewModel.rescheduleNotifications()
                                 navController.navigate(HomeRoute) {
                                     popUpTo(OnboardingRoute) { inclusive = true }
                                 }
@@ -89,6 +95,17 @@ fun App(component: AppComponent) {
                                     popUpTo(0) { inclusive = true }
                                 }
                             },
+                            onNavigateNotifications = { navController.navigate(NotificationSettingsRoute) },
+                        )
+                    }
+
+                    composable<NotificationSettingsRoute> {
+                        NotificationSettingsScreen(
+                            prefs = viewModel.notificationPrefs,
+                            hasPermission = viewModel.notificationPermissionGranted,
+                            onRequestPermission = { viewModel.requestNotificationPermission() },
+                            onPrefsChange = { viewModel.updateNotificationPrefs(it) },
+                            onBack = { navController.popBackStack() },
                         )
                     }
                 }

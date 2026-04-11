@@ -284,32 +284,45 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Download to a path OUTSIDE the repo so the untracked artifact files
+      # don't collide with tracked files on the `screenshots` branch when we
+      # switch to it. (Previous runs accidentally committed a `screenshots/`
+      # directory into the branch, which made `git switch screenshots` abort
+      # with "untracked working tree files would be overwritten".)
       - name: Download Android screenshots
         uses: actions/download-artifact@v4
         with:
           name: android-screenshots
-          path: screenshots/android/
+          path: /tmp/downloaded-screenshots/android/
 
       - name: Publish to screenshots branch
         run: |
+          set -euo pipefail
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # Create or switch to orphan branch
+          # Switch to (or create) the orphan branch. The working tree now
+          # only contains files tracked on that branch — no artifact dir.
           if git ls-remote --exit-code origin screenshots >/dev/null 2>&1; then
             git fetch origin screenshots
             git switch screenshots
-            # Clean old screenshots
-            git rm -rf android ios 2>/dev/null || true
+            # Defensive cleanup: nuke everything tracked AND anything stale
+            # from earlier buggy runs (e.g. a leftover `screenshots/` dir).
+            git rm -rf . 2>/dev/null || true
+            git clean -fdx
           else
             git switch --orphan screenshots
             git rm -rf . 2>/dev/null || true
+            git clean -fdx
           fi
 
-          # Copy new screenshots to root
-          cp -R screenshots/android/ android/
-          if [ -d screenshots/ios ]; then
-            cp -R screenshots/ios/ ios/
+          # Copy new screenshots from the out-of-repo download location.
+          mkdir -p android
+          cp -R /tmp/downloaded-screenshots/android/. android/
+          if [ -d /tmp/downloaded-screenshots/ios ]; then
+            mkdir -p ios
+            cp -R /tmp/downloaded-screenshots/ios/. ios/
           fi
 
           # Generate a README with preview links
