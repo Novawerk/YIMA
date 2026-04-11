@@ -231,6 +231,18 @@ jobs:
             --title "${{ steps.version.outputs.tag }}" \
             --notes-file release_notes.md
 
+      # GitHub Actions limitation: pushes made with GITHUB_TOKEN do not trigger
+      # other workflows (anti-loop guard). The v* tag we just pushed therefore
+      # does NOT auto-fire google-play-release.yml. Dispatch it explicitly.
+      # workflow_dispatch IS allowed to be triggered by GITHUB_TOKEN.
+      - name: Trigger Google Play Release for new tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          gh workflow run google-play-release.yml --ref "$TAG" -f track=internal
+          echo "Dispatched google-play-release.yml for $TAG (internal track)"
+
       - name: Backport version bump to main
         continue-on-error: true
         env:
@@ -253,11 +265,20 @@ jobs:
           git commit -m "chore: sync version ${VERSION} to main"
           git push origin "$BRANCH"
 
-          gh pr create \
+          # NOTE: gh pr create may fail with
+          #   "GitHub Actions is not permitted to create or approve pull requests"
+          # if the org has "Allow GitHub Actions to create and approve pull
+          # requests" disabled (Novawerk org currently does). In that case the
+          # backport branch is still pushed; the URL printed below can be used
+          # to open the PR manually, or the next workflow step prints it again.
+          if ! gh pr create \
             --base main \
             --head "$BRANCH" \
             --title "chore: sync version ${VERSION} to main" \
-            --body "Auto-generated PR to sync version bump from release branch."
+            --body "Auto-generated PR to sync version bump from release branch."; then
+            echo "::warning::Could not create backport PR automatically. Open one at:"
+            echo "::warning::https://github.com/${{ github.repository }}/compare/main...${BRANCH}?expand=1"
+          fi
 
       # Note: Google Play upload is handled by google-play-release.yml,
-      # which fires automatically on the v* tag push above. Don't duplicate it here.
+      # invoked explicitly above (not via tag-push trigger).
