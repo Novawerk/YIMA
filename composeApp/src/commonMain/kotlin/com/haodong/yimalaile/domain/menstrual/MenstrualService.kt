@@ -206,6 +206,15 @@ class MenstrualService(private val repository: RecordsRepository) {
         repository.clearAll()
     }
 
+    /**
+     * Return every non-deleted record, sorted by start date ascending.
+     * Used by the PDF export flow.
+     */
+    suspend fun getAllRecords(): List<MenstrualRecord> =
+        repository.getAllRecords()
+            .filter { !it.isDeleted }
+            .sortedBy { it.startDate }
+
     // ---------- Prediction ----------
 
     suspend fun predictNextCycles(count: Int = 3, cycleLength: Int = 28): List<PredictedCycle> =

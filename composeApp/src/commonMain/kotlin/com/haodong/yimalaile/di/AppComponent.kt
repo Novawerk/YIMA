@@ -2,6 +2,7 @@ package com.haodong.yimalaile.di
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import com.haodong.yimalaile.domain.export.ReportExportService
 import com.haodong.yimalaile.domain.menstrual.DailyNoteRepository
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.domain.menstrual.RecordsRepository
@@ -18,6 +19,7 @@ import me.tatarka.inject.annotations.Provides
 abstract class AppComponent(
     @get:Provides protected val dataStore: DataStore<Preferences>,
     @get:Provides protected val notificationScheduler: NotificationScheduler,
+    @get:Provides val reportExportService: ReportExportService,
 ) {
     abstract val menstrualService: MenstrualService
     abstract val settingsRepository: SettingsRepository
@@ -40,4 +42,5 @@ abstract class AppComponent(
 expect fun AppComponent.Companion.create(
     dataStore: DataStore<Preferences>,
     notificationScheduler: NotificationScheduler,
+    reportExportService: ReportExportService,
 ): AppComponent

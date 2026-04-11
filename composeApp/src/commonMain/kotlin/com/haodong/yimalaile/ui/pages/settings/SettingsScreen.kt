@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.BuildKonfig
+import com.haodong.yimalaile.ExportStatus
 import com.haodong.yimalaile.domain.settings.AppDarkMode
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
@@ -34,12 +35,16 @@ fun SettingsScreen(
     onBack: () -> Unit,
     onClearData: () -> Unit,
     onNavigateNotifications: () -> Unit = {},
+    exportStatus: ExportStatus = ExportStatus.Idle,
+    onExport: (language: String) -> Unit = {},
+    onResetExportStatus: () -> Unit = {},
 ) {
     val uriHandler = LocalUriHandler.current
     var showClearConfirm by remember { mutableStateOf(false) }
     var showAboutSheet by remember { mutableStateOf(false) }
     var showPeriodDurationDialog by remember { mutableStateOf(false) }
     var showCycleLengthDialog by remember { mutableStateOf(false) }
+    var showExportDialog by remember { mutableStateOf(false) }
 
     Column(
         Modifier
@@ -115,6 +120,18 @@ fun SettingsScreen(
             label = stringResource(Res.string.settings_notifications),
             value = stringResource(Res.string.settings_notifications_value),
             onClick = onNavigateNotifications,
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        // ── Export report ──
+        SettingsItem(
+            label = stringResource(Res.string.settings_export),
+            value = stringResource(Res.string.settings_export_value),
+            onClick = {
+                onResetExportStatus()
+                showExportDialog = true
+            },
         )
 
         Spacer(Modifier.height(48.dp))
@@ -213,6 +230,17 @@ fun SettingsScreen(
             maxLabel = "45",
             onConfirm = { onCycleLengthChange(it); showCycleLengthDialog = false },
             onDismiss = { showCycleLengthDialog = false },
+        )
+    }
+
+    if (showExportDialog) {
+        ExportDialog(
+            status = exportStatus,
+            onExport = { language -> onExport(language) },
+            onDismiss = {
+                showExportDialog = false
+                onResetExportStatus()
+            },
         )
     }
 }
