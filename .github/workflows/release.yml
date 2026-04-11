@@ -1,22 +1,26 @@
 # Release Workflow
 #
-# Triggered when a PR from main is merged into the release branch.
+# Triggered on push to the release branch (typically a PR merge from main).
 # Requires exactly one PR label: version:patch, version:minor, or version:major.
 #
+# Why push and not pull_request:closed?
+#   The pull_request:closed trigger has proven unreliable on this repo —
+#   merges of main → release did not fire any workflow runs. push is reliable.
+#   The merge-commit guard in `if:` ensures we only release on actual PR merges.
+#
 # What it does:
-#   1. Determines version bump from PR label
+#   1. Determines version bump from PR label (looked up via merge commit SHA)
 #   2. Computes next semver + version code
 #   3. Bumps version in gradle/libs.versions.toml + syncs to Config.xcconfig
 #   4. Commits version bump to release branch
 #   5. Creates git tag + GitHub Release with categorized notes
-#   6. Builds and uploads AAB to Google Play production
-#   7. Opens backport PR to sync version bump to main
+#      (the v* tag push triggers google-play-release.yml to upload to Play Store)
+#   6. Opens backport PR to sync version bump to main
 
 name: Release
 
 on:
-  pull_request:
-    types: [closed]
+  push:
     branches: [release]
   workflow_dispatch:
     inputs:
@@ -32,9 +36,17 @@ on:
 
 jobs:
   release:
+    # Run on:
+    #   - manual workflow_dispatch
+    #   - push events whose head commit is a PR merge ("Merge pull request #N ...")
+    # Skip self-pushes from this workflow (version bump, [skip ci]) to avoid loops.
     if: >-
       github.event_name == 'workflow_dispatch'
-      || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+      || (
+        github.event_name == 'push'
+        && startsWith(github.event.head_commit.message, 'Merge pull request')
+        && !contains(github.event.head_commit.message, '[skip ci]')
+      )
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -54,24 +66,38 @@ jobs:
 
       - name: Determine version bump
         id: bump
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+          REPO: ${{ github.repository }}
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "bump=${{ inputs.bump }}" >> $GITHUB_OUTPUT
             exit 0
           fi
 
-          LABELS='${{ toJSON(github.event.pull_request.labels.*.name) }}'
+          # push event: extract PR number from merge commit message and read its labels
+          FIRST_LINE=$(printf '%s\n' "$COMMIT_MSG" | head -1)
+          PR_NUM=$(printf '%s\n' "$FIRST_LINE" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
+          if [ -z "$PR_NUM" ]; then
+            echo "::error::Could not extract PR number from commit message: $FIRST_LINE"
+            exit 1
+          fi
+          echo "Found PR #$PR_NUM from commit message"
+
+          LABELS=$(gh pr view "$PR_NUM" --repo "$REPO" --json labels --jq '[.labels[].name]')
+          echo "Labels: $LABELS"
           PATCH=$(echo "$LABELS" | jq -r 'map(select(. == "version:patch")) | length')
           MINOR=$(echo "$LABELS" | jq -r 'map(select(. == "version:minor")) | length')
           MAJOR=$(echo "$LABELS" | jq -r 'map(select(. == "version:major")) | length')
 
           COUNT=$((PATCH + MINOR + MAJOR))
           if [ "$COUNT" -eq 0 ]; then
-            echo "::error::No version label found. Add exactly one of: version:patch, version:minor, version:major"
+            echo "::error::No version label on PR #$PR_NUM. Add exactly one of: version:patch, version:minor, version:major"
             exit 1
           fi
           if [ "$COUNT" -gt 1 ]; then
-            echo "::error::Multiple version labels found. Use exactly one of: version:patch, version:minor, version:major"
+            echo "::error::Multiple version labels on PR #$PR_NUM. Use exactly one of: version:patch, version:minor, version:major"
             exit 1
           fi
 
@@ -233,51 +259,5 @@ jobs:
             --title "chore: sync version ${VERSION} to main" \
             --body "Auto-generated PR to sync version bump from release branch."
 
-  publish-play-store:
-    needs: release
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          ref: release
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v5
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: Decode keystore
-        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
-
-      - name: Build release AAB
-        env:
-          KEYSTORE_PATH: ${{ github.workspace }}/keystore.jks
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          VERSION_CODE: ${{ needs.release.outputs.version_code }}
-          VERSION_NAME: ${{ needs.release.outputs.version }}
-        run: ./gradlew :composeApp:bundleRelease
-
-      - name: Decode service account key
-        run: echo "${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}" | base64 -d > service-account.json
-
-      - name: Upload to Google Play
-        uses: r0adkll/upload-google-play@v1
-        with:
-          serviceAccountJson: service-account.json
-          packageName: com.haodong.yimalaile
-          releaseFiles: composeApp/build/outputs/bundle/release/*.aab
-          track: internal
-          status: draft
-
-      - name: Upload AAB as artifact
-        uses: actions/upload-artifact@v5
-        with:
-          name: release-aab
-          path: composeApp/build/outputs/bundle/release/*.aab
+      # Note: Google Play upload is handled by google-play-release.yml,
+      # which fires automatically on the v* tag push above. Don't duplicate it here.
