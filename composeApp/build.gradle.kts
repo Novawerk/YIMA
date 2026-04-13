@@ -71,6 +71,7 @@ kotlin {
             implementation(libs.datastore.preferences)
             implementation(libs.kotlin.inject.runtime)
             implementation(libs.navigation.compose)
+            implementation(libs.health.kmp)
         }
     }
 }

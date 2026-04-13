@@ -2,7 +2,7 @@ package com.haodong.yimalaile.domain.menstrual
 
 import kotlinx.datetime.LocalDate
 
-enum class RecordSource { MANUAL, PREDICTION, AUTO_CONFIRMED }
+enum class RecordSource { MANUAL, PREDICTION, AUTO_CONFIRMED, HEALTH_IMPORT }
 
 data class MenstrualRecord(
     val id: String,
