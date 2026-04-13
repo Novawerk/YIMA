@@ -26,7 +26,7 @@ class HealthSyncManager(
 
     suspend fun sync(): SyncResult {
         val tz = TimeZone.currentSystemDefault()
-        val now = kotlinx.datetime.Clock.System.now()
+        val now = kotlin.time.Clock.System.now()
         val today = now.toLocalDateTime(tz).date
 
         val lastSyncMillis = settingsRepository.getHealthLastSync()

@@ -97,7 +97,7 @@ class HealthService(
     ): MenstrualRecord {
         val pStart = period.startTime.toLocalDateTime(tz).date
         val pEnd = period.endTime.toLocalDateTime(tz).date
-        val now = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
+        val now = kotlin.time.Clock.System.now().toEpochMilliseconds()
 
         val dailyRecords = allFlows
             .filter { flow ->

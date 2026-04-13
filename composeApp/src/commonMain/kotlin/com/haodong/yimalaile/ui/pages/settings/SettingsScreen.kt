@@ -20,7 +20,6 @@ import com.haodong.yimalaile.BuildKonfig
 import com.haodong.yimalaile.ExportStatus
 import com.haodong.yimalaile.domain.health.HealthAuthStatus
 import com.haodong.yimalaile.domain.settings.AppDarkMode
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime

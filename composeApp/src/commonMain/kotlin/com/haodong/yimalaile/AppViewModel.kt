@@ -15,7 +15,7 @@ import com.haodong.yimalaile.domain.notifications.NotificationPrefs
 import com.haodong.yimalaile.domain.notifications.NotificationService
 import com.haodong.yimalaile.domain.settings.AppDarkMode
 import com.haodong.yimalaile.domain.settings.SettingsRepository
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import com.haodong.yimalaile.ui.navigation.DisclaimerRoute
 import com.haodong.yimalaile.ui.navigation.HomeRoute
 import com.haodong.yimalaile.ui.navigation.OnboardingRoute
