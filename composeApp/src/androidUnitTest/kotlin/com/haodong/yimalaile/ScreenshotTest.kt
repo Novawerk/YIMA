@@ -43,11 +43,11 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import java.io.File
 
+private const val SCREENSHOT_SYNC_TIMESTAMP = 1_712_400_000_000L // April 6, 2024 12:00 UTC
+
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [33], qualifiers = "w393dp-h851dp-xxhdpi")
-private const val SCREENSHOT_SYNC_TIMESTAMP = 1_712_400_000_000L // April 6, 2024 12:00 UTC
-
 class ScreenshotTest {
 
     @get:Rule
