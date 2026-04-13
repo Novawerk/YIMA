@@ -14,6 +14,7 @@ import com.haodong.yimalaile.di.create
 import com.haodong.yimalaile.domain.export.IosReportExportService
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.domain.settings.SettingsRepository
+import com.haodong.yimalaile.domain.health.HealthAuthStatus
 import com.haodong.yimalaile.notifications.IosNotificationScheduler
 import com.viktormykhailiv.kmp.health.HealthManagerFactory
 import com.haodong.yimalaile.fakes.FakeRecordsRepository
@@ -100,6 +101,9 @@ fun ScreenshotMainViewController() = ComposeUIViewController {
                             onPeriodDurationChange = { viewModel.updatePeriodDuration(it) },
                             onBack = { navController.popBackStack() },
                             onClearData = {},
+                            healthSyncEnabled = true,
+                            healthAuthStatus = HealthAuthStatus.AUTHORIZED,
+                            healthLastSync = 1_712_400_000_000L,
                         )
                     }
                     composable<DisclaimerRoute> {

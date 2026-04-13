@@ -15,6 +15,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.test.core.app.ApplicationProvider
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.haodong.yimalaile.domain.health.HealthAuthStatus
 import com.haodong.yimalaile.domain.menstrual.*
 import com.haodong.yimalaile.domain.settings.AppDarkMode
 import com.haodong.yimalaile.domain.settings.SettingsRepository
@@ -45,6 +46,8 @@ import java.io.File
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [33], qualifiers = "w393dp-h851dp-xxhdpi")
+private const val SCREENSHOT_SYNC_TIMESTAMP = 1_712_400_000_000L // April 6, 2024 12:00 UTC
+
 class ScreenshotTest {
 
     @get:Rule
@@ -107,6 +110,9 @@ class ScreenshotTest {
             onPeriodDurationChange = {},
             onBack = {},
             onClearData = {},
+            healthSyncEnabled = true,
+            healthAuthStatus = HealthAuthStatus.AUTHORIZED,
+            healthLastSync = SCREENSHOT_SYNC_TIMESTAMP,
         )
     }
 
@@ -123,6 +129,9 @@ class ScreenshotTest {
             onPeriodDurationChange = {},
             onBack = {},
             onClearData = {},
+            healthSyncEnabled = true,
+            healthAuthStatus = HealthAuthStatus.AUTHORIZED,
+            healthLastSync = SCREENSHOT_SYNC_TIMESTAMP,
         )
     }
 
@@ -139,6 +148,9 @@ class ScreenshotTest {
             onPeriodDurationChange = {},
             onBack = {},
             onClearData = {},
+            healthSyncEnabled = true,
+            healthAuthStatus = HealthAuthStatus.AUTHORIZED,
+            healthLastSync = SCREENSHOT_SYNC_TIMESTAMP,
         )
     }
 
@@ -155,6 +167,9 @@ class ScreenshotTest {
             onPeriodDurationChange = {},
             onBack = {},
             onClearData = {},
+            healthSyncEnabled = true,
+            healthAuthStatus = HealthAuthStatus.AUTHORIZED,
+            healthLastSync = SCREENSHOT_SYNC_TIMESTAMP,
         )
     }
 
