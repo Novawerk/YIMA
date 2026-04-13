@@ -11,7 +11,6 @@ import com.viktormykhailiv.kmp.health.readMenstruationPeriod
 import com.viktormykhailiv.kmp.health.records.MenstruationFlowRecord
 import com.viktormykhailiv.kmp.health.records.MenstruationPeriodRecord
 import com.viktormykhailiv.kmp.health.records.metadata.Metadata
-import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
@@ -98,7 +97,7 @@ class HealthService(
     ): MenstrualRecord {
         val pStart = period.startTime.toLocalDateTime(tz).date
         val pEnd = period.endTime.toLocalDateTime(tz).date
-        val now = Clock.System.now().toEpochMilliseconds()
+        val now = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
 
         val dailyRecords = allFlows
             .filter { flow ->

@@ -3,7 +3,6 @@ package com.haodong.yimalaile.domain.health
 import com.haodong.yimalaile.domain.menstrual.RecordSource
 import com.haodong.yimalaile.domain.menstrual.RecordsRepository
 import com.haodong.yimalaile.domain.settings.SettingsRepository
-import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
@@ -27,7 +26,7 @@ class HealthSyncManager(
 
     suspend fun sync(): SyncResult {
         val tz = TimeZone.currentSystemDefault()
-        val now = Clock.System.now()
+        val now = kotlinx.datetime.Clock.System.now()
         val today = now.toLocalDateTime(tz).date
 
         val lastSyncMillis = settingsRepository.getHealthLastSync()
