@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.haodong.yimalaile.domain.notifications.NotificationPrefs
 import kotlinx.coroutines.flow.first
@@ -16,6 +17,10 @@ private val LANGUAGE = stringPreferencesKey("language")
 private val HOME_MODE = stringPreferencesKey("home_mode")
 private val CYCLE_LENGTH = stringPreferencesKey("cycle_length")
 private val PERIOD_DURATION = stringPreferencesKey("period_duration")
+
+// Health sync
+private val HEALTH_SYNC_ENABLED = booleanPreferencesKey("health_sync_enabled")
+private val HEALTH_LAST_SYNC = longPreferencesKey("health_last_sync_millis")
 
 // Notifications
 private val NOTIF_PERIOD_ENABLED = booleanPreferencesKey("notif_period_enabled")
@@ -72,6 +77,22 @@ open class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun setPeriodDuration(value: Int) {
         dataStore.edit { prefs -> prefs[PERIOD_DURATION] = value.toString() }
+    }
+
+    // ---------- Health sync ----------
+
+    suspend fun isHealthSyncEnabled(): Boolean =
+        dataStore.data.first()[HEALTH_SYNC_ENABLED] ?: false
+
+    suspend fun setHealthSyncEnabled(value: Boolean) {
+        dataStore.edit { prefs -> prefs[HEALTH_SYNC_ENABLED] = value }
+    }
+
+    suspend fun getHealthLastSync(): Long =
+        dataStore.data.first()[HEALTH_LAST_SYNC] ?: 0L
+
+    suspend fun setHealthLastSync(value: Long) {
+        dataStore.edit { prefs -> prefs[HEALTH_LAST_SYNC] = value }
     }
 
     // ---------- Notification preferences ----------

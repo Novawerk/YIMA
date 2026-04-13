@@ -18,7 +18,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.haodong.yimalaile.BuildKonfig
 import com.haodong.yimalaile.ExportStatus
+import com.haodong.yimalaile.domain.health.HealthAuthStatus
 import com.haodong.yimalaile.domain.settings.AppDarkMode
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
 
@@ -38,6 +43,12 @@ fun SettingsScreen(
     exportStatus: ExportStatus = ExportStatus.Idle,
     onExport: (language: String) -> Unit = {},
     onResetExportStatus: () -> Unit = {},
+    healthSyncEnabled: Boolean = false,
+    healthAuthStatus: HealthAuthStatus = HealthAuthStatus.NOT_AVAILABLE,
+    healthLastSync: Long = 0L,
+    healthSyncInProgress: Boolean = false,
+    onToggleHealthSync: (Boolean) -> Unit = {},
+    onSyncHealthNow: () -> Unit = {},
 ) {
     val uriHandler = LocalUriHandler.current
     var showClearConfirm by remember { mutableStateOf(false) }
@@ -133,6 +144,86 @@ fun SettingsScreen(
                 showExportDialog = true
             },
         )
+
+        Spacer(Modifier.height(24.dp))
+
+        // ── Health Data ──
+        SectionLabel(stringResource(Res.string.settings_health_data))
+        Spacer(Modifier.height(12.dp))
+        Surface(
+            tonalElevation = 1.dp,
+            shape = MaterialTheme.shapes.large,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Column(Modifier.padding(20.dp)) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            stringResource(Res.string.settings_health_sync),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text(
+                            stringResource(Res.string.settings_health_sync_desc),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Switch(
+                        checked = healthSyncEnabled,
+                        onCheckedChange = onToggleHealthSync,
+                        enabled = healthAuthStatus != HealthAuthStatus.NOT_AVAILABLE,
+                    )
+                }
+                if (healthAuthStatus == HealthAuthStatus.NOT_AVAILABLE) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        stringResource(Res.string.settings_health_not_available),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+                if (healthSyncEnabled) {
+                    Spacer(Modifier.height(12.dp))
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            if (healthLastSync > 0L) {
+                                stringResource(
+                                    Res.string.settings_health_last_sync,
+                                    formatSyncTime(healthLastSync),
+                                )
+                            } else {
+                                stringResource(Res.string.settings_health_never_synced)
+                            },
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f),
+                        )
+                        FilledTonalButton(
+                            onClick = onSyncHealthNow,
+                            enabled = !healthSyncInProgress,
+                        ) {
+                            if (healthSyncInProgress) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(16.dp),
+                                    strokeWidth = 2.dp,
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(stringResource(Res.string.settings_health_syncing))
+                            } else {
+                                Text(stringResource(Res.string.settings_health_sync_now))
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         Spacer(Modifier.height(48.dp))
 
@@ -243,6 +334,14 @@ fun SettingsScreen(
             },
         )
     }
+}
+
+private fun formatSyncTime(epochMillis: Long): String {
+    val tz = TimeZone.currentSystemDefault()
+    val dt = Instant.fromEpochMilliseconds(epochMillis).toLocalDateTime(tz)
+    val h = dt.hour.toString().padStart(2, '0')
+    val m = dt.minute.toString().padStart(2, '0')
+    return "${dt.date} $h:$m"
 }
 
 // ════════════════════════════════════════════════════════════════

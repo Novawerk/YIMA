@@ -46,6 +46,12 @@ If that experiment lands, maybe more small utilities can be rebuilt this way.
 
 All three are off by default and require an explicit OS-level permission grant.
 
+### Health data sync
+- **Apple Health & Google Health Connect** — Bidirectional sync of menstrual period and flow data via [HealthKMP](https://github.com/vitoksmile/HealthKMP)
+- **Import** — Reads periods from the health platform and merges them with your existing records (skips overlapping ranges)
+- **Export** — Writes your manually-logged periods back to the health platform
+- **Opt-in** — Off by default; enable in Settings under "Health Data"
+
 ### Cycle report export
 - **Long-image PNG report** — Generates a single shareable image containing your summary (total records, average cycle, average period) and every record with its daily logs (flow, mood, symptoms, notes)
 - **Pick the report language** — English or Chinese, independent of the app language
@@ -61,6 +67,7 @@ All three are off by default and require an explicit OS-level permission grant.
 - Display mode — System / Light / Dark
 - Language — Auto / English / 中文
 - Period duration & cycle length (sliders, editable any time)
+- Health data sync (Apple Health / Google Health Connect)
 - Notifications
 - Cycle report export
 - About (version, author)
@@ -91,6 +98,7 @@ All three are off by default and require an explicit OS-level permission grant.
 | UI | Compose Multiplatform 1.8 (Material 3 Expressive) |
 | Navigation | Compose Navigation with type-safe `@Serializable` routes |
 | DI | kotlin-inject + KSP (`@KmpComponentCreate`) |
+| Health | [HealthKMP](https://github.com/vitoksmile/HealthKMP) (Apple HealthKit + Google Health Connect) |
 | Storage | Jetpack DataStore Preferences + kotlinx.serialization |
 | Date/Time | kotlinx-datetime + kotlinx-datetime-names |
 | Notifications | Platform-specific schedulers via `expect` / `actual` |
@@ -107,6 +115,7 @@ composeApp/src/commonMain/kotlin/com/haodong/yimalaile/
 ├── di/                               # kotlin-inject root component
 ├── domain/
 │   ├── menstrual/                    # MenstrualService, cycle logic, models
+│   ├── health/                       # HealthService, HealthSyncManager
 │   ├── notifications/                # Reminder scheduling contracts
 │   └── settings/                     # SettingsRepository + AppDarkMode
 ├── infrastructure/

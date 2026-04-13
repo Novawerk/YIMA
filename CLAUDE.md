@@ -25,6 +25,7 @@ composeApp/src/
 │   ├── Platform.kt                  # expect declarations
 │   ├── di/AppComponent.kt           # DI root
 │   ├── domain/
+│   │   ├── health/                  # HealthService, HealthSyncManager (HealthKMP)
 │   │   ├── menstrual/               # MenstrualService, models, repository interface
 │   │   └── settings/                # SettingsRepository
 │   ├── infrastructure/persistence/  # DataStoreRecordsRepository
@@ -59,7 +60,8 @@ iosApp/                              # Native Xcode project
 - Domain layer: `MenstrualService` wraps `RecordsRepository` + cycle calculation
 - Infrastructure: `DataStoreRecordsRepository` (JSON serialization in DataStore)
 - UI: Compose screens with ViewModels, BottomSheet dialogs, custom `RangeCalendar`
-- Privacy-first: local storage only, no cloud sync
+- Health: `HealthService` wraps HealthKMP for Apple HealthKit / Google Health Connect sync
+- Privacy-first: local storage only, no cloud sync; health sync is opt-in
 
 ## Key Business Rules
 

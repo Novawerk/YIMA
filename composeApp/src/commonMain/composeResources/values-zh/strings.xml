@@ -173,6 +173,16 @@
     <string name="notifications_daily_time">每日报告时间</string>
     <string name="notifications_permission_required">需要通知权限</string>
     <string name="notifications_permission_hint">点击以允许发送提醒通知。</string>
+    <!-- Health Data Sync -->
+    <string name="settings_health_data">健康数据</string>
+    <string name="settings_health_sync">同步健康数据</string>
+    <string name="settings_health_sync_desc">与 Apple 健康或 Google 健康互联同步经期记录</string>
+    <string name="settings_health_sync_now">立即同步</string>
+    <string name="settings_health_syncing">同步中\u2026</string>
+    <string name="settings_health_last_sync">上次同步：%1$s</string>
+    <string name="settings_health_never_synced">尚未同步</string>
+    <string name="settings_health_not_available">此设备不支持健康数据</string>
+    <string name="settings_health_not_authorized">需要授权才能同步健康数据</string>
     <!-- Notification payload copy -->
     <string name="notif_period_title">姨妈快来了</string>
     <string name="notif_period_body">预计还有 %1$d 天开始下次月经，记得提前准备哦。</string>
