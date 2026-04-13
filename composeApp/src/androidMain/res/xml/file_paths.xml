@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!--
+      The long-image exporter writes the generated PNG into the app's
+      private cache directory (context.cacheDir/exports/) and then
+      hands a FileProvider content:// URI to the system share sheet.
+      Exposing only the `exports` subdirectory keeps the provider's
+      surface area tight.
+    -->
+    <cache-path
+        name="exports"
+        path="exports/"/>
+</paths>

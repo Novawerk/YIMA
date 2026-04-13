@@ -271,10 +271,10 @@ jobs:
               await github.rest.issues.createComment({ ...params, issue_number: context.issue.number });
             }
 
-  # On main: publish screenshots to an orphan branch for stable access
-  publish-to-branch:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [android-screenshots]
+  # On release: commit screenshots to the release branch
+  commit-to-release:
+    if: github.event_name == 'release'
+    needs: [android-screenshots, ios-screenshots]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -282,74 +282,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          ref: release
+          fetch-depth: 1
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      # Download to a path OUTSIDE the repo so the untracked artifact files
-      # don't collide with tracked files on the `screenshots` branch when we
-      # switch to it. (Previous runs accidentally committed a `screenshots/`
-      # directory into the branch, which made `git switch screenshots` abort
-      # with "untracked working tree files would be overwritten".)
       - name: Download Android screenshots
         uses: actions/download-artifact@v4
         with:
           name: android-screenshots
           path: /tmp/downloaded-screenshots/android/
 
-      - name: Publish to screenshots branch
+      - name: Download iOS screenshots
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-screenshots
+          path: /tmp/downloaded-screenshots/ios/
+
+      - name: Commit screenshots to release branch
         run: |
           set -euo pipefail
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # Switch to (or create) the orphan branch. The working tree now
-          # only contains files tracked on that branch — no artifact dir.
-          if git ls-remote --exit-code origin screenshots >/dev/null 2>&1; then
-            git fetch origin screenshots
-            git switch screenshots
-            # Defensive cleanup: nuke everything tracked AND anything stale
-            # from earlier buggy runs (e.g. a leftover `screenshots/` dir).
-            git rm -rf . 2>/dev/null || true
-            git clean -fdx
-          else
-            git switch --orphan screenshots
-            git rm -rf . 2>/dev/null || true
-            git clean -fdx
-          fi
+          # Clear old CI screenshots and copy fresh ones
+          rm -rf docs/screenshots/ci
+          mkdir -p docs/screenshots/ci/android docs/screenshots/ci/ios
+          cp -R /tmp/downloaded-screenshots/android/. docs/screenshots/ci/android/
+          cp -R /tmp/downloaded-screenshots/ios/. docs/screenshots/ci/ios/
 
-          # Copy new screenshots from the out-of-repo download location.
-          mkdir -p android
-          cp -R /tmp/downloaded-screenshots/android/. android/
-          if [ -d /tmp/downloaded-screenshots/ios ]; then
-            mkdir -p ios
-            cp -R /tmp/downloaded-screenshots/ios/. ios/
-          fi
-
-          # Generate a README with preview links
-          cat > README.md << 'READMEEOF'
-          # App Screenshots
-
-          Auto-generated screenshots from CI. Updated on every push to `main`.
-
-          ## Structure
-
-          ```
-          android/
-          ├── en/ (light/ dark/)
-          └── zh/ (light/ dark/)
-          ios/
-          ├── en/ (light/ dark/)
-          └── zh/ (light/ dark/)
-          ```
-
-          ## Quick Links
-
-          | | EN Light | EN Dark | ZH Light | ZH Dark |
-          |---|---|---|---|---|
-          | **Android** | [📂](android/en/light/) | [📂](android/en/dark/) | [📂](android/zh/light/) | [📂](android/zh/dark/) |
-          | **iOS** | [📂](ios/en/light/) | [📂](ios/en/dark/) | [📂](ios/zh/light/) | [📂](ios/zh/dark/) |
-          READMEEOF
-
-          git add -A
-          git commit -m "Update screenshots from ${GITHUB_SHA:0:7}" || echo "No changes to commit"
-          git push origin screenshots --force
+          git add docs/screenshots/ci/
+          git diff --cached --quiet && echo "No screenshot changes to commit" || {
+            TAG_NAME="${GITHUB_REF#refs/tags/}"
+            git commit -m "docs: update screenshots for ${TAG_NAME} [skip ci]"
+            git push origin release
+          }

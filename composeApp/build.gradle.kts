@@ -1,3 +1,5 @@
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.INT
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -8,6 +10,7 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.roborazzi)
+    alias(libs.plugins.buildkonfig)
 }
 
 kotlin {
@@ -68,6 +71,7 @@ kotlin {
             implementation(libs.datastore.preferences)
             implementation(libs.kotlin.inject.runtime)
             implementation(libs.navigation.compose)
+            implementation(libs.health.kmp)
         }
     }
 }
@@ -115,6 +119,18 @@ android {
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+}
+
+buildkonfig {
+    packageName = "com.haodong.yimalaile"
+    val versionName = System.getenv("VERSION_NAME")
+        ?: libs.versions.app.versionName.get()
+    val versionCode = System.getenv("VERSION_CODE")?.toIntOrNull()
+        ?: libs.versions.app.versionCode.get().toInt()
+    defaultConfigs {
+        buildConfigField(STRING, "VERSION_NAME", versionName)
+        buildConfigField(INT, "VERSION_CODE", versionCode.toString())
     }
 }
 

@@ -26,9 +26,11 @@ fun App(component: AppComponent) {
     val service = component.menstrualService
     val settings = component.settingsRepository
     val notificationService = component.notificationService
+    val reportExportService = component.reportExportService
+    val healthSyncManager = component.healthSyncManager
 
     val viewModel = remember {
-        AppViewModel(service, settings, notificationService)
+        AppViewModel(service, settings, notificationService, reportExportService, healthSyncManager)
     }
     val sheetViewModel = remember { SheetViewModel(service) }
 
@@ -96,6 +98,15 @@ fun App(component: AppComponent) {
                                 }
                             },
                             onNavigateNotifications = { navController.navigate(NotificationSettingsRoute) },
+                            exportStatus = viewModel.exportStatus,
+                            onExport = { lang -> viewModel.exportReport(lang) },
+                            onResetExportStatus = { viewModel.resetExportStatus() },
+                            healthSyncEnabled = viewModel.healthSyncEnabled,
+                            healthAuthStatus = viewModel.healthAuthStatus,
+                            healthLastSync = viewModel.healthLastSync,
+                            healthSyncInProgress = viewModel.healthSyncInProgress,
+                            onToggleHealthSync = { viewModel.toggleHealthSync(it) },
+                            onSyncHealthNow = { viewModel.syncHealth() },
                         )
                     }
 

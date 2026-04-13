@@ -13,7 +13,7 @@
 - **DI**: kotlin-inject 0.8.0 with KSP (@KmpComponentCreate for multiplatform)
 - **Date/Time**: kotlinx-datetime 0.6.1
 - **Build**: Gradle 8.7.3 with version catalog (`gradle/libs.versions.toml`)
-- **Android**: Min SDK 24, Compile/Target SDK 36, AGP 8.7.3
+- **Android**: Min SDK 26, Compile/Target SDK 36, AGP 8.7.3
 - **iOS**: Swift/SwiftUI wrapper in `iosApp/`, KMP framework named `ComposeApp`
 
 ## Project Structure
@@ -25,6 +25,7 @@ composeApp/src/
 │   ├── Platform.kt                  # expect declarations
 │   ├── di/AppComponent.kt           # DI root
 │   ├── domain/
+│   │   ├── health/                  # HealthService, HealthSyncManager (HealthKMP)
 │   │   ├── menstrual/               # MenstrualService, models, repository interface
 │   │   └── settings/                # SettingsRepository
 │   ├── infrastructure/persistence/  # DataStoreRecordsRepository
@@ -59,14 +60,15 @@ iosApp/                              # Native Xcode project
 - Domain layer: `MenstrualService` wraps `RecordsRepository` + cycle calculation
 - Infrastructure: `DataStoreRecordsRepository` (JSON serialization in DataStore)
 - UI: Compose screens with ViewModels, BottomSheet dialogs, custom `RangeCalendar`
-- Privacy-first: local storage only, no cloud sync
+- Health: `HealthService` wraps HealthKMP for Apple HealthKit / Google Health Connect sync
+- Privacy-first: local storage only, no cloud sync; health sync is opt-in
 
 ## Key Business Rules
 
 1. Cannot start a new period while one is active (no end date)
 2. Period date ranges cannot overlap
 3. Backfill not blocked by active period (records past data)
-4. Predictions require ≥ 2 complete records
+4. Predictions require ≥ 1 existing record; onboarding seeds 5 past cycles so the app is immediately useful
 5. Ending a period auto-trims daily records outside the range
 6. Data export/import/clear under user control
 7. No medical claims; disclaimer on first launch

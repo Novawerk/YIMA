@@ -6,11 +6,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.haodong.yimalaile.domain.export.ExportResult
+import com.haodong.yimalaile.domain.export.ReportExportService
+import com.haodong.yimalaile.domain.health.HealthAuthStatus
+import com.haodong.yimalaile.domain.health.HealthSyncManager
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.domain.notifications.NotificationPrefs
 import com.haodong.yimalaile.domain.notifications.NotificationService
 import com.haodong.yimalaile.domain.settings.AppDarkMode
 import com.haodong.yimalaile.domain.settings.SettingsRepository
+import kotlin.time.Clock
 import com.haodong.yimalaile.ui.navigation.DisclaimerRoute
 import com.haodong.yimalaile.ui.navigation.HomeRoute
 import com.haodong.yimalaile.ui.navigation.OnboardingRoute
@@ -28,6 +33,8 @@ class AppViewModel(
     private val service: MenstrualService,
     private val settings: SettingsRepository,
     private val notificationService: NotificationService? = null,
+    private val reportExportService: ReportExportService? = null,
+    private val healthSyncManager: HealthSyncManager? = null,
 ) : ViewModel() {
 
     var darkMode by mutableStateOf(AppDarkMode.SYSTEM)
@@ -51,6 +58,21 @@ class AppViewModel(
     var notificationPermissionGranted by mutableStateOf(false)
         private set
 
+    var exportStatus by mutableStateOf<ExportStatus>(ExportStatus.Idle)
+        private set
+
+    var healthSyncEnabled by mutableStateOf(false)
+        private set
+
+    var healthAuthStatus by mutableStateOf(HealthAuthStatus.NOT_AVAILABLE)
+        private set
+
+    var healthLastSync by mutableStateOf(0L)
+        private set
+
+    var healthSyncInProgress by mutableStateOf(false)
+        private set
+
     init {
         viewModelScope.launch {
             darkMode = settings.getDarkMode()
@@ -72,6 +94,14 @@ class AppViewModel(
             // Re-apply the stored schedule on app start so alarms survive
             // app relaunch and preference bundle migrations.
             applySchedule()
+
+            // Health sync
+            healthSyncEnabled = settings.isHealthSyncEnabled()
+            healthLastSync = settings.getHealthLastSync()
+            healthAuthStatus = healthSyncManager?.getAuthStatus() ?: HealthAuthStatus.NOT_AVAILABLE
+            if (healthSyncEnabled && healthAuthStatus == HealthAuthStatus.AUTHORIZED) {
+                syncHealth()
+            }
         }
     }
 
@@ -144,11 +174,64 @@ class AppViewModel(
         }
     }
 
+    /**
+     * Render the full history to a long PNG image and save it to the
+     * device's Pictures folder. [language] picks the report body
+     * language ("en" or "zh") independently of the current UI locale.
+     */
+    fun exportReport(language: String) {
+        val exporter = reportExportService ?: run {
+            exportStatus = ExportStatus.Failure("Export service not available")
+            return
+        }
+        viewModelScope.launch {
+            exportStatus = ExportStatus.InProgress
+            val records = service.getAllRecords()
+            exportStatus = when (val result = exporter.exportCycleReport(records, language)) {
+                is ExportResult.Success -> ExportStatus.Success(result.displayLocation)
+                is ExportResult.Failure -> ExportStatus.Failure(result.message)
+            }
+        }
+    }
+
+    fun resetExportStatus() {
+        exportStatus = ExportStatus.Idle
+    }
+
     fun requestNotificationPermission() {
         viewModelScope.launch {
             val granted = notificationService?.requestPermission() ?: false
             notificationPermissionGranted = granted
             if (granted) applySchedule()
+        }
+    }
+
+    // ---------- Health sync ----------
+
+    fun toggleHealthSync(enabled: Boolean) {
+        val manager = healthSyncManager ?: return
+        viewModelScope.launch {
+            if (enabled) {
+                val authorized = manager.requestAuthorization()
+                if (!authorized) return@launch
+                healthAuthStatus = manager.getAuthStatus()
+            }
+            healthSyncEnabled = enabled
+            settings.setHealthSyncEnabled(enabled)
+            if (enabled) syncHealth()
+        }
+    }
+
+    fun syncHealth() {
+        val manager = healthSyncManager ?: return
+        viewModelScope.launch {
+            healthSyncInProgress = true
+            try {
+                manager.sync()
+                healthLastSync = Clock.System.now().toEpochMilliseconds()
+            } finally {
+                healthSyncInProgress = false
+            }
         }
     }
 
@@ -170,4 +253,11 @@ class AppViewModel(
         )
         svc.reschedule(prefs = prefs, cycleLength = cycleLength, copy = copy)
     }
+}
+
+sealed class ExportStatus {
+    data object Idle : ExportStatus()
+    data object InProgress : ExportStatus()
+    data class Success(val location: String) : ExportStatus()
+    data class Failure(val message: String) : ExportStatus()
 }

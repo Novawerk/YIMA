@@ -1,0 +1,107 @@
+package com.haodong.yimalaile.domain.export
+
+/**
+ * Bilingual strings used inside the exported PDF. Kept separate from
+ * Compose string resources because the PDF body language is picked by
+ * the user at export time, independent of the current UI locale.
+ */
+internal data class ExportStrings(
+    val reportTitle: String,
+    val generatedOn: String,
+    val summaryHeader: String,
+    val summaryTotalRecords: String,
+    val summaryAverageCycle: String,
+    val summaryAveragePeriod: String,
+    val recordsHeader: String,
+    val recordIndex: String,
+    val recordStart: String,
+    val recordEnd: String,
+    val recordDuration: String,
+    val recordOngoing: String,
+    val recordNoEnd: String,
+    val dailyHeader: String,
+    val dailyIntensity: String,
+    val dailyMood: String,
+    val dailySymptoms: String,
+    val dailyNotes: String,
+    val intensityLight: String,
+    val intensityMedium: String,
+    val intensityHeavy: String,
+    val moodHappy: String,
+    val moodNeutral: String,
+    val moodSad: String,
+    val moodVerySad: String,
+    val unitDays: String,
+    val noRecords: String,
+    val disclaimer: String,
+    val pageFooter: String,
+) {
+    companion object {
+        fun forLanguage(language: String): ExportStrings =
+            if (language == "zh") Chinese else English
+
+        val English = ExportStrings(
+            reportTitle = "Menstrual Cycle Report",
+            generatedOn = "Generated on",
+            summaryHeader = "Summary",
+            summaryTotalRecords = "Total records",
+            summaryAverageCycle = "Average cycle length",
+            summaryAveragePeriod = "Average period length",
+            recordsHeader = "Records",
+            recordIndex = "Record",
+            recordStart = "Start",
+            recordEnd = "End",
+            recordDuration = "Duration",
+            recordOngoing = "ongoing",
+            recordNoEnd = "—",
+            dailyHeader = "Daily log",
+            dailyIntensity = "Flow",
+            dailyMood = "Mood",
+            dailySymptoms = "Symptoms",
+            dailyNotes = "Notes",
+            intensityLight = "Light",
+            intensityMedium = "Medium",
+            intensityHeavy = "Heavy",
+            moodHappy = "Happy",
+            moodNeutral = "Neutral",
+            moodSad = "Low",
+            moodVerySad = "Bad",
+            unitDays = "days",
+            noRecords = "No records to export.",
+            disclaimer = "This report is for personal reference only and is not medical advice.",
+            pageFooter = "Page",
+        )
+
+        val Chinese = ExportStrings(
+            reportTitle = "月经周期报告",
+            generatedOn = "生成时间",
+            summaryHeader = "总览",
+            summaryTotalRecords = "记录总数",
+            summaryAverageCycle = "平均周期长度",
+            summaryAveragePeriod = "平均经期长度",
+            recordsHeader = "记录",
+            recordIndex = "记录",
+            recordStart = "开始",
+            recordEnd = "结束",
+            recordDuration = "持续",
+            recordOngoing = "进行中",
+            recordNoEnd = "—",
+            dailyHeader = "每日记录",
+            dailyIntensity = "经量",
+            dailyMood = "心情",
+            dailySymptoms = "症状",
+            dailyNotes = "备注",
+            intensityLight = "少量",
+            intensityMedium = "中量",
+            intensityHeavy = "多量",
+            moodHappy = "开心",
+            moodNeutral = "一般",
+            moodSad = "低落",
+            moodVerySad = "难受",
+            unitDays = "天",
+            noRecords = "暂无可导出的记录。",
+            disclaimer = "本报告仅供个人参考，不构成医疗建议。",
+            pageFooter = "第",
+        )
+    }
+}
