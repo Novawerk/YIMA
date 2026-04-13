@@ -13,7 +13,7 @@
 - **DI**: kotlin-inject 0.8.0 with KSP (@KmpComponentCreate for multiplatform)
 - **Date/Time**: kotlinx-datetime 0.6.1
 - **Build**: Gradle 8.7.3 with version catalog (`gradle/libs.versions.toml`)
-- **Android**: Min SDK 24, Compile/Target SDK 36, AGP 8.7.3
+- **Android**: Min SDK 26, Compile/Target SDK 36, AGP 8.7.3
 - **iOS**: Swift/SwiftUI wrapper in `iosApp/`, KMP framework named `ComposeApp`
 
 ## Project Structure

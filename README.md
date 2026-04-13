@@ -82,7 +82,7 @@ All three are off by default and require an explicit OS-level permission grant.
 - **Disclaimer on first launch** — YIMA is a tracking tool, not a medical device
 
 ### Platform & design
-- **Android** (min SDK 24) and **iOS** — shared codebase
+- **Android** (min SDK 26) and **iOS** — shared codebase
 - **Material Design 3 Expressive** with custom Comfortaa typography
 - Full English + Simplified Chinese localization with localized month and weekday names
 
@@ -102,7 +102,7 @@ All three are off by default and require an explicit OS-level permission grant.
 | Storage | Jetpack DataStore Preferences + kotlinx.serialization |
 | Date/Time | kotlinx-datetime + kotlinx-datetime-names |
 | Notifications | Platform-specific schedulers via `expect` / `actual` |
-| Targets | Android (min SDK 24, compile/target 36), iOS |
+| Targets | Android (min SDK 26, compile/target 36), iOS |
 | Build | Gradle 8.7 with version catalog |
 
 ## Architecture
