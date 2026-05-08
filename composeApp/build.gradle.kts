@@ -31,7 +31,6 @@ kotlin {
     }
 
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach { iosTarget ->
@@ -152,7 +151,6 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
     debugImplementation(compose.uiTooling)
     add("kspAndroid", libs.kotlin.inject.compiler)
-    add("kspIosX64", libs.kotlin.inject.compiler)
     add("kspIosArm64", libs.kotlin.inject.compiler)
     add("kspIosSimulatorArm64", libs.kotlin.inject.compiler)
 }

@@ -10,6 +10,7 @@ import com.haodong.yimalaile.di.create
 import com.haodong.yimalaile.domain.export.AndroidReportExportService
 import com.haodong.yimalaile.notifications.AndroidNotificationScheduler
 import com.viktormykhailiv.kmp.health.HealthManagerFactory
+import com.viktormykhailiv.kmp.health.HealthManagerFactoryOptions
 import okio.Path.Companion.toPath
 
 private const val DATA_STORE_FILE_NAME = "yimalaile.preferences_pb"
@@ -26,7 +27,8 @@ class MainActivity : ComponentActivity() {
         )
         val scheduler = AndroidNotificationScheduler(applicationContext)
         val reportExportService = AndroidReportExportService(applicationContext)
-        val healthManager = HealthManagerFactory().createManager()
+        val healthManager = HealthManagerFactory()
+            .createManager(options = HealthManagerFactoryOptions.default())
         val component = AppComponent.create(dataStore, scheduler, reportExportService, healthManager)
 
         setContent {

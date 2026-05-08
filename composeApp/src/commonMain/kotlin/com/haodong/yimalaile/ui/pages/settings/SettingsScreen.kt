@@ -20,9 +20,9 @@ import com.haodong.yimalaile.BuildKonfig
 import com.haodong.yimalaile.ExportStatus
 import com.haodong.yimalaile.domain.health.HealthAuthStatus
 import com.haodong.yimalaile.domain.settings.AppDarkMode
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Instant
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
 

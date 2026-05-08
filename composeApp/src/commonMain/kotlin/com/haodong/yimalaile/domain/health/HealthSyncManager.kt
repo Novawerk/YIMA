@@ -4,12 +4,12 @@ import com.haodong.yimalaile.domain.menstrual.RecordSource
 import com.haodong.yimalaile.domain.menstrual.RecordsRepository
 import com.haodong.yimalaile.domain.settings.SettingsRepository
 import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
 import me.tatarka.inject.annotations.Inject
+import kotlin.time.Instant
 
 data class SyncResult(val imported: Int, val exported: Int)
 
