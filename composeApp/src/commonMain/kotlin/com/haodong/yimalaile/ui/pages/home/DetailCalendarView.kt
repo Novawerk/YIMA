@@ -275,7 +275,7 @@ internal fun DetailCalendarView(
                         )
                         SmallSpacer(4)
                         Text(
-                            phase.description(),
+                            phase.description(selectedPhaseInfo),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.End,

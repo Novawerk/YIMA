@@ -5,7 +5,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -13,7 +12,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.haodong.yimalaile.ui.components.DecorShape
 import com.haodong.yimalaile.ui.components.SmallSpacer
+import com.haodong.yimalaile.ui.theme.expressiveShapes
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.Res
 import yimalaile.composeapp.generated.resources.btn_record_period
@@ -45,9 +46,10 @@ fun BottomSection(
                         contentColor = if (homeMode == HomeMode.CALENDAR) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
                     ),
                 ) {
-                    Icon(
-                        if (homeMode == HomeMode.CALENDAR) Icons.Filled.Home else Icons.Outlined.Home,
-                        contentDescription = null,
+                    DecorShape(
+                        size = 20,
+                        shape = MaterialTheme.expressiveShapes.puffy,
+                        color = if (homeMode == HomeMode.CALENDAR) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 // Tab 2: Detail calendar
