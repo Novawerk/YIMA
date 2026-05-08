@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>364041827824-iuq44ltmg7d7g3k79l2eikf2himk8i4r.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.364041827824-iuq44ltmg7d7g3k79l2eikf2himk8i4r</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAy8HvQyj1gqKxMIKTjrIr5tYaVF9U4SY8</string>
+	<key>GCM_SENDER_ID</key>
+	<string>364041827824</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.novawerk.yimalaile</string>
+	<key>PROJECT_ID</key>
+	<string>novawerk-7dd18</string>
+	<key>STORAGE_BUCKET</key>
+	<string>novawerk-7dd18.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:364041827824:ios:024c91c3498ef324165935</string>
+</dict>
+</plist>
