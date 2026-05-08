@@ -5,7 +5,9 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.window.ComposeUIViewController
+import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -13,6 +15,7 @@ import com.haodong.yimalaile.di.AppComponent
 import com.haodong.yimalaile.di.create
 import com.haodong.yimalaile.domain.export.IosReportExportService
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
+import com.haodong.yimalaile.domain.notifications.NotificationPrefs
 import com.haodong.yimalaile.domain.settings.SettingsRepository
 import com.haodong.yimalaile.domain.health.HealthAuthStatus
 import com.haodong.yimalaile.notifications.IosNotificationScheduler
@@ -38,10 +41,20 @@ import okio.Path.Companion.toPath
 
 private const val DATA_STORE_FILE_NAME = "yimalaile.preferences_pb"
 
-fun MainViewController() = ComposeUIViewController {
-    val dataStore = PreferenceDataStoreFactory.createWithPath(
+// DataStore must be a process-wide singleton — opening two instances against the
+// same file throws IllegalStateException. Lazy single-init survives any
+// re-instantiation of the view controller (e.g. scene restoration).
+private var sharedDataStore: DataStore<Preferences>? = null
+
+private fun appDataStore(): DataStore<Preferences> {
+    sharedDataStore?.let { return it }
+    return PreferenceDataStoreFactory.createWithPath(
         produceFile = { dataStorePath(DATA_STORE_FILE_NAME).toPath() }
-    )
+    ).also { sharedDataStore = it }
+}
+
+fun MainViewController() = ComposeUIViewController {
+    val dataStore = appDataStore()
     val scheduler = IosNotificationScheduler()
     val reportExportService = IosReportExportService()
     val healthManager = HealthManagerFactory()
@@ -163,6 +176,11 @@ fun ScreenshotOnboardingViewController() = ComposeUIViewController {
                 OnboardingScreen(
                     service = service,
                     settings = settings,
+                    healthSyncManager = null,
+                    notificationPrefs = NotificationPrefs(),
+                    notificationPermissionGranted = false,
+                    onUpdateNotificationPrefs = {},
+                    onRequestNotificationPermission = {},
                     onComplete = {},
                 )
             }

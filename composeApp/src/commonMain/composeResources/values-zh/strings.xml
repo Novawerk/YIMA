@@ -72,10 +72,14 @@
     <string name="onboarding_when_last_start">上次月经是什么时候开始的？</string>
     <string name="onboarding_when_end">什么时候结束的？</string>
     <string name="onboarding_select_period_range">上次月经是什么时候？</string>
+    <string name="onboarding_select_period_hint">先点开始日期，再点结束日期。</string>
     <string name="onboarding_select_end">选择结束日期</string>
     <string name="onboarding_all_set">准备就绪！</string>
     <string name="onboarding_get_started">开始使用</string>
     <string name="onboarding_next">下一步</string>
+    <string name="onboarding_continue">继续</string>
+    <string name="onboarding_skip">暂时跳过</string>
+    <string name="onboarding_step_indicator">第 %1$d / %2$d 步</string>
     <string name="onboarding_adjust">调整</string>
     <string name="onboarding_confirm">确认</string>
     <string name="onboarding_cycle_settings_title">关于你的周期</string>
@@ -83,8 +87,24 @@
     <string name="onboarding_period_duration_label">经期持续天数</string>
     <string name="onboarding_cycle_length_label">月经周期</string>
     <string name="onboarding_all_set_hint_simple">经期已记录，预测功能已开启。</string>
+    <string name="onboarding_all_set_hint_imported">已导入 %1$d 个周期，预测功能已开启。</string>
     <string name="onboarding_back">返回</string>
     <string name="onboarding_save">保存</string>
+    <!-- Onboarding — 健康同步 -->
+    <string name="onboarding_health_title">从健康同步</string>
+    <string name="onboarding_health_desc">从 Apple 健康或 Google 健康互联导入已有的经期记录，立即获得预测。所有数据始终保存在本机。</string>
+    <string name="onboarding_health_connect">立即连接</string>
+    <string name="onboarding_health_syncing">连接中…</string>
+    <string name="onboarding_health_imported">已导入 %1$d 条记录</string>
+    <string name="onboarding_health_imported_one">已导入 1 条记录</string>
+    <string name="onboarding_health_no_records">健康中未找到记录</string>
+    <string name="onboarding_health_failed">连接失败。请在系统弹窗中勾选并允许访问月经数据。</string>
+    <string name="onboarding_health_retry">重试</string>
+    <!-- Onboarding — 通知 -->
+    <string name="onboarding_notifications_title">温柔的提醒</string>
+    <string name="onboarding_notifications_desc">在经期和排卵期前提前提醒您。打开您需要的项目即可，之后可在「设置」里微调。</string>
+    <!-- Onboarding — 合成数据提示 -->
+    <string name="onboarding_synthetic_hint">为了让预测立刻可用，我们会基于以上设置生成几个过往周期。您可以随时查看并修改它们。</string>
     <!-- Statistics Screen -->
     <string name="stats_empty_message">记录至少 2 次月经，即可查看统计数据</string>
     <string name="stats_avg_section_title">最近%1$d个周期的平均值</string>
