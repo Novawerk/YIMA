@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import com.haodong.yimalaile.domain.menstrual.CyclePhase
+import com.haodong.yimalaile.domain.menstrual.CyclePhaseInfo
 import com.haodong.yimalaile.ui.theme.expressiveShapes
 import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.*
@@ -23,6 +24,49 @@ internal fun CyclePhase.description(): String = when (this) {
     CyclePhase.FOLLICULAR -> stringResource(Res.string.phase_follicular_desc)
     CyclePhase.OVULATION -> stringResource(Res.string.phase_ovulation_desc)
     CyclePhase.LUTEAL -> stringResource(Res.string.phase_luteal_desc)
+}
+
+@Composable
+internal fun CyclePhase.description(info: CyclePhaseInfo): String {
+    if (this == CyclePhase.MENSTRUAL) {
+        return when (info.dayInCycle) {
+            1 -> stringResource(Res.string.phase_menstrual_desc_day1)
+            2 -> stringResource(Res.string.phase_menstrual_desc_day2)
+            3 -> stringResource(Res.string.phase_menstrual_desc_day3)
+            4 -> stringResource(Res.string.phase_menstrual_desc_day4)
+            else -> stringResource(Res.string.phase_menstrual_desc_day5_plus)
+        }
+    }
+
+    val phaseStart = info.phaseStartDay(this)
+    val nextPhase = when (this) {
+        CyclePhase.FOLLICULAR -> CyclePhase.OVULATION
+        CyclePhase.OVULATION -> CyclePhase.LUTEAL
+        else -> null
+    }
+    val phaseEnd = nextPhase?.let { info.phaseStartDay(it) - 1 } ?: info.cycleLength
+    val phaseLen = (phaseEnd - phaseStart + 1).coerceAtLeast(1)
+    val dayInPhase = (info.dayInCycle - phaseStart + 1).coerceIn(1, phaseLen)
+    val progress = (dayInPhase - 1).toFloat() / phaseLen.toFloat()
+
+    return when (this) {
+        CyclePhase.FOLLICULAR -> when {
+            progress < 0.34f -> stringResource(Res.string.phase_follicular_desc_early)
+            progress < 0.67f -> stringResource(Res.string.phase_follicular_desc_mid)
+            else -> stringResource(Res.string.phase_follicular_desc_late)
+        }
+        CyclePhase.OVULATION -> when {
+            progress < 0.34f -> stringResource(Res.string.phase_ovulation_desc_early)
+            progress < 0.67f -> stringResource(Res.string.phase_ovulation_desc_mid)
+            else -> stringResource(Res.string.phase_ovulation_desc_late)
+        }
+        CyclePhase.LUTEAL -> when {
+            progress < 0.34f -> stringResource(Res.string.phase_luteal_desc_early)
+            progress < 0.67f -> stringResource(Res.string.phase_luteal_desc_mid)
+            else -> stringResource(Res.string.phase_luteal_desc_late)
+        }
+        else -> description()
+    }
 }
 
 @Composable
