@@ -3,16 +3,15 @@ package com.haodong.yimalaile.ui.pages.home
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -21,7 +20,6 @@ import com.haodong.yimalaile.domain.menstrual.CyclePhaseInfo
 import com.haodong.yimalaile.domain.menstrual.CycleState
 import com.haodong.yimalaile.domain.menstrual.MenstrualService
 import com.haodong.yimalaile.ui.components.DecorShape
-import com.haodong.yimalaile.ui.components.GrowSpacer
 import com.haodong.yimalaile.ui.components.SmallSpacer
 import com.haodong.yimalaile.ui.components.SuccessOverlay
 import com.haodong.yimalaile.ui.pages.sheet.SheetViewModel
@@ -117,20 +115,25 @@ private fun HomeAppBar(
         modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        DecorShape(
-            24,
-            shape = MaterialTheme.expressiveShapes.cookie7,
-            color = MaterialTheme.colorScheme.primary
-        )
-        SmallSpacer(8)
-        Text(
-            stringResource(Res.string.app_name),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        GrowSpacer()
-        IconButton(onClick = onNavigateSettings, modifier = Modifier.size(40.dp).testTag("nav_settings")) {
-            Icon(Icons.Outlined.Settings, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .clickable(onClick = onNavigateSettings)
+                .testTag("nav_settings")
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            DecorShape(
+                24,
+                shape = MaterialTheme.expressiveShapes.cookie7,
+                color = MaterialTheme.colorScheme.primary
+            )
+            SmallSpacer(8)
+            Text(
+                stringResource(Res.string.app_name),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
