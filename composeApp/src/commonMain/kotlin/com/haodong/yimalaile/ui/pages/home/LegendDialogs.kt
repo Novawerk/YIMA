@@ -50,11 +50,7 @@ internal fun CalendarLegendDialog(onDismiss: () -> Unit) {
     val periodColor = MaterialTheme.colorScheme.error
     AlertDialog(
         onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(Res.string.dialog_confirm))
-            }
-        },
+        confirmButton = {},
         title = { Text(stringResource(Res.string.home_cycle_calendar)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {

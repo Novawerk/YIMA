@@ -142,12 +142,29 @@
     <string name="settings_about">关于我们</string>
     <string name="settings_about_org">Novawerk</string>
     <string name="settings_made_by">由 Novawerk 制作</string>
-    <string name="settings_about_motto">开源应用，用心打造。以非盈利的方式重新制作每一个日常工具。</string>
+    <string name="settings_about_motto">不为盈利，只为意义。</string>
+    <string name="about_description">Novawerk 是一个开放的非营利社区，致力于通过协作、创意与行动，为社会带来真正的积极改变。\n\n我们相信，好的想法不应止于概念。当人们聚到一起，一起动手、学习、协作，把想法变成现实，积极的改变才会真正发生。</string>
+    <string name="about_vision_title">愿景</string>
+    <string name="about_vision_body">打造一个开放的空间，让每个人都能把有意义的想法转化为对社会的积极改变。</string>
+    <string name="about_mission_title">使命</string>
+    <string name="about_mission_intro">Novawerk 致力于降低人们创造积极改变的门槛，帮助大家：</string>
+    <string name="about_mission_b1">验证并打磨有意义的想法</string>
+    <string name="about_mission_b2">把想法拆解为可执行的步骤</string>
+    <string name="about_mission_b3">与志同道合的人协作</string>
+    <string name="about_mission_b4">在真实项目中获得实践技能</string>
+    <string name="about_mission_b5">创造对社会有益的解决方案</string>
+    <string name="about_principles_title">核心理念</string>
+    <string name="about_principle_1_title">有目的的创新</string>
+    <string name="about_principle_1_body">我们相信创新应该为人和社会带来真正的积极改变。比起追逐短期潮流或简单复制，我们更看重有意义的想法、用心的执行，以及通过实际行动带来的长期贡献。</string>
+    <string name="about_principle_2_title">共同建设，共同学习</string>
+    <string name="about_principle_2_body">Novawerk 是一个开放的社区，人们在这里通过实际的协作与真实的项目一起学习、建设、成长。我们欢迎来自不同背景、经验与技能水平、愿意共同创造积极改变的每一个人。</string>
+    <string name="about_principle_3_title">共担积极改变的责任</string>
+    <string name="about_principle_3_body">我们相信每个人都肩负着以行动、想法和参与为社会带来积极贡献的责任。当人们选择去在乎、去付出、去承担，而不是冷漠或袖手旁观，积极的改变才会真正开始。</string>
     <string name="about_team_title">团队</string>
     <string name="about_team_members">由 Novawerk 团队用 ♥ 制作</string>
     <string name="about_links_title">链接</string>
+    <string name="about_website">novawerk.io</string>
     <string name="about_github">github.com/Novawerk/yimalaile</string>
-    <string name="settings_review">去App Store评分</string>
     <string name="calendar_month_label">%1$d月</string>
     <!-- Weekday labels -->
     <!-- Cycle phases -->

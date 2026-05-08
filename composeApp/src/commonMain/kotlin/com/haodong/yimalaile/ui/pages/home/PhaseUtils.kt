@@ -18,6 +18,15 @@ internal fun CyclePhase.displayName(): String = when (this) {
     CyclePhase.LUTEAL -> stringResource(Res.string.phase_luteal)
 }
 
+/**
+ * Day-aware label: shows "排卵日" (Ovulation day) on the peak day,
+ * otherwise falls back to the broader phase name (e.g. "排卵期").
+ */
+@Composable
+internal fun CyclePhaseInfo.dayLabel(): String =
+    if (isOvulationPeakDay) stringResource(Res.string.detail_ovulation_day)
+    else phase.displayName()
+
 @Composable
 internal fun CyclePhase.description(): String = when (this) {
     CyclePhase.MENSTRUAL -> stringResource(Res.string.phase_menstrual_desc)
@@ -56,8 +65,8 @@ internal fun CyclePhase.description(info: CyclePhaseInfo): String {
             else -> stringResource(Res.string.phase_follicular_desc_late)
         }
         CyclePhase.OVULATION -> when {
-            progress < 0.34f -> stringResource(Res.string.phase_ovulation_desc_early)
-            progress < 0.67f -> stringResource(Res.string.phase_ovulation_desc_mid)
+            info.isOvulationPeakDay -> stringResource(Res.string.phase_ovulation_desc_mid)
+            info.dayInCycle < info.peakDayInCycle -> stringResource(Res.string.phase_ovulation_desc_early)
             else -> stringResource(Res.string.phase_ovulation_desc_late)
         }
         CyclePhase.LUTEAL -> when {

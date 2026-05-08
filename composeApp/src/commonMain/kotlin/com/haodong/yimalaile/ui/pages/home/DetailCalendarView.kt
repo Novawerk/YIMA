@@ -230,23 +230,26 @@ internal fun DetailCalendarView(
 
             // ListItem 2: Current phase (clickable → opens phase sheet)
             item {
-                val pColor = phase.color()
-                val isOvPeak = date in ovulationPeakDates
+                val isPeakDay = selectedPhaseInfo.isOvulationPeakDay
                 val ovColor = Color(0xFF7C4DFF)
+                val accentColor = if (isPeakDay) ovColor else phase.color()
                 var showPhaseSheet by remember { mutableStateOf(false) }
                 ListItem(
                     headlineContent = { Text(stringResource(Res.string.detail_current_phase), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) },
                     trailingContent = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (isOvPeak) {
+                            if (isPeakDay) {
                                 DecorShape(size = 14, shape = MaterialTheme.expressiveShapes.flower, color = ovColor)
-                                SmallSpacer(6)
-                                Text(stringResource(Res.string.detail_ovulation_day), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = ovColor)
                             } else {
-                                Box(Modifier.size(10.dp).clip(RoundedCornerShape(50)).background(pColor))
-                                SmallSpacer(6)
-                                Text(phase.displayName(), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = pColor)
+                                Box(Modifier.size(10.dp).clip(RoundedCornerShape(50)).background(accentColor))
                             }
+                            SmallSpacer(6)
+                            Text(
+                                selectedPhaseInfo.dayLabel(),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = accentColor,
+                            )
                         }
                     },
                     colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),

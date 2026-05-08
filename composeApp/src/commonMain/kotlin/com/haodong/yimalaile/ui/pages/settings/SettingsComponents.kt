@@ -3,13 +3,16 @@ package com.haodong.yimalaile.ui.pages.settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -165,7 +168,10 @@ internal fun AboutSheet(onDismiss: () -> Unit) {
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
         Column(
-            Modifier.padding(horizontal = 24.dp).padding(bottom = 32.dp),
+            Modifier
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 32.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
@@ -175,15 +181,128 @@ internal fun AboutSheet(onDismiss: () -> Unit) {
             )
             Text(
                 stringResource(Res.string.settings_about_motto),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                stringResource(Res.string.about_description),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+
             HorizontalDivider()
+
+            AboutSection(
+                title = stringResource(Res.string.about_vision_title),
+                body = stringResource(Res.string.about_vision_body),
+            )
+
+            AboutSection(
+                title = stringResource(Res.string.about_mission_title),
+                body = stringResource(Res.string.about_mission_intro),
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                listOf(
+                    stringResource(Res.string.about_mission_b1),
+                    stringResource(Res.string.about_mission_b2),
+                    stringResource(Res.string.about_mission_b3),
+                    stringResource(Res.string.about_mission_b4),
+                    stringResource(Res.string.about_mission_b5),
+                ).forEach { item ->
+                    Row {
+                        Text(
+                            "·  ",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                        Text(
+                            item,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+
+            HorizontalDivider()
+
+            Text(
+                stringResource(Res.string.about_principles_title),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+            )
+            PrincipleItem(
+                index = "01",
+                title = stringResource(Res.string.about_principle_1_title),
+                body = stringResource(Res.string.about_principle_1_body),
+            )
+            PrincipleItem(
+                index = "02",
+                title = stringResource(Res.string.about_principle_2_title),
+                body = stringResource(Res.string.about_principle_2_body),
+            )
+            PrincipleItem(
+                index = "03",
+                title = stringResource(Res.string.about_principle_3_title),
+                body = stringResource(Res.string.about_principle_3_body),
+            )
+
+            HorizontalDivider()
+
             Text(stringResource(Res.string.about_team_title), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
             Text(stringResource(Res.string.about_team_members), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(stringResource(Res.string.about_links_title), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-            Text(stringResource(Res.string.about_github), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+
+            val uriHandler = LocalUriHandler.current
+            val website = stringResource(Res.string.about_website)
+            val github = stringResource(Res.string.about_github)
+            Text(
+                website,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable { uriHandler.openUri("https://$website") },
+            )
+            Text(
+                github,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable { uriHandler.openUri("https://$github") },
+            )
         }
+    }
+}
+
+@Composable
+private fun AboutSection(title: String, body: String) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+        Text(body, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun PrincipleItem(index: String, title: String, body: String) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                index,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+        Text(
+            body,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

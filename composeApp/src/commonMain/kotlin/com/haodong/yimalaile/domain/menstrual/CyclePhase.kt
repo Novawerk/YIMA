@@ -92,8 +92,10 @@ data class CyclePhaseInfo(
                 end?.let { r.startDate.until(it, DateTimeUnit.DAY).toInt() + 1 }
             } ?: avgPeriod
             
-            val peakDayInCycle = currentCycleLen - 14
-            
+            // Peak day = 14 days before next period (medical convention),
+            // i.e. day (currentCycleLen + 1) − 14. Matches MenstrualService.ovulationPeakDate.
+            val peakDayInCycle = (currentCycleLen - 13).coerceAtLeast(1)
+
             val phase = when {
                 inActualPeriod || inPredictedPeriod -> CyclePhase.MENSTRUAL
                 dayInCycle <= currentPeriodLen -> CyclePhase.MENSTRUAL
@@ -119,12 +121,22 @@ data class CyclePhaseInfo(
 
     }
 
+    /**
+     * Day-in-cycle (1-based) of the predicted ovulation peak.
+     * Convention: peak is 14 days before the *next* period, i.e. day (cycleLength + 1) − 14.
+     * Matches MenstrualService.getMenstrualCycle().ovulationPeakDate.
+     */
+    val peakDayInCycle: Int get() = (cycleLength - 13).coerceAtLeast(1)
+
+    /** True when this date is the predicted ovulation peak (the single 排卵日). */
+    val isOvulationPeakDay: Boolean get() = phase == CyclePhase.OVULATION && dayInCycle == peakDayInCycle
+
     /** Start day (1-based) of each phase within this cycle. */
     fun phaseStartDay(p: CyclePhase): Int = when (p) {
         CyclePhase.MENSTRUAL -> 1
         CyclePhase.FOLLICULAR -> periodLength + 1
-        CyclePhase.OVULATION -> (cycleLength - 14) - 4
-        CyclePhase.LUTEAL -> (cycleLength - 14) + 2
+        CyclePhase.OVULATION -> peakDayInCycle - 4
+        CyclePhase.LUTEAL -> peakDayInCycle + 2
     }
 
     /** Days until a given phase starts. Negative = already past, 0 = current phase. */

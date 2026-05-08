@@ -142,12 +142,29 @@
     <string name="settings_about">About Us</string>
     <string name="settings_about_org">Novawerk</string>
     <string name="settings_made_by">Made by Novawerk</string>
-    <string name="settings_about_motto">Open-source apps, made with care. Remaking everyday tools the non-profit way.</string>
+    <string name="settings_about_motto">Not profitable, but meaningful.</string>
+    <string name="about_description">Novawerk is an open, non-profit community hub focused on creating real positive change in society through collaboration, creativity, and action.\n\nWe believe great ideas should not remain as concepts, and that positive change happens when people come together to build, learn, and collaborate on real projects that turn ideas into reality.</string>
+    <string name="about_vision_title">Vision</string>
+    <string name="about_vision_body">To build an open space that empowers people to transform meaningful ideas into positive change for society.</string>
+    <string name="about_mission_title">Mission</string>
+    <string name="about_mission_intro">Novawerk exists to lower the barriers to creating positive change by helping people:</string>
+    <string name="about_mission_b1">Validate and refine meaningful ideas</string>
+    <string name="about_mission_b2">Break ideas into actionable scopes</string>
+    <string name="about_mission_b3">Collaborate with like-minded people</string>
+    <string name="about_mission_b4">Gain practical skills through real projects</string>
+    <string name="about_mission_b5">Create solutions that contribute positively to society</string>
+    <string name="about_principles_title">Core Principles</string>
+    <string name="about_principle_1_title">Purposeful Innovation</string>
+    <string name="about_principle_1_body">We believe innovation should create real positive change for people and society. Rather than following short-term trends or simple replication, we value meaningful ideas, thoughtful execution, and long-term contribution through real action.</string>
+    <string name="about_principle_2_title">Build, Learn, Together</string>
+    <string name="about_principle_2_body">Novawerk is an open community where people come together to learn, build, and grow through practical collaboration and real projects. We welcome individuals from different backgrounds, experiences, and skill levels who share a desire to create positive change together.</string>
+    <string name="about_principle_3_title">Responsibility for Positive Change</string>
+    <string name="about_principle_3_body">We believe everyone shares a responsibility to contribute positively to society through their actions, ideas, and participation. Positive change begins when people choose to care, contribute, and take responsibility instead of remaining indifferent or inactive.</string>
     <string name="about_team_title">Team</string>
     <string name="about_team_members">Made with ♥ by the Novawerk team</string>
     <string name="about_links_title">Links</string>
+    <string name="about_website">novawerk.io</string>
     <string name="about_github">github.com/Novawerk/yimalaile</string>
-    <string name="settings_review">Leave a review</string>
     <!-- Weekday labels -->
     <string name="calendar_month_label">%1$d</string>
     <!-- Weekday labels -->

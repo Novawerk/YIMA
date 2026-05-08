@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,6 +21,7 @@ import com.haodong.yimalaile.domain.menstrual.CyclePhaseInfo
 import com.haodong.yimalaile.domain.menstrual.CycleState
 import com.haodong.yimalaile.domain.menstrual.MenstrualRecord
 import com.haodong.yimalaile.ui.components.DayType
+import com.haodong.yimalaile.ui.components.DecorShape
 import com.haodong.yimalaile.ui.components.GrowSpacer
 import com.haodong.yimalaile.ui.components.SmallSpacer
 import com.haodong.yimalaile.ui.components.buildDateMap
@@ -63,90 +65,47 @@ internal fun HomeCalendar(
         }
     } else emptySet()
 
-    val months = (0..1).map { offset ->
-        val m = today.plus(offset, DateTimeUnit.MONTH)
-        YearMonth(m.year, m.month)
-    }
+    val currentMonth = YearMonth(today.year, today.month)
 
     var showPhaseSheet by remember { mutableStateOf(false) }
 
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        // Status header — clickable to open phase explanation
         if (phaseInfo != null) {
-            Surface(
+            HeroCountdown(
+                phaseInfo = phaseInfo,
+                inPeriod = inPeriod,
+                dayCount = dayCount,
                 onClick = { showPhaseSheet = true },
-                color = MaterialTheme.colorScheme.background,
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
-                ) {
-
-                    Text(
-                        when {
-                            inPeriod -> stringResource(Res.string.home_in_period)
-                            phaseInfo.daysUntilNextPeriod <= 0 -> stringResource(Res.string.home_hero_due_today)
-                            else -> stringResource(Res.string.home_next_period_starts)
-                        },
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    SmallSpacer(2)
-                    Text(
-                        when {
-                            inPeriod -> stringResource(Res.string.home_day_n, dayCount ?: 0)
-                            phaseInfo.daysUntilNextPeriod <= 0 -> stringResource(Res.string.legend_today)
-                            else -> "${phaseInfo.daysUntilNextPeriod} ${stringResource(Res.string.unit_days)}"
-                        },
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Black,
-                    )
-
-
-                }
-            }
-            SmallSpacer(16)
+            )
         }
         GrowSpacer()
-        Column(Modifier.fillMaxWidth(0.55f)) {
-            // This month
-            MonthBlock(months[0], today, dateMap, periodColor, periodLight, nextPredictedDates, state.records, defaultCycleLength)
+        Column(Modifier.fillMaxWidth(0.65f)) {
+            MonthBlock(currentMonth, today, dateMap, periodColor, periodLight, nextPredictedDates, state.records, defaultCycleLength)
 
-            // Info between months — plain text
-            SmallSpacer(32)
+            SmallSpacer(28)
             val lastPeriod = state.records.maxByOrNull { it.startDate }
-            if (lastPeriod != null) {
-                Text(
-                    stringResource(Res.string.home_last_period),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    formatDateWithWeekday(lastPeriod.startDate),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            val nextStart = phaseInfo?.nextPeriodStart
+            if (lastPeriod != null || nextStart != null) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    InfoColumn(
+                        label = stringResource(Res.string.home_last_period),
+                        value = lastPeriod?.let { formatDateWithWeekday(it.startDate) },
+                        modifier = Modifier.weight(1f),
+                    )
+                    VerticalDivider(
+                        modifier = Modifier.height(36.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                    )
+                    InfoColumn(
+                        label = stringResource(Res.string.home_next_period_starts),
+                        value = nextStart?.let { formatDateWithWeekday(it) },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
             }
-            SmallSpacer(12)
-            if (phaseInfo?.nextPeriodStart != null) {
-                Text(
-                    stringResource(Res.string.home_next_period_starts),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    formatDateWithWeekday(phaseInfo.nextPeriodStart),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            SmallSpacer(32)
-
-            // Next month
-            MonthBlock(months[1], today, dateMap, periodColor, periodLight, nextPredictedDates, state.records)
-
         }
         GrowSpacer()
         SmallSpacer(128)
@@ -157,6 +116,114 @@ internal fun HomeCalendar(
         PhaseExplanationSheet(
             phaseInfo = phaseInfo,
             onDismiss = { showPhaseSheet = false },
+        )
+    }
+}
+
+@Composable
+private fun HeroCountdown(
+    phaseInfo: CyclePhaseInfo,
+    inPeriod: Boolean,
+    dayCount: Int?,
+    onClick: () -> Unit,
+) {
+    val phase = phaseInfo.phase
+    val phaseColor = phase.color()
+    val dueToday = phaseInfo.daysUntilNextPeriod <= 0 && !inPeriod
+
+    Surface(
+        onClick = onClick,
+        color = MaterialTheme.colorScheme.background,
+        shape = RoundedCornerShape(20.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                DecorShape(size = 10, shape = phase.shape(), color = phaseColor)
+                Text(
+                    phaseInfo.dayLabel(),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = phaseColor,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+            SmallSpacer(6)
+            when {
+                inPeriod -> {
+                    Text(
+                        stringResource(Res.string.home_day_n, dayCount ?: 0),
+                        style = MaterialTheme.typography.displayMedium,
+                        fontWeight = FontWeight.Black,
+                    )
+                }
+                dueToday -> {
+                    Text(
+                        stringResource(Res.string.legend_today),
+                        style = MaterialTheme.typography.displayMedium,
+                        fontWeight = FontWeight.Black,
+                    )
+                }
+                else -> {
+                    Row(
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        Text(
+                            "${phaseInfo.daysUntilNextPeriod}",
+                            style = MaterialTheme.typography.displayMedium,
+                            fontWeight = FontWeight.Black,
+                        )
+                        Text(
+                            stringResource(Res.string.unit_days),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(bottom = 8.dp),
+                        )
+                    }
+                }
+            }
+            SmallSpacer(2)
+            Text(
+                when {
+                    inPeriod -> stringResource(Res.string.home_in_period)
+                    dueToday -> stringResource(Res.string.home_hero_due_today)
+                    else -> stringResource(Res.string.home_next_period_starts)
+                },
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+    SmallSpacer(16)
+}
+
+@Composable
+private fun InfoColumn(
+    label: String,
+    value: String?,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        SmallSpacer(2)
+        Text(
+            value ?: "—",
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurface,
         )
     }
 }
@@ -256,8 +323,8 @@ private fun MonthBlock(
                                 .aspectRatio(1f)
                                 .then(
                                     if (isToday) Modifier.zIndex(1f).graphicsLayer {
-                                        scaleX = 1.25f
-                                        scaleY = 1.25f
+                                        scaleX = 1.15f
+                                        scaleY = 1.15f
                                     } else Modifier
                                 )
                                 .then(
@@ -280,8 +347,8 @@ private fun MonthBlock(
                                     Text(
                                         "$dayNum",
                                         fontSize = when {
-                                            todayOverlap -> 15.sp
-                                            isToday -> 13.sp
+                                            todayOverlap -> 13.sp
+                                            isToday -> 12.sp
                                             else -> 11.sp
                                         },
                                         fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
