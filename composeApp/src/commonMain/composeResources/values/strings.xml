@@ -72,10 +72,14 @@
     <string name="onboarding_when_last_start">When did your last period start?</string>
     <string name="onboarding_when_end">When did it end?</string>
     <string name="onboarding_select_period_range">When was your last period?</string>
+    <string name="onboarding_select_period_hint">Tap a start date, then an end date.</string>
     <string name="onboarding_select_end">select end date</string>
     <string name="onboarding_all_set">All set!</string>
     <string name="onboarding_get_started">Get started</string>
     <string name="onboarding_next">Next</string>
+    <string name="onboarding_continue">Continue</string>
+    <string name="onboarding_skip">Skip for now</string>
+    <string name="onboarding_step_indicator">Step %1$d of %2$d</string>
     <string name="onboarding_adjust">Adjust</string>
     <string name="onboarding_confirm">Confirm</string>
     <string name="onboarding_cycle_settings_title">About your cycle</string>
@@ -83,8 +87,24 @@
     <string name="onboarding_period_duration_label">Period duration</string>
     <string name="onboarding_cycle_length_label">Cycle length</string>
     <string name="onboarding_all_set_hint_simple">Your period has been recorded. Predictions are now enabled.</string>
+    <string name="onboarding_all_set_hint_imported">%1$d cycles imported. Predictions are now enabled.</string>
     <string name="onboarding_back">Back</string>
     <string name="onboarding_save">Save</string>
+    <!-- Onboarding — Health sync step -->
+    <string name="onboarding_health_title">Sync from Health</string>
+    <string name="onboarding_health_desc">Import your existing menstrual records from Apple Health or Google Health Connect to get predictions right away. Your data stays on this device.</string>
+    <string name="onboarding_health_connect">Connect</string>
+    <string name="onboarding_health_syncing">Connecting…</string>
+    <string name="onboarding_health_imported">%1$d records imported</string>
+    <string name="onboarding_health_imported_one">1 record imported</string>
+    <string name="onboarding_health_no_records">No records found in Health</string>
+    <string name="onboarding_health_failed">Couldn\'t connect. Make sure to allow access to menstrual data when prompted.</string>
+    <string name="onboarding_health_retry">Try again</string>
+    <!-- Onboarding — Notifications step -->
+    <string name="onboarding_notifications_title">Reminders</string>
+    <string name="onboarding_notifications_desc">Get gentle nudges before your period and ovulation. Toggle on what you want — you can fine-tune in Settings later.</string>
+    <!-- Onboarding — Synthetic data note -->
+    <string name="onboarding_synthetic_hint">We\'ll generate a few past cycles based on these settings so predictions work right away. You can review and edit them anytime.</string>
     <!-- Statistics Screen -->
     <string name="stats_empty_message">Record at least 2 periods to see your statistics</string>
     <string name="stats_avg_section_title">Average of last %1$d cycles</string>

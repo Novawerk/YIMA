@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.haodong.yimalaile.di.AppComponent
+import com.haodong.yimalaile.domain.health.HealthAuthStatus
 import com.haodong.yimalaile.ui.locale.LocalAppLocale
 import com.haodong.yimalaile.ui.navigation.DisclaimerRoute
 import com.haodong.yimalaile.ui.navigation.HomeRoute
@@ -62,6 +63,12 @@ fun App(component: AppComponent) {
                         OnboardingScreen(
                             service = service,
                             settings = settings,
+                            healthSyncManager = healthSyncManager
+                                .takeIf { viewModel.healthAuthStatus != HealthAuthStatus.NOT_AVAILABLE },
+                            notificationPrefs = viewModel.notificationPrefs,
+                            notificationPermissionGranted = viewModel.notificationPermissionGranted,
+                            onUpdateNotificationPrefs = { viewModel.updateNotificationPrefs(it) },
+                            onRequestNotificationPermission = { viewModel.requestNotificationPermission() },
                             onComplete = {
                                 viewModel.rescheduleNotifications()
                                 navController.navigate(HomeRoute) {
