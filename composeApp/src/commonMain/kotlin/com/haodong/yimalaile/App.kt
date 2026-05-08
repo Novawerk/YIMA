@@ -1,6 +1,14 @@
 package com.haodong.yimalaile
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -20,6 +28,7 @@ import com.haodong.yimalaile.ui.pages.settings.SettingsScreen
 import com.haodong.yimalaile.ui.pages.sheet.LocalSheetViewModel
 import com.haodong.yimalaile.ui.pages.sheet.SheetHost
 import com.haodong.yimalaile.ui.pages.sheet.SheetViewModel
+import com.haodong.yimalaile.ui.pages.splash.SplashScreen
 import com.haodong.yimalaile.ui.theme.AppTheme
 
 @Composable
@@ -39,97 +48,115 @@ fun App(component: AppComponent) {
     val language = viewModel.language
     val cycleLength = viewModel.cycleLength
     val periodDuration = viewModel.periodDuration
-    val startRoute = viewModel.startRoute ?: return
+    val startRoute = viewModel.startRoute
+
+    var splashDone by rememberSaveable { mutableStateOf(false) }
 
     CompositionLocalProvider(
         LocalAppLocale provides language,
         LocalSheetViewModel provides sheetViewModel,
     ) {
-        key(language) {
-            AppTheme(darkMode = darkMode) {
-                val navController = rememberNavController()
+        AppTheme(darkMode = darkMode) {
+            Box(Modifier.fillMaxSize()) {
+                if (startRoute != null) key(language) {
+                    val navController = rememberNavController()
 
-                NavHost(navController = navController, startDestination = startRoute) {
-                    composable<DisclaimerRoute> {
-                        DisclaimerScreen(onAccept = {
-                            viewModel.setDisclaimerAccepted(true)
-                            navController.navigate(OnboardingRoute) {
-                                popUpTo(DisclaimerRoute) { inclusive = true }
-                            }
-                        })
-                    }
-
-                    composable<OnboardingRoute> {
-                        OnboardingScreen(
-                            service = service,
-                            settings = settings,
-                            healthSyncManager = healthSyncManager
-                                .takeIf { viewModel.healthAuthStatus != HealthAuthStatus.NOT_AVAILABLE },
-                            notificationPrefs = viewModel.notificationPrefs,
-                            notificationPermissionGranted = viewModel.notificationPermissionGranted,
-                            onUpdateNotificationPrefs = { viewModel.updateNotificationPrefs(it) },
-                            onRequestNotificationPermission = { viewModel.requestNotificationPermission() },
-                            onComplete = {
-                                viewModel.rescheduleNotifications()
-                                navController.navigate(HomeRoute) {
-                                    popUpTo(OnboardingRoute) { inclusive = true }
+                    NavHost(navController = navController, startDestination = startRoute) {
+                        composable<DisclaimerRoute> {
+                            DisclaimerScreen(onAccept = {
+                                viewModel.setDisclaimerAccepted(true)
+                                navController.navigate(OnboardingRoute) {
+                                    popUpTo(DisclaimerRoute) { inclusive = true }
                                 }
-                            },
-                        )
+                            })
+                        }
+
+                        composable<OnboardingRoute> {
+                            OnboardingScreen(
+                                service = service,
+                                settings = settings,
+                                healthSyncManager = healthSyncManager
+                                    .takeIf { viewModel.healthAuthStatus != HealthAuthStatus.NOT_AVAILABLE },
+                                notificationPrefs = viewModel.notificationPrefs,
+                                notificationPermissionGranted = viewModel.notificationPermissionGranted,
+                                onUpdateNotificationPrefs = { viewModel.updateNotificationPrefs(it) },
+                                onRequestNotificationPermission = { viewModel.requestNotificationPermission() },
+                                onComplete = {
+                                    viewModel.rescheduleNotifications()
+                                    navController.navigate(HomeRoute) {
+                                        popUpTo(OnboardingRoute) { inclusive = true }
+                                    }
+                                },
+                            )
+                        }
+
+                        composable<HomeRoute> {
+                            HomeScreen(
+                                service = service,
+                                sheetViewModel = sheetViewModel,
+                                settings = settings,
+                                onNavigateSettings = { navController.navigate(SettingsRoute) },
+                            )
+                        }
+
+                        composable<SettingsRoute> {
+                            SettingsScreen(
+                                currentDarkMode = darkMode,
+                                currentLanguage = language,
+                                currentCycleLength = cycleLength,
+                                currentPeriodDuration = periodDuration,
+                                onDarkModeChange = { newMode -> viewModel.updateDarkMode(newMode) },
+                                onLanguageChange = { newLang -> viewModel.updateLanguage(newLang) },
+                                onCycleLengthChange = { newLen -> viewModel.updateCycleLength(newLen) },
+                                onPeriodDurationChange = { newDur -> viewModel.updatePeriodDuration(newDur) },
+                                onBack = { navController.popBackStack() },
+                                onClearData = {
+                                    viewModel.clearAllData()
+                                    navController.navigate(DisclaimerRoute) {
+                                        popUpTo(0) { inclusive = true }
+                                    }
+                                },
+                                onNavigateNotifications = { navController.navigate(NotificationSettingsRoute) },
+                                exportStatus = viewModel.exportStatus,
+                                onExport = { lang -> viewModel.exportReport(lang) },
+                                onResetExportStatus = { viewModel.resetExportStatus() },
+                                healthSyncEnabled = viewModel.healthSyncEnabled,
+                                healthAuthStatus = viewModel.healthAuthStatus,
+                                healthLastSync = viewModel.healthLastSync,
+                                healthSyncInProgress = viewModel.healthSyncInProgress,
+                                onToggleHealthSync = { viewModel.toggleHealthSync(it) },
+                                onSyncHealthNow = { viewModel.syncHealth() },
+                            )
+                        }
+
+                        composable<NotificationSettingsRoute> {
+                            NotificationSettingsScreen(
+                                prefs = viewModel.notificationPrefs,
+                                hasPermission = viewModel.notificationPermissionGranted,
+                                onRequestPermission = { viewModel.requestNotificationPermission() },
+                                onPrefsChange = { viewModel.updateNotificationPrefs(it) },
+                                onBack = { navController.popBackStack() },
+                            )
+                        }
                     }
 
-                    composable<HomeRoute> {
-                        HomeScreen(
-                            service = service,
-                            sheetViewModel = sheetViewModel,
-                            settings = settings,
-                            onNavigateSettings = { navController.navigate(SettingsRoute) },
-                        )
-                    }
-
-                    composable<SettingsRoute> {
-                        SettingsScreen(
-                            currentDarkMode = darkMode,
-                            currentLanguage = language,
-                            currentCycleLength = cycleLength,
-                            currentPeriodDuration = periodDuration,
-                            onDarkModeChange = { newMode -> viewModel.updateDarkMode(newMode) },
-                            onLanguageChange = { newLang -> viewModel.updateLanguage(newLang) },
-                            onCycleLengthChange = { newLen -> viewModel.updateCycleLength(newLen) },
-                            onPeriodDurationChange = { newDur -> viewModel.updatePeriodDuration(newDur) },
-                            onBack = { navController.popBackStack() },
-                            onClearData = {
-                                viewModel.clearAllData()
-                                navController.navigate(DisclaimerRoute) {
-                                    popUpTo(0) { inclusive = true }
-                                }
-                            },
-                            onNavigateNotifications = { navController.navigate(NotificationSettingsRoute) },
-                            exportStatus = viewModel.exportStatus,
-                            onExport = { lang -> viewModel.exportReport(lang) },
-                            onResetExportStatus = { viewModel.resetExportStatus() },
-                            healthSyncEnabled = viewModel.healthSyncEnabled,
-                            healthAuthStatus = viewModel.healthAuthStatus,
-                            healthLastSync = viewModel.healthLastSync,
-                            healthSyncInProgress = viewModel.healthSyncInProgress,
-                            onToggleHealthSync = { viewModel.toggleHealthSync(it) },
-                            onSyncHealthNow = { viewModel.syncHealth() },
-                        )
-                    }
-
-                    composable<NotificationSettingsRoute> {
-                        NotificationSettingsScreen(
-                            prefs = viewModel.notificationPrefs,
-                            hasPermission = viewModel.notificationPermissionGranted,
-                            onRequestPermission = { viewModel.requestNotificationPermission() },
-                            onPrefsChange = { viewModel.updateNotificationPrefs(it) },
-                            onBack = { navController.popBackStack() },
-                        )
-                    }
+                    // Global sheet host — renders active sheet from SheetViewModel
+                    SheetHost(sheetViewModel)
                 }
 
-                // Global sheet host — renders active sheet from SheetViewModel
-                SheetHost(sheetViewModel)
+                // Brand splash overlays everything until upstream state is
+                // loaded and the entrance animation has settled. Fades out
+                // smoothly so the underlying NavHost is already mounted.
+                AnimatedVisibility(
+                    visible = !splashDone,
+                    enter = EnterTransition.None,
+                    exit = fadeOut(tween(450)),
+                ) {
+                    SplashScreen(
+                        ready = startRoute != null,
+                        onFinish = { splashDone = true },
+                    )
+                }
             }
         }
     }
