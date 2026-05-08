@@ -17,6 +17,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.haodong.yimalaile.domain.health.HealthAuthStatus
 import com.haodong.yimalaile.domain.menstrual.*
+import com.haodong.yimalaile.domain.notifications.NotificationPrefs
 import com.haodong.yimalaile.domain.settings.AppDarkMode
 import com.haodong.yimalaile.domain.settings.SettingsRepository
 import com.haodong.yimalaile.fakes.FakeRecordsRepository
@@ -406,6 +407,11 @@ class ScreenshotTest {
                     OnboardingScreen(
                         service = service,
                         settings = settings,
+                        healthSyncManager = null,
+                        notificationPrefs = NotificationPrefs(),
+                        notificationPermissionGranted = false,
+                        onUpdateNotificationPrefs = {},
+                        onRequestNotificationPermission = {},
                         onComplete = {},
                     )
                 }
