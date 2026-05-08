@@ -1,5 +1,5 @@
 [versions]
-app-versionCode = "10119"
+app-versionCode = "10120"
 app-versionName = "1.2.2"
 
 agp = "8.12.3"
