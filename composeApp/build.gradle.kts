@@ -11,6 +11,8 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.roborazzi)
     alias(libs.plugins.buildkonfig)
+    alias(libs.plugins.googleServices)
+    alias(libs.plugins.firebaseCrashlytics)
 }
 
 kotlin {
@@ -44,6 +46,9 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(project.dependencies.platform(libs.firebase.bom))
+            implementation(libs.firebase.analytics)
+            implementation(libs.firebase.crashlytics)
         }
         val androidUnitTest by getting {
             dependencies {

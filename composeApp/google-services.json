@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "364041827824",
+    "project_id": "novawerk-7dd18",
+    "storage_bucket": "novawerk-7dd18.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:364041827824:android:e27f88d0baea0b18165935",
+        "android_client_info": {
+          "package_name": "com.haodong.yimalaile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "364041827824-6huotiqpevmp1sqg7e45h5cg63i3fcd2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsZewGPZ9pTYpxsVjRIwidR517Gjftwa8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "364041827824-6huotiqpevmp1sqg7e45h5cg63i3fcd2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "364041827824-8s5lpcivhi2cm23df5j9q1vq3mh1mmco.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.novawerk.berlinfoodmap"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
