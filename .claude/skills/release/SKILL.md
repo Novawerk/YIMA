@@ -1,84 +1,56 @@
 ---
 name: release
-description: "Open a release PR from main to the release branch with semantic version labeling. CI handles the rest: version bumping, tagging, GitHub Release, and Play Store publishing. Use this skill whenever the user says /release, 'do a release', 'cut a release', 'publish a new version', 'ship it', or anything related to releasing or publishing the app."
+description: "Cut a release from main. Triggers the Release workflow which bumps version, tags, creates a GitHub Release, builds the signed AAB, and uploads to the Play Store internal track. Use this skill whenever the user says /release, 'do a release', 'cut a release', 'publish a new version', 'ship it', or anything related to releasing or publishing the app."
 user_invocable: true
 ---
 
 # Release Flow
 
-This skill opens a PR from `main` to the `release` branch. When the PR is merged, CI automatically:
-- Bumps version in `composeApp/build.gradle.kts` and `iosApp/Configuration/Config.xcconfig`
-- Creates a git tag and GitHub Release with categorized notes
-- Builds and publishes the AAB to Google Play production
-- Opens a backport PR to sync the version bump back to main
+One workflow on `main` does everything. No release branch, no PR, no backport.
 
 ## Steps
 
-### Step 1: Preflight checks
+### 1. Preflight
 
-Verify the working tree is clean and on `main`. If not, warn the user.
+Confirm the user is on `main` with a clean working tree, and that `main` is pushed to `origin`. If not, warn before continuing.
 
-### Step 2: Check for existing release PR
-
-```bash
-gh pr list --base release --state open
-```
-
-If an open PR to `release` already exists, show it and ask the user if they want to proceed or use the existing one.
-
-### Step 3: Find latest tag and show changelog
+### 2. Show what will ship
 
 ```bash
 PREV_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
-git log "$PREV_TAG"..HEAD --oneline
+git log "$PREV_TAG"..HEAD --oneline --no-merges
 ```
 
-Categorize commits:
-- **Features**: add, feat, implement, introduce
-- **Fixes**: fix, patch, resolve, correct
-- **CI/Testing**: ci, test, screenshot, workflow, build
-- **Docs**: doc, readme, comment
-- **Other**: everything else
+If there are no new commits, tell the user there's nothing to release and stop.
 
-Show the categorized summary. If no commits since last tag, tell the user there's nothing to release and stop.
+### 3. Pick the bump
 
-### Step 4: Ensure release branch exists
+Use `AskUserQuestion` to pick **patch / minor / major**. Suggest a default based on the commits (fixes/CI → patch, new features → minor). Show the computed next version for each option.
+
+### 4. Trigger the workflow
 
 ```bash
-git ls-remote --heads origin release
+gh workflow run release.yml --ref main -f bump=<patch|minor|major>
 ```
 
-If it doesn't exist, create it:
-```bash
-git push origin main:release
-```
-
-### Step 5: Open the PR
-
-Use `gh pr create` from `main` to `release`. Include the categorized changelog in the PR body.
+### 5. Watch it
 
 ```bash
-gh pr create --base release --head main --title "Release: <summary>" --body "<changelog>"
+sleep 3
+RUN_ID=$(gh run list --workflow=release.yml --limit 1 --json databaseId -q '.[0].databaseId')
+gh run watch "$RUN_ID" --exit-status
 ```
 
-### Step 6: Apply version label
+The workflow will:
+1. Bump `versionName` and `versionCode` in `gradle/libs.versions.toml` and `iosApp/Configuration/Config.xcconfig`
+2. Commit `Release <version>` to main and push
+3. Create tag `v<version>` and push
+4. Create GitHub Release with auto-generated notes
+5. Build signed AAB
+6. Upload to Play Store internal track (status: draft)
 
-Ask the user which version bump to apply via `AskUserQuestion`:
-- **Patch** (x.y.Z) — fixes, CI, docs
-- **Minor** (x.Y.0) — new features
-- **Major** (X.0.0) — breaking changes
-
-Suggest the appropriate default based on the commit categories. Show the computed next version for each option.
-
-Apply the label:
-```bash
-gh pr edit <PR_NUMBER> --add-label "version:<bump>"
-```
-
-### Step 7: Done
+### 6. Done
 
 Tell the user:
-- PR link
-- Which version label was applied and what the next version will be
-- "Merge the PR and CI will handle version bumping, tagging, GitHub Release, and Play Store publishing."
-- Remind them to check the Actions tab after merging
+- Tag URL
+- Promote from internal to production in the Play Console when ready.
