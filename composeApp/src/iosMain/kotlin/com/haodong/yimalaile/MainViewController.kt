@@ -17,6 +17,7 @@ import com.haodong.yimalaile.domain.settings.SettingsRepository
 import com.haodong.yimalaile.domain.health.HealthAuthStatus
 import com.haodong.yimalaile.notifications.IosNotificationScheduler
 import com.viktormykhailiv.kmp.health.HealthManagerFactory
+import com.viktormykhailiv.kmp.health.HealthManagerFactoryOptions
 import com.haodong.yimalaile.fakes.FakeRecordsRepository
 import com.haodong.yimalaile.fakes.createScreenshotTestData
 import com.haodong.yimalaile.ui.locale.LocalAppLocale
@@ -43,7 +44,8 @@ fun MainViewController() = ComposeUIViewController {
     )
     val scheduler = IosNotificationScheduler()
     val reportExportService = IosReportExportService()
-    val healthManager = HealthManagerFactory().createManager()
+    val healthManager = HealthManagerFactory()
+        .createManager(options = HealthManagerFactoryOptions.default())
     val component = AppComponent.create(dataStore, scheduler, reportExportService, healthManager)
     App(component)
 }
