@@ -98,13 +98,13 @@
     <string name="onboarding_health_imported">%1$d records imported</string>
     <string name="onboarding_health_imported_one">1 record imported</string>
     <string name="onboarding_health_no_records">No records found in Health</string>
-    <string name="onboarding_health_failed">Couldn\'t connect. Make sure to allow access to menstrual data when prompted.</string>
+    <string name="onboarding_health_failed">Couldn't connect. Make sure to allow access to menstrual data when prompted.</string>
     <string name="onboarding_health_retry">Try again</string>
     <!-- Onboarding — Notifications step -->
     <string name="onboarding_notifications_title">Reminders</string>
     <string name="onboarding_notifications_desc">Get gentle nudges before your period and ovulation. Toggle on what you want — you can fine-tune in Settings later.</string>
     <!-- Onboarding — Synthetic data note -->
-    <string name="onboarding_synthetic_hint">We\'ll generate a few past cycles based on these settings so predictions work right away. You can review and edit them anytime.</string>
+    <string name="onboarding_synthetic_hint">We'll generate a few past cycles based on these settings so predictions work right away. You can review and edit them anytime.</string>
     <!-- Statistics Screen -->
     <string name="stats_empty_message">Record at least 2 periods to see your statistics</string>
     <string name="stats_avg_section_title">Average of last %1$d cycles</string>
@@ -193,7 +193,7 @@
     <string name="phase_luteal_desc">Post-ovulation. PMS symptoms may appear.</string>
     <string name="phase_menstrual_desc_day1">Day 1 — flow is often heaviest. Rest, stay warm, take it easy.</string>
     <string name="phase_menstrual_desc_day2">Day 2 — cramps may peak. A heat pad and gentle stretches can help.</string>
-    <string name="phase_menstrual_desc_day3">Day 3 — flow is easing. Sip warm fluids and don\'t overdo it.</string>
+    <string name="phase_menstrual_desc_day3">Day 3 — flow is easing. Sip warm fluids and don't overdo it.</string>
     <string name="phase_menstrual_desc_day4">Day 4 — energy is returning. Iron-rich meals support recovery.</string>
     <string name="phase_menstrual_desc_day5_plus">Tail end — light spotting is normal. Listen to your body.</string>
     <string name="phase_follicular_desc_early">Early follicular — energy is bouncing back. Good time to start something new.</string>
@@ -241,5 +241,5 @@
     <string name="notif_ovulation_title">Ovulation window soon</string>
     <string name="notif_ovulation_body">You are entering your fertile window in about %1$d days.</string>
     <string name="notif_daily_title">Daily cycle report</string>
-    <string name="notif_daily_body">Open the app to see today\'s phase and log how you feel.</string>
+    <string name="notif_daily_body">Open the app to see today's phase and log how you feel.</string>
 </resources>
