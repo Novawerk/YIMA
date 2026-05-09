@@ -37,6 +37,7 @@ import org.jetbrains.compose.resources.stringResource
 import yimalaile.composeapp.generated.resources.Res
 import yimalaile.composeapp.generated.resources.app_name
 import yimalaile.composeapp.generated.resources.logo
+import yimalaile.composeapp.generated.resources.splash_built_by
 
 private const val LOGO_DURATION_MS = 700
 private const val NAME_DURATION_MS = 450
@@ -45,7 +46,7 @@ private const val BRAND_DELAY_MS = 600L
 private const val MIN_VISIBLE_AFTER_BRAND_MS = 700L
 
 /**
- * Brand splash. Logo + app name fade and lift in; the "Built by NovaWerk"
+ * Brand splash. Logo + app name fade and lift in; the "Built by Novawerk"
  * tagline floats up from the bottom slightly later — a stage that the
  * studio's name slips onto without stealing the show.
  *
@@ -122,7 +123,7 @@ fun SplashScreen(
             }
 
             Text(
-                text = "Built by NovaWerk",
+                text = stringResource(Res.string.splash_built_by),
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = FontWeight.Medium,
                     letterSpacing = 1.5.sp,

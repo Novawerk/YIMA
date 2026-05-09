@@ -142,6 +142,7 @@
     <string name="settings_about">About Us</string>
     <string name="settings_about_org">Novawerk</string>
     <string name="settings_made_by">Made by Novawerk</string>
+    <string name="splash_built_by">Built by Novawerk</string>
     <string name="settings_about_motto">Not profitable, but meaningful.</string>
     <string name="about_description">Novawerk is an open, non-profit community hub focused on creating real positive change in society through collaboration, creativity, and action.\n\nWe believe great ideas should not remain as concepts, and that positive change happens when people come together to build, learn, and collaborate on real projects that turn ideas into reality.</string>
     <string name="about_vision_title">Vision</string>
