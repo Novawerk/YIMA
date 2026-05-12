@@ -69,24 +69,30 @@ internal fun HomeCalendar(
 
     var showPhaseSheet by remember { mutableStateOf(false) }
 
-    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        if (phaseInfo != null) {
-            HeroCountdown(
-                phaseInfo = phaseInfo,
-                inPeriod = inPeriod,
-                dayCount = dayCount,
-                onClick = { showPhaseSheet = true },
-            )
-        }
-        Column(Modifier.fillMaxWidth(0.65f)) {
-            MonthBlock(currentMonth, today, dateMap, periodColor, periodLight, nextPredictedDates, state.records, defaultCycleLength)
+    val lastPeriod = state.records.maxByOrNull { it.startDate }
+    val nextStart = phaseInfo?.nextPeriodStart
 
-            SmallSpacer(28)
-            val lastPeriod = state.records.maxByOrNull { it.startDate }
-            val nextStart = phaseInfo?.nextPeriodStart
+    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        GrowSpacer()
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(48.dp),
+        ) {
+            if (phaseInfo != null) {
+                HeroCountdown(
+                    phaseInfo = phaseInfo,
+                    inPeriod = inPeriod,
+                    dayCount = dayCount,
+                    onClick = { showPhaseSheet = true },
+                )
+            }
+            Column(Modifier.fillMaxWidth(0.65f)) {
+                MonthBlock(currentMonth, today, dateMap, periodColor, periodLight, nextPredictedDates, state.records, defaultCycleLength)
+            }
             if (lastPeriod != null || nextStart != null) {
                 Row(
-                    Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(0.65f),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     InfoColumn(
@@ -199,7 +205,6 @@ private fun HeroCountdown(
             )
         }
     }
-    SmallSpacer(16)
 }
 
 @Composable
