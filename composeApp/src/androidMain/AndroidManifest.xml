@@ -10,6 +10,10 @@
     <!-- Pulled in transitively by HealthKMP, but unused: app only reads/writes menstruation data. -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" tools:node="remove"/>
 
+    <!-- Firebase Analytics adds these by default; we don't collect advertising ID. -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_AD_ID" tools:node="remove"/>
+
     <queries>
         <package android:name="com.google.android.apps.healthdata"/>
     </queries>
