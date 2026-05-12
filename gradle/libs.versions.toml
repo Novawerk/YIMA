@@ -1,6 +1,6 @@
 [versions]
-app-versionCode = "10126"
-app-versionName = "1.5.3"
+app-versionCode = "10127"
+app-versionName = "1.5.4"
 
 agp = "8.12.3"
 buildkonfig = "0.18.0"
