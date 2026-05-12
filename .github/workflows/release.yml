@@ -96,7 +96,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
-          ./gradlew :composeApp:bundleRelease
+          ./gradlew :composeApp:clean :composeApp:bundleRelease --no-build-cache
 
       - name: Decode Play service account
         run: echo "${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}" | base64 -d > service-account.json
