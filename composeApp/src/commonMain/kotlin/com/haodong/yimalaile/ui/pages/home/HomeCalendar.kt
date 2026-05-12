@@ -78,7 +78,6 @@ internal fun HomeCalendar(
                 onClick = { showPhaseSheet = true },
             )
         }
-        GrowSpacer()
         Column(Modifier.fillMaxWidth(0.65f)) {
             MonthBlock(currentMonth, today, dateMap, periodColor, periodLight, nextPredictedDates, state.records, defaultCycleLength)
 
