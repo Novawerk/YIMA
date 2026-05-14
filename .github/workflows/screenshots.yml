@@ -281,12 +281,12 @@ jobs:
               await github.rest.issues.createComment({ ...params, issue_number: context.issue.number });
             }
 
-  # On release: commit refreshed screenshots back to main.
+  # On release or manual dispatch (with iOS): commit refreshed screenshots back to main.
   # Writes:
   #   docs/screenshots/{android,ios}/<NN>-<screen>[-zh].png   — curated EN/ZH light-mode subset (referenced by README)
   #   docs/screenshots/ci/{android,ios}/<lang>/<theme>/...    — full 4-variant grid (regression reference)
   commit-screenshots-to-main:
-    if: github.event_name == 'release'
+    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.include_ios)
     needs: [android-screenshots, ios-screenshots]
     runs-on: ubuntu-latest
     permissions:

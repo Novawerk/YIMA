@@ -88,6 +88,16 @@ jobs:
             --title "${{ steps.v.outputs.tag }}" \
             --generate-notes
 
+      # The release-published event triggered above does NOT fire downstream
+      # workflows because it was created with GITHUB_TOKEN. Explicitly dispatch
+      # the screenshots workflow so the release auto-refreshes screenshots.
+      - name: Trigger screenshots refresh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run screenshots.yml --ref main -f include_ios=true
+          echo "Screenshots workflow dispatched on main."
+
       - name: Build signed AAB
         env:
           KEYSTORE_PATH: ${{ github.workspace }}/keystore.jks
