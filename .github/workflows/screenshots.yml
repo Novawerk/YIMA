@@ -294,7 +294,13 @@ jobs:
   #   docs/screenshots/{android,ios}/<NN>-<screen>[-zh].png   — curated EN/ZH light-mode subset (referenced by README)
   #   docs/screenshots/ci/{android,ios}/<lang>/<theme>/...    — full 4-variant grid (regression reference)
   commit-screenshots-to-main:
-    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.include_ios)
+    # Run whenever Android succeeded on a release or manual full-run. Tolerates
+    # iOS failure so a broken iOS build doesn't block refreshing Android shots.
+    if: |
+      always() && needs.android-screenshots.result == 'success' && (
+        github.event_name == 'release' ||
+        (github.event_name == 'workflow_dispatch' && inputs.include_ios)
+      )
     needs: [android-screenshots, ios-screenshots]
     runs-on: ubuntu-latest
     permissions:
@@ -314,6 +320,7 @@ jobs:
           path: /tmp/downloaded-screenshots/android/
 
       - name: Download iOS screenshots
+        if: needs.ios-screenshots.result == 'success'
         uses: actions/download-artifact@v4
         with:
           name: ios-screenshots
@@ -323,14 +330,23 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Wipe old curated + full-grid screenshots so renames/removals propagate.
-          rm -rf docs/screenshots/android docs/screenshots/ios docs/screenshots/ci
-          mkdir -p docs/screenshots/android docs/screenshots/ios
-          mkdir -p docs/screenshots/ci/android docs/screenshots/ci/ios
+          HAS_IOS=0
+          [ -d /tmp/downloaded-screenshots/ios ] && [ -n "$(ls /tmp/downloaded-screenshots/ios 2>/dev/null)" ] && HAS_IOS=1
 
-          # Full 4-variant grid (lang/theme/screen.png).
+          # Wipe old android + ci/android so renames/removals propagate.
+          rm -rf docs/screenshots/android docs/screenshots/ci/android
+          mkdir -p docs/screenshots/android docs/screenshots/ci/android
+
+          # Full 4-variant grid (lang/theme/screen.png) — android always.
           cp -R /tmp/downloaded-screenshots/android/. docs/screenshots/ci/android/
-          cp -R /tmp/downloaded-screenshots/ios/. docs/screenshots/ci/ios/
+
+          if [ "$HAS_IOS" = 1 ]; then
+            rm -rf docs/screenshots/ios docs/screenshots/ci/ios
+            mkdir -p docs/screenshots/ios docs/screenshots/ci/ios
+            cp -R /tmp/downloaded-screenshots/ios/. docs/screenshots/ci/ios/
+          else
+            echo "::warning::iOS artifact missing — refreshing Android only."
+          fi
 
           # Curated subset: light mode only, EN + ZH, mapped to README-friendly flat names.
           # Mapping order matches the README screenshot table.
@@ -360,12 +376,16 @@ jobs:
           }
 
           curate /tmp/downloaded-screenshots/android docs/screenshots/android android
-          curate /tmp/downloaded-screenshots/ios     docs/screenshots/ios     ios
+          if [ "$HAS_IOS" = 1 ]; then
+            curate /tmp/downloaded-screenshots/ios docs/screenshots/ios ios
+          fi
 
           echo "--- curated android ---"
           ls -la docs/screenshots/android
-          echo "--- curated ios ---"
-          ls -la docs/screenshots/ios
+          if [ "$HAS_IOS" = 1 ]; then
+            echo "--- curated ios ---"
+            ls -la docs/screenshots/ios
+          fi
 
       - name: Commit refreshed screenshots to main
         run: |
