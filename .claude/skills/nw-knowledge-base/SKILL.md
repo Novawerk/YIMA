@@ -1,12 +1,12 @@
 ---
 name: nw-knowledge-base
-description: Fetch canonical Novawerk organisational facts (identity, brand voice, three principles, portfolio projects, operations, community) from the novawerk/nw-knowledge-base repo. Use whenever the user asks about Novawerk's tagline, mission, vision, brand mark, principles, the four-step process, MAU, open-by-default, ways to join, community stats/channels/rhythm, or the current portfolio projects — and you do not already have the knowledge-base files in this repo.
+description: Fetch canonical Novawerk organisational facts (identity, brand voice, three principles, portfolio projects, operations, community) from the Novawerk/nw-knowledge-base repo. Use whenever the user asks about Novawerk's tagline, mission, vision, brand mark, principles, the four-step process, MAU, open-by-default, ways to join, community stats/channels/rhythm, or the current portfolio projects — and you do not already have the knowledge-base files in this repo.
 ---
 
 # Novawerk knowledge base
 
 Canonical facts about the **Novawerk** organisation live in a separate
-repo: [`novawerk/nw-knowledge-base`](https://github.com/novawerk/nw-knowledge-base).
+repo: [`Novawerk/nw-knowledge-base`](https://github.com/Novawerk/nw-knowledge-base).
 This skill makes those facts available to you in any other Novawerk repo.
 
 ## When to use this skill
@@ -44,7 +44,7 @@ if [ -d "${KB_DIR}/.git" ]; then
     && git -C "${KB_DIR}" reset --quiet --hard origin/main
 else
   mkdir -p "$(dirname "${KB_DIR}")"
-  git clone --quiet --depth 1 https://github.com/novawerk/nw-knowledge-base.git "${KB_DIR}"
+  git clone --quiet --depth 1 https://github.com/Novawerk/nw-knowledge-base.git "${KB_DIR}"
 fi
 ```
 
@@ -87,7 +87,7 @@ Copy this directory into the consumer repo's `.claude/skills/`:
 
 ```bash
 mkdir -p .claude/skills
-curl -sSL https://raw.githubusercontent.com/novawerk/nw-knowledge-base/main/skills/nw-knowledge-base/SKILL.md \
+curl -sSL https://raw.githubusercontent.com/Novawerk/nw-knowledge-base/main/skills/nw-knowledge-base/SKILL.md \
   -o .claude/skills/nw-knowledge-base/SKILL.md
 ```
 
