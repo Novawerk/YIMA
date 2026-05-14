@@ -116,6 +116,14 @@ jobs:
           echo "DEVICE_ID=$DEVICE_ID" >> "$GITHUB_ENV"
           xcrun simctl boot "$DEVICE_ID" || true
 
+      # The "Compile Kotlin Framework" build phase in project.pbxproj forces
+      # JAVA_HOME to brew's openjdk@17 location (intended for Xcode Cloud). On
+      # GitHub macos-15 runners brew predicts the path but openjdk@17 isn't
+      # installed, so JAVA_HOME points to a non-existent directory and gradle
+      # fails. Install openjdk@17 to satisfy that assumption.
+      - name: Install openjdk@17 (for Xcode build phase)
+        run: brew install openjdk@17
+
       - name: Pre-build KMP framework
         run: ./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
 
