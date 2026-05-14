@@ -69,6 +69,26 @@ final class ScreenshotUITests: XCTestCase {
     }
 
     // ═══════════════════════════════════════════════════
+    // MARK: - Notification Settings Screen
+    // ═══════════════════════════════════════════════════
+
+    func test_notifications_en_light() throws {
+        try captureNotifications(language: "en", locale: "en_US", appearance: .light, suffix: "en_light")
+    }
+
+    func test_notifications_en_dark() throws {
+        try captureNotifications(language: "en", locale: "en_US", appearance: .dark, suffix: "en_dark")
+    }
+
+    func test_notifications_zh_light() throws {
+        try captureNotifications(language: "zh-Hans", locale: "zh_CN", appearance: .light, suffix: "zh_light")
+    }
+
+    func test_notifications_zh_dark() throws {
+        try captureNotifications(language: "zh-Hans", locale: "zh_CN", appearance: .dark, suffix: "zh_dark")
+    }
+
+    // ═══════════════════════════════════════════════════
     // MARK: - Record Detail Sheet (opened from Stats)
     // ═══════════════════════════════════════════════════
 
@@ -166,6 +186,20 @@ final class ScreenshotUITests: XCTestCase {
         nextBtn.tap()
         sleep(2)
         saveScreenshot(name: "onboarding_calendar_\(suffix)")
+    }
+
+    /// Launch in notifications mode and capture the notification settings screen.
+    private func captureNotifications(
+        language: String,
+        locale: String,
+        appearance: XCUIDevice.Appearance,
+        suffix: String
+    ) throws {
+        let app = launchApp(mode: "--screenshot-notifications", language: language, locale: locale, appearance: appearance)
+        // Give the Compose UI a moment to render — there's no stable accessibility id on this screen.
+        sleep(3)
+        XCTAssertTrue(app.state == .runningForeground, "App failed to reach foreground")
+        saveScreenshot(name: "notifications_\(suffix)")
     }
 
     /// Launch in home mode, navigate to stats, tap a record card to open the detail sheet.

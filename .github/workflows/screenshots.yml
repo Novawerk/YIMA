@@ -12,6 +12,12 @@ on:
       - '*.md'
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      include_ios:
+        description: 'Also run iOS screenshots (macOS runner, slow)'
+        type: boolean
+        default: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -59,7 +65,7 @@ jobs:
           path: screenshots/android/
 
   ios-screenshots:
-    if: github.event_name == 'release'
+    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.include_ios)
     runs-on: macos-15
 
     steps:
@@ -223,7 +229,7 @@ jobs:
             const screens = [
               'disclaimer', 'onboarding_welcome', 'onboarding_calendar',
               'home_calendar', 'home_detail', 'home_stats', 'settings',
-              'record_detail', 'log_day', 'prediction_detail',
+              'notifications', 'record_detail', 'log_day', 'prediction_detail',
             ];
             const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
 
@@ -275,8 +281,11 @@ jobs:
               await github.rest.issues.createComment({ ...params, issue_number: context.issue.number });
             }
 
-  # On release: commit screenshots to the release branch
-  commit-to-release:
+  # On release: commit refreshed screenshots back to main.
+  # Writes:
+  #   docs/screenshots/{android,ios}/<NN>-<screen>[-zh].png   — curated EN/ZH light-mode subset (referenced by README)
+  #   docs/screenshots/ci/{android,ios}/<lang>/<theme>/...    — full 4-variant grid (regression reference)
+  commit-screenshots-to-main:
     if: github.event_name == 'release'
     needs: [android-screenshots, ios-screenshots]
     runs-on: ubuntu-latest
@@ -286,7 +295,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: release
+          ref: main
           fetch-depth: 1
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -302,22 +311,64 @@ jobs:
           name: ios-screenshots
           path: /tmp/downloaded-screenshots/ios/
 
-      - name: Commit screenshots to release branch
+      - name: Curate + refresh screenshots
+        run: |
+          set -euo pipefail
+
+          # Wipe old curated + full-grid screenshots so renames/removals propagate.
+          rm -rf docs/screenshots/android docs/screenshots/ios docs/screenshots/ci
+          mkdir -p docs/screenshots/android docs/screenshots/ios
+          mkdir -p docs/screenshots/ci/android docs/screenshots/ci/ios
+
+          # Full 4-variant grid (lang/theme/screen.png).
+          cp -R /tmp/downloaded-screenshots/android/. docs/screenshots/ci/android/
+          cp -R /tmp/downloaded-screenshots/ios/. docs/screenshots/ci/ios/
+
+          # Curated subset: light mode only, EN + ZH, mapped to README-friendly flat names.
+          # Mapping order matches the README screenshot table.
+          curate() {
+            local src=$1 dst=$2 platform=$3
+            local screens=(
+              "home_calendar:01-overview"
+              "home_detail:02-detail"
+              "home_stats:03-statistics"
+              "notifications:04-reminder"
+              "settings:05-settings"
+            )
+            for entry in "${screens[@]}"; do
+              local screen="${entry%%:*}"
+              local target="${entry##*:}"
+              for lang in en zh; do
+                local src_file="$src/$lang/light/$screen.png"
+                local suffix=""
+                [ "$lang" = "zh" ] && suffix="-zh"
+                if [ -f "$src_file" ]; then
+                  cp "$src_file" "$dst/${target}${suffix}.png"
+                else
+                  echo "::warning::[$platform] missing $src_file — skipping ${target}${suffix}.png"
+                fi
+              done
+            done
+          }
+
+          curate /tmp/downloaded-screenshots/android docs/screenshots/android android
+          curate /tmp/downloaded-screenshots/ios     docs/screenshots/ios     ios
+
+          echo "--- curated android ---"
+          ls -la docs/screenshots/android
+          echo "--- curated ios ---"
+          ls -la docs/screenshots/ios
+
+      - name: Commit refreshed screenshots to main
         run: |
           set -euo pipefail
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # Clear old CI screenshots and copy fresh ones
-          rm -rf docs/screenshots/ci
-          mkdir -p docs/screenshots/ci/android docs/screenshots/ci/ios
-          cp -R /tmp/downloaded-screenshots/android/. docs/screenshots/ci/android/
-          cp -R /tmp/downloaded-screenshots/ios/. docs/screenshots/ci/ios/
-
-          git add docs/screenshots/ci/
+          git add docs/screenshots/
           git diff --cached --quiet && echo "No screenshot changes to commit" || {
             TAG_NAME="${GITHUB_REF#refs/tags/}"
-            git commit -m "docs: update screenshots for ${TAG_NAME} [skip ci]"
-            git push origin release
+            git commit -m "docs: refresh screenshots for ${TAG_NAME} [skip ci]"
+            git push origin main
           }

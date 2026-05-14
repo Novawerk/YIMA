@@ -26,6 +26,7 @@ import com.haodong.yimalaile.ui.locale.LocalAppLocale
 import com.haodong.yimalaile.ui.pages.disclaimer.DisclaimerScreen
 import com.haodong.yimalaile.ui.pages.home.HomeScreen
 import com.haodong.yimalaile.ui.pages.onboarding.OnboardingScreen
+import com.haodong.yimalaile.ui.pages.settings.NotificationSettingsScreen
 import com.haodong.yimalaile.ui.pages.settings.SettingsScreen
 import com.haodong.yimalaile.ui.pages.sheet.LocalSheetViewModel
 import com.haodong.yimalaile.ui.pages.sheet.SheetHost
@@ -173,6 +174,22 @@ class ScreenshotTest {
             healthLastSync = SCREENSHOT_SYNC_TIMESTAMP,
         )
     }
+
+    // ═══════════════════════════════════════════════════
+    // Notification Settings Screen
+    // ═══════════════════════════════════════════════════
+
+    @Test
+    fun notifications_en_light() = notificationSettingsTest("en", AppDarkMode.LIGHT)
+
+    @Test
+    fun notifications_en_dark() = notificationSettingsTest("en", AppDarkMode.DARK)
+
+    @Test
+    fun notifications_zh_light() = notificationSettingsTest("zh", AppDarkMode.LIGHT)
+
+    @Test
+    fun notifications_zh_dark() = notificationSettingsTest("zh", AppDarkMode.DARK)
 
     // ═══════════════════════════════════════════════════
     // Home Screen (Calendar mode)
@@ -419,6 +436,30 @@ class ScreenshotTest {
         }
         composeTestRule.waitForIdle()
         composeTestRule.onRoot().captureRoboImage()
+    }
+
+    private fun notificationSettingsTest(
+        locale: String,
+        darkMode: AppDarkMode,
+    ) {
+        val samplePrefs = NotificationPrefs(
+            periodReminderEnabled = true,
+            periodReminderDaysBefore = 2,
+            ovulationReminderEnabled = true,
+            ovulationReminderDaysBefore = 1,
+            dailyReportEnabled = true,
+            dailyReportHour = 9,
+            dailyReportMinute = 0,
+        )
+        screenshotTest(locale, darkMode) {
+            NotificationSettingsScreen(
+                prefs = samplePrefs,
+                hasPermission = true,
+                onRequestPermission = {},
+                onPrefsChange = {},
+                onBack = {},
+            )
+        }
     }
 
     private fun recordDetailTest(

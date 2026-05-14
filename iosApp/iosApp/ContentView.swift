@@ -4,9 +4,10 @@ import ComposeApp
 
 enum ScreenshotMode: String {
     case none
-    case home       // --screenshot-mode
-    case disclaimer // --screenshot-disclaimer
-    case onboarding // --screenshot-onboarding
+    case home          // --screenshot-mode
+    case disclaimer    // --screenshot-disclaimer
+    case onboarding    // --screenshot-onboarding
+    case notifications // --screenshot-notifications
 }
 
 struct ComposeView: UIViewControllerRepresentable {
@@ -24,6 +25,8 @@ struct ComposeView: UIViewControllerRepresentable {
             return MainViewControllerKt.ScreenshotDisclaimerViewController()
         case .onboarding:
             return MainViewControllerKt.ScreenshotOnboardingViewController()
+        case .notifications:
+            return MainViewControllerKt.ScreenshotNotificationsViewController()
         case .none:
             return MainViewControllerKt.MainViewController()
         }
@@ -38,6 +41,7 @@ struct ContentView: View {
         let args = ProcessInfo.processInfo.arguments
         if args.contains("--screenshot-disclaimer") { return .disclaimer }
         if args.contains("--screenshot-onboarding") { return .onboarding }
+        if args.contains("--screenshot-notifications") { return .notifications }
         if args.contains("--screenshot-mode") { return .home }
         return .none
     }()

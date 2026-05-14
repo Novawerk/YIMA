@@ -88,9 +88,9 @@ All three are off by default and require an explicit OS-level permission grant.
 
 ## Screenshots
 
-| Overview | Detail calendar | Statistics | Settings |
-|---|---|---|---|
-| ![Overview](docs/screenshots/android/01-overview.png) | ![Detail calendar](docs/screenshots/android/02-detail.png) | ![Statistics](docs/screenshots/android/03-statistics.png) | ![Settings](docs/screenshots/android/04-settings.png) |
+| Overview | Detail calendar | Statistics | Reminders | Settings |
+|---|---|---|---|---|
+| ![Overview](docs/screenshots/android/01-overview.png) | ![Detail calendar](docs/screenshots/android/02-detail.png) | ![Statistics](docs/screenshots/android/03-statistics.png) | ![Reminders](docs/screenshots/android/04-reminder.png) | ![Settings](docs/screenshots/android/05-settings.png) |
 
 _Android, English locale, version 1.5.0. The bar chart shows the seeded 5-cycle history from onboarding._
 

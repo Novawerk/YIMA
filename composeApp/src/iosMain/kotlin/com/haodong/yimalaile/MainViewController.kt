@@ -31,6 +31,7 @@ import com.haodong.yimalaile.ui.navigation.SettingsRoute
 import com.haodong.yimalaile.ui.pages.disclaimer.DisclaimerScreen
 import com.haodong.yimalaile.ui.pages.home.HomeScreen
 import com.haodong.yimalaile.ui.pages.onboarding.OnboardingScreen
+import com.haodong.yimalaile.ui.pages.settings.NotificationSettingsScreen
 import com.haodong.yimalaile.ui.pages.settings.SettingsScreen
 import com.haodong.yimalaile.ui.pages.sheet.LocalSheetViewModel
 import com.haodong.yimalaile.ui.pages.sheet.SheetHost
@@ -150,6 +151,47 @@ fun ScreenshotDisclaimerViewController() = ComposeUIViewController {
         key(language) {
             AppTheme(darkMode = darkMode) {
                 DisclaimerScreen(onAccept = {})
+            }
+        }
+    }
+}
+
+/**
+ * Entry point for iOS screenshot tests — renders the NotificationSettings screen
+ * directly with sample preferences and permission granted.
+ */
+fun ScreenshotNotificationsViewController() = ComposeUIViewController {
+    val dataStore = PreferenceDataStoreFactory.createWithPath(
+        produceFile = { dataStorePath("screenshot_notifications.preferences_pb").toPath() }
+    )
+    val settings = SettingsRepository(dataStore)
+    val fakeRepo = FakeRecordsRepository()
+    val service = MenstrualService(fakeRepo)
+
+    val viewModel = remember { AppViewModel(service, settings) }
+    val darkMode = viewModel.darkMode
+    val language = viewModel.language
+
+    val samplePrefs = NotificationPrefs(
+        periodReminderEnabled = true,
+        periodReminderDaysBefore = 2,
+        ovulationReminderEnabled = true,
+        ovulationReminderDaysBefore = 1,
+        dailyReportEnabled = true,
+        dailyReportHour = 9,
+        dailyReportMinute = 0,
+    )
+
+    CompositionLocalProvider(LocalAppLocale provides language) {
+        key(language) {
+            AppTheme(darkMode = darkMode) {
+                NotificationSettingsScreen(
+                    prefs = samplePrefs,
+                    hasPermission = true,
+                    onRequestPermission = {},
+                    onPrefsChange = {},
+                    onBack = {},
+                )
             }
         }
     }
