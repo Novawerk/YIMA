@@ -130,12 +130,18 @@ jobs:
       - name: Run iOS UI tests
         timeout-minutes: 30
         run: |
+          # Kotlin/Native compiles ComposeApp against the latest iOS SDK
+          # (currently 18.5) and emits a hard reference to UIViewLayoutRegion,
+          # which the linker only accepts when the deployment target matches.
+          # Override only for the CI test build so production stays at the
+          # project-level deployment target.
           xcodebuild test \
             -project iosApp/iosApp.xcodeproj \
             -scheme iosApp \
             -destination "platform=iOS Simulator,id=$DEVICE_ID" \
             -only-testing iosAppUITests \
-            -resultBundlePath TestResults.xcresult
+            -resultBundlePath TestResults.xcresult \
+            IPHONEOS_DEPLOYMENT_TARGET=18.5
 
       - name: Extract screenshots from test results
         run: |
