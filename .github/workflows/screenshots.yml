@@ -144,6 +144,9 @@ jobs:
             IPHONEOS_DEPLOYMENT_TARGET=18.5
 
       - name: Extract screenshots from test results
+        # Run even if some XCUITests failed — the tests that did pass still
+        # produced screenshots we want to keep.
+        if: ${{ !cancelled() }}
         run: |
           DST=screenshots/ios
           EXPORT_DIR=$(mktemp -d)
@@ -190,6 +193,7 @@ jobs:
           "
 
       - name: Upload iOS screenshots
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: ios-screenshots
@@ -325,8 +329,11 @@ jobs:
           name: android-screenshots
           path: /tmp/downloaded-screenshots/android/
 
+      # Try to download iOS regardless of job result — extract+upload run with
+      # `if: !cancelled()` so a partial XCUITest failure still uploads the
+      # screenshots that DID get captured.
       - name: Download iOS screenshots
-        if: needs.ios-screenshots.result == 'success'
+        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           name: ios-screenshots
