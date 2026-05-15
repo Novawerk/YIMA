@@ -126,7 +126,12 @@ final class ScreenshotUITests: XCTestCase {
         let launched = calendarTab.waitForExistence(timeout: 30)
         XCTAssertTrue(launched, "App failed to launch — nav_calendar button not found")
 
-        // 1. Home Calendar (default view on launch)
+        // 1. Home Calendar — explicitly tap the calendar tab. The home mode is
+        // persisted in DataStore, so we can't assume the app launches on the
+        // calendar view. (Without this tap the first screenshot ends up being
+        // whatever mode was set last, e.g. stats.)
+        calendarTab.tap()
+        sleep(2)
         saveScreenshot(name: "home_calendar_\(suffix)")
 
         // 2. Home Detail
