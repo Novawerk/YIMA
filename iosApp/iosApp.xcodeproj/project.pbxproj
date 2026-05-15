@@ -437,6 +437,7 @@
 					"$(inherited)",
 					"-framework",
 					CoreLocation,
+					"-Wl,-U,_OBJC_CLASS_$$_UIViewLayoutRegion",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.novawerk.yimalaile;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -482,6 +483,7 @@
 					"$(inherited)",
 					"-framework",
 					CoreLocation,
+					"-Wl,-U,_OBJC_CLASS_$$_UIViewLayoutRegion",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.novawerk.yimalaile;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
