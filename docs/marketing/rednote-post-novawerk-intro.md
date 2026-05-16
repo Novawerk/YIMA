@@ -1,6 +1,6 @@
 # 小红书 / RedNote 发帖文案 · Novawerk × YIMA 社群介绍版
 
-**标题:** 🇩🇪 在柏林捣鼓了个非营利社区，第一个App刚上架
+**标题:** Novawerk × YIMA：这个在柏林的年轻AI社群，到底想做什么？
 
 *（配图建议：YIMA App 截图 ×2 + Novawerk logo + 柏林街景或工作场景）*
 
